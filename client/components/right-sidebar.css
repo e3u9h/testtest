@@ -1,0 +1,93 @@
+.right-sidebar-sidebar {
+  width: 25.7%;
+  height: 815px;
+  display: flex;
+  padding: var(--dl-space-space-twounits);
+  position: relative;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.right-sidebar-nav-item {
+  display: flex;
+  margin-bottom: var(--dl-space-space-unit);
+  flex-direction: column;
+}
+.right-sidebar-text {
+  font-weight: 600;
+  margin-bottom: var(--dl-space-space-unit);
+  text-transform: uppercase;
+}
+.right-sidebar-options {
+  height: auto;
+  display: flex;
+  margin-top: var(--dl-space-space-oneandhalfunits);
+  margin-left: var(--dl-space-space-unit);
+  flex-direction: column;
+  padding-bottom: 1px;
+}
+.right-sidebar-text1 {
+  color: var(--dl-color-gray-500);
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: var(--dl-space-space-oneandhalfunits);
+}
+.right-sidebar-text2 {
+  color: var(--dl-color-custom-neutral-dark);
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: var(--dl-space-space-unit);
+}
+.right-sidebar-text3 {
+  color: var(--dl-color-custom-neutral-dark);
+  height: auto;
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: var(--dl-space-space-unit);
+  padding-bottom: 0px;
+}
+.right-sidebar-options1 {
+  height: auto;
+  display: flex;
+  margin-top: var(--dl-space-space-oneandhalfunits);
+  margin-left: var(--dl-space-space-unit);
+  flex-direction: column;
+  padding-bottom: 1px;
+}
+.right-sidebar-text4 {
+  color: var(--dl-color-gray-500);
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: var(--dl-space-space-oneandhalfunits);
+}
+.right-sidebar-text5 {
+  color: var(--dl-color-custom-neutral-dark);
+  margin-top: 0px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: var(--dl-space-space-unit);
+}
+.right-sidebar-text6 {
+  color: var(--dl-color-custom-neutral-dark);
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+
+
+.right-sidebar-root-class-name3 {
+  height: 100%;
+}
+.right-sidebar-root-class-name4 {
+  height: 100%;
+}
+.right-sidebar-root-class-name5 {
+  height: 100%;
+}
+
+
+

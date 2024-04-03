@@ -1,0 +1,8 @@
+.component8-container {
+  display: flex;
+  position: relative;
+}
+.component8-text {
+  align-self: flex-start;
+  font-weight: 400;
+}

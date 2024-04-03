@@ -1,0 +1,190 @@
+.registerwithemailverification-container {
+  width: 100%;
+  display: flex;
+  overflow: auto;
+  min-height: 100vh;
+  align-items: center;
+  flex-direction: column;
+}
+.registerwithemailverification-container1 {
+  width: 100%;
+  height: 751px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.registerwithemailverification-hero {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-self: center;
+  margin-top: 0px;
+  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+  background-color: var(--dl-color-custom-primary2);
+}
+.registerwithemailverification-container2 {
+  width: 909px;
+  height: 567px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.registerwithemailverification-sidebar {
+  width: 650px;
+  height: 656px;
+  display: flex;
+  padding: 0px;
+  align-self: flex-start;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.registerwithemailverification-nav {
+  width: 508px;
+  height: 579px;
+  display: flex;
+  z-index: 100;
+  align-self: center;
+  align-items: flex-start;
+  border-color: var(--dl-color-gray-black);
+  border-width: 1px;
+  border-radius: var(--dl-radius-radius-radius4);
+  flex-direction: column;
+  background-color: var(--dl-color-custom-neutral-light);
+}
+.registerwithemailverification-image {
+  width: 149px;
+  height: 148px;
+  align-self: center;
+  object-fit: cover;
+}
+.registerwithemailverification-text {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-textinput {
+  align-self: center;
+}
+.registerwithemailverification-text1 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-textinput1 {
+  align-self: center;
+}
+.registerwithemailverification-text2 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-textinput2 {
+  align-self: center;
+}
+.registerwithemailverification-text3 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-textinput3 {
+  width: 69px;
+  height: 32px;
+  align-self: center;
+}
+.registerwithemailverification-text4 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-gender {
+  z-index: 100;
+  align-self: center;
+}
+.registerwithemailverification-text5 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-container3 {
+  width: 100%;
+  height: 42px;
+  display: flex;
+  align-self: flex-start;
+  align-items: flex-start;
+  justify-content: center;
+}
+.registerwithemailverification-textinput4 {
+  align-self: center;
+}
+.registerwithemailverification-button {
+  color: var(--dl-color-custom-secondary1);
+  margin-left: 10px;
+  background-color: var(--dl-color-custom-primary2);
+}
+.registerwithemailverification-text6 {
+  color: var(--dl-color-custom-neutral-dark);
+  align-self: center;
+  font-style: normal;
+  text-align: center;
+  font-weight: 600;
+}
+.registerwithemailverification-textinput5 {
+  align-self: center;
+}
+.registerwithemailverification-button1 {
+  color: var(--dl-color-custom-secondary1);
+  width: 97px;
+  height: 37px;
+  align-self: center;
+  margin-top: 10px;
+  margin-left: 0px;
+  background-color: var(--dl-color-custom-primary2);
+}
+.registerwithemailverification-features {
+  flex: 0 0 auto;
+  width: 100%;
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.registerwithemailverification-pricing {
+  flex: 0 0 auto;
+  width: 100%;
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.registerwithemailverification-banner {
+  flex: 0 0 auto;
+  width: 100%;
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media(max-width: 767px) {
+  .registerwithemailverification-sidebar {
+    height: 70vh;
+  }
+}

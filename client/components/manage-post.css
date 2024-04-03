@@ -1,0 +1,106 @@
+.manage-post-container {
+  width: 991px;
+  height: 101px;
+  display: flex;
+  z-index: 100;
+  position: relative;
+  align-items: flex-start;
+  border-color: var(--dl-color-gray-500);
+  border-style: solid;
+  border-width: 0px;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.manage-post-container1 {
+  width: 1029px;
+  height: 80px;
+  display: flex;
+  position: relative;
+  align-self: center;
+  margin-top: 5px;
+  align-items: center;
+  margin-left: 5px;
+  border-color: var(--dl-color-custom-primary2);
+  border-width: 2px;
+  margin-right: 5px;
+  border-radius: var(--dl-radius-radius-radius8);
+  margin-bottom: 5px;
+  justify-content: center;
+}
+.manage-post-container2 {
+  flex: 0 0 auto;
+  width: 622px;
+  height: auto;
+  display: flex;
+  position: relative;
+  align-items: center;
+  flex-direction: column;
+}
+.manage-post-container3 {
+  width: 622px;
+  height: 18px;
+  display: flex;
+  position: relative;
+  align-self: flex-start;
+  margin-top: 5px;
+  align-items: flex-start;
+  margin-right: 5px;
+  margin-bottom: 5px;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.manage-post-container4 {
+  flex: 0 0 auto;
+  width: auto;
+  border: 2px dashed rgba(120, 120, 120, 0.4);
+  height: auto;
+  display: flex;
+  position: relative;
+  align-items: flex-start;
+  margin-bottom: 5px;
+  justify-content: flex-start;
+}
+.manage-post-button {
+  top: -7px;
+  color: var(--dl-color-custom-neutral-dark);
+  right: -111px;
+  position: absolute;
+  align-self: center;
+  font-style: normal;
+  font-weight: 500;
+  padding-right: 0reeUnits;
+  text-transform: capitalize;
+  background-color: var(--dl-color-custom-primary1);
+}
+.manage-post-text {
+  top: 29px;
+  left: 376px;
+  position: absolute;
+}
+.manage-post-text1 {
+  top: 29px;
+  left: 483px;
+  position: absolute;
+}
+.manage-post-text2 {
+  top: 30px;
+  left: 50px;
+  position: absolute;
+}
+.manage-post-button1 {
+  top: 18px;
+  left: 681px;
+  color: var(--dl-color-custom-neutral-dark);
+  position: absolute;
+  align-self: center;
+  font-style: normal;
+  font-weight: 500;
+  padding-right: 0reeUnits;
+  text-transform: capitalize;
+  background-color: var(--dl-color-success-500);
+}
+
+
+
+
+
