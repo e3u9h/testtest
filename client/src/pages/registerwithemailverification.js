@@ -5,10 +5,10 @@ import { Helmet } from 'react-helmet'
 import Header from '../components/header'
 import Footer from '../components/footer'
 import './registerwithemailverification.css'
-import  { useHistory } from 'react-router-dom'
+import  { useNavigate } from 'react-router-dom'
 
 const Registerwithemailverification = (props) => {
-    const history = useHistory()
+    const navigate = useNavigate()
     const [nickname, setNickname] = useState("")
     const [password, setPassword] = useState("")
     const [password2, setPassword2] = useState("")
@@ -46,7 +46,7 @@ const Registerwithemailverification = (props) => {
                 if (data.token) {
                   localStorage.setItem('token', data.token);
                   console.log('register success');
-                  history.push('/home1')
+                  navigate('/home1', { replace: true })
                 } else {
                   console.log('register failed:', data.message);
                 }
@@ -80,9 +80,9 @@ const Registerwithemailverification = (props) => {
                   className="registerwithemailverification-image"
                 />
                 <form onSubmit={handleRegister}>
-                <span className="registerwithemailverification-text">
+                <block className="registerwithemailverification-text">
                   Nickname:
-                </span>
+                </block>
                 <input
                   type="text"
                   required="true"

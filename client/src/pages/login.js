@@ -5,11 +5,11 @@ import { Helmet } from 'react-helmet'
 import NavigationLinks1 from '../components/navigation-links1'
 import Footer from '../components/footer'
 import './login.css'
-import  { useHistory } from 'react-router-dom'
+import  { useNavigate } from 'react-router-dom'
 
 const Login = (props) => {
-    const history = useHistory()
-    const toRegisterPage = () =>{history.push('/registerwithemailverification')}
+    const navigate = useNavigate()
+    const toRegisterPage = () =>{navigate('/registerwithemailverification', { replace: true })}
   return (
     <div className="login-container">
       <Helmet>
@@ -74,7 +74,7 @@ const Login = (props) => {
               <button type="button" className="login-hero-button1 buttonFilled" onClick={toRegisterPage}>
                 Register
               </button>
-              <button type="button" className="login-hero-button2 buttonFlat" onClick={() =>history.push('/loginafterregister')}>Login→</button>
+              <button type="button" className="login-hero-button2 buttonFlat" onClick={() =>navigate('/loginafterregister', { replace: true })}>Login→</button>
             </div>
           </div>
           <div className="login-container5">
