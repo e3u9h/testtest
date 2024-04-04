@@ -13,6 +13,8 @@ class SearchUserid extends React.Component{
             selfname : getLoginInfo()['username'],
             userList:[]
         };
+
+
     }
     
     async getAllUser() {
