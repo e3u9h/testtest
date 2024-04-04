@@ -35,7 +35,27 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setIsReported(tweetInfo['isReported']);
   }, [tweetInfo]);
 
+  // click like 
+  const clickLikeTweet = () => {
+    if (likeInfo.bLikeByUser) {
+      updateTweetInfo("cancel-like");
+    } else {
+      updateTweetInfo("like");
+    }
+  }
+
+  // click dislike
+  const clickDislikeTweet = () => {
+    if (dislikeInfo.bDislikeByUser) {
+      updateTweetInfo("cancel-dislike");
+    } else {
+      updateTweetInfo("dislike");
+    }
+  }
+
   
+
+
 
 
 
