@@ -13,89 +13,88 @@ const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retry
 console.log("Connecting to MongoDB...");
 mongoose.connect(uri);
 
+const AccountSchema = mongoose.Schema({
+    username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
+    pwd: { type: String, required: true },
+    identity: { type: String, required: true }
+});
+
+const TweetSchema = mongoose.Schema({
+    poster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    tweet_content: { type: String },
+    files: [{type: String}],
+    tags: [{ type: String, required: true }],
+    comments: [{
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        portrait: { type: String },
+        content: { type: String },
+        floor: { type: Number },
+        time: { type: Date }
+    }],
+    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' },
+    likes: [{
+        time: { type: Date, required: true },
+        username: { type: String, required: true },
+    }],
+    dislike_counter: { type: Number, required: true },
+    report_counter: { type: Number, required: true },
+    retweets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
+    post_time: { type: Date, required: true },
+    private: { type: Boolean, required: true },
+});
+
+const UserSchema = mongoose.Schema({
+    username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
+    gender: { type: String },
+    interests: [{ type: String }],
+    about: { type: String },
+    follower_counter: { type: Number },
+    following_counter: { type: Number },
+    tweets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
+    followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    followings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    tweets_reported: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
+    users_reported: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    users_blocked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    report_counter: { type: Number },
+    tweets_liked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
+    tweets_disliked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
+    portrait: { type: String }
+});
+
+const NotificationSchema = mongoose.Schema({
+    username: { type: String, required: true }, //who is receiving this notifications
+    actor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who is sending this notification
+    action: { type: String, required: true }, // follow, like, comment, retweet
+    tid: { type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }, // which tweet is involved, null for follow action
+    time: { type: Date, required: true }
+});
+
+const TagSchema = mongoose.Schema({
+    tag: { type: String, required: true, unique: true },
+    tid: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }] // the tweets that contain the tag
+});
+
+const messageSchema = new mongoose.Schema({
+    from: { type: String, required: true },
+    to: { type: String, required: true },
+    content: { type: String, required: true },
+    time: { type: Date, default: Date.now }
+});
+
+const Account = mongoose.model('Account', AccountSchema);
+const Tweet = mongoose.model('Tweet', TweetSchema);
+const User = mongoose.model('User', UserSchema);
+const Notification = mongoose.model('Notification', NotificationSchema);
+const Tag = mongoose.model('Tag', TagSchema);
+const Message = mongoose.model('Message', messageSchema);
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
 db.once('open', function () {
     console.log("Connection is open...");
-
-    const AccountSchema = mongoose.Schema({
-        username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
-        pwd: { type: String, required: true },
-        identity: { type: String, required: true }
-    });
-
-    const TweetSchema = mongoose.Schema({
-        poster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-        tweet_content: { type: String },
-        files: [{type: String}],
-        tags: [{ type: String, required: true }],
-        comments: [{
-            user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-            portrait: { type: String },
-            content: { type: String },
-            floor: { type: Number },
-            time: { type: Date }
-        }],
-        parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' },
-        likes: [{
-            time: { type: Date, required: true },
-            username: { type: String, required: true },
-        }],
-        dislike_counter: { type: Number, required: true },
-        report_counter: { type: Number, required: true },
-        retweets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
-        post_time: { type: Date, required: true },
-        private: { type: Boolean, required: true },
-    });
-
-    const UserSchema = mongoose.Schema({
-        username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
-        gender: { type: String },
-        interests: [{ type: String }],
-        about: { type: String },
-        follower_counter: { type: Number },
-        following_counter: { type: Number },
-        tweets: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
-        followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        followings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        tweets_reported: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
-        users_reported: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        users_blocked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-        report_counter: { type: Number },
-        tweets_liked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
-        tweets_disliked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }],
-        portrait: { type: String }
-    });
-
-    const NotificationSchema = mongoose.Schema({
-        username: { type: String, required: true }, //who is receiving this notifications
-        actor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who is sending this notification
-        action: { type: String, required: true }, // follow, like, comment, retweet
-        tid: { type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }, // which tweet is involved, null for follow action
-        time: { type: Date, required: true }
-    });
-
-    const TagSchema = mongoose.Schema({
-        tag: { type: String, required: true, unique: true },
-        tid: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tweet' }] // the tweets that contain the tag
-    });
-
-    const messageSchema = new mongoose.Schema({
-        from: { type: String, required: true },
-        to: { type: String, required: true },
-        content: { type: String, required: true },
-        time: { type: Date, default: Date.now }
-    });
-
-    const Account = mongoose.model('Account', AccountSchema);
-    const Tweet = mongoose.model('Tweet', TweetSchema);
-    const User = mongoose.model('User', UserSchema);
-    const Notification = mongoose.model('Notification', NotificationSchema);
-    const Tag = mongoose.model('Tag', TagSchema);
-    const Message = mongoose.model('Message', messageSchema);
-
-
 });
+// 在这里添加后端各种function
+
 const server = app.listen(8000);
 
 

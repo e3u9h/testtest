@@ -35,7 +35,52 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setIsReported(tweetInfo['isReported']);
   }, [tweetInfo]);
 
+  // click like 
+  const clickLikeTweet = () => {
+    if (likeInfo.bLikeByUser) {
+      updateTweetInfo("cancel-like");
+    } else {
+      updateTweetInfo("like");
+    }
+  }
+
+  // click dislike
+  const clickDislikeTweet = () => {
+    if (dislikeInfo.bDislikeByUser) {
+      updateTweetInfo("cancel-dislike");
+    } else {
+      updateTweetInfo("dislike");
+    }
+  }
+
   
+  const updateTweetInfo = (operation) => {
+    console.log("Updated tweet info to DB");
+    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + getLoginInfo()['username'] + "/" + operation, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    }).then(res => {
+      if (res.status === 201) {
+        return res.json();
+      } else {
+        console.log("Like tweet failed");
+        throw new Error("Like tweet failed");
+      }
+    }).then(data => {
+      setLikeInfo(data['likeInfo']);
+      setDislikeInfo(data['dislikeInfo']);
+    }).catch(err => {
+      console.log(err);
+    });
+  }
+
+
+
+
+
+
 
 
 
