@@ -1,0 +1,17 @@
+{
+  "name": "c3u-server",
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "fetch-blob": "^3.2.0",
+    "mongoose": "^7.0.3",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^3.3.1"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "client": "cd ../client && npm start"
+  }
+}
