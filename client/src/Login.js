@@ -1,14 +1,12 @@
 import cookie from 'react-cookies';
-import * as React from 'react';
+import React, { useState } from 'react';
 import {
   MDBContainer,
   MDBTabs,
   MDBTabsItem,
   MDBTabsLink,
   MDBTabsContent,
-  MDBInput,
-  MDBTabsPane,
-  MDBBtn
+  MDBTabsPane
 }
   from 'mdb-react-ui-kit';
 import { Navigate } from 'react-router-dom';
@@ -29,62 +27,217 @@ export const logout = () => {
 };
 
 
-class Login extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { login: false, username: undefined, mode: 'user', justifyActive: 'login' };
-  }
+const Login = (props) => {
+  const [login, setLogin] = useState(false);
+  const [mode, setMode] = useState('user');
+  const [justifyActive, setJustifyActive] = useState('login');
 
-  handleUserSignup = (event) => {
+  const handleRegister = (event) => {
+    event.preventDefault();
     const username = document.getElementById("newusername").value;
     const newpwd = document.getElementById("newpwd").value;
+    const newpwd2 = document.getElementById("newpwd2").value;
+    const genderRadios = document.getElementsByName("radio-gender");
+    const genderRadio = document.querySelector('input[name="radio-gender"]:checked');
+    const gender = genderRadio ? genderRadio.value : null;
+    console.log(username, newpwd, gender)
+    const userInfo = {
+      newusername: username,
+      newpwd: newpwd,
+      gender: gender
+    };
+    if (username === '') {
+      window.alert("Please enter a username.");
+    } else if (!newpwd || !newpwd2) {
+      window.alert("Please enter a password");
+    } else if (newpwd.length <= 4 || newpwd.length >= 20) {
+      window.alert("The length of the password should be larger than 4 and smaller than 20.");
+    } else if (newpwd !== newpwd2) {
+      window.alert("Password mismatch!");
+    } else if (!gender) {
+      window.alert("Please select a gender.");
+    } else {
+      fetch(BACK_END + "createuser", {
+        method: "POST",
+        body: JSON.stringify(userInfo),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      })
+        .then(res => {
+          if (res.status === 201) {
+            setLogin(true);
+            setMode('user');
+            login(username, 'user');
+          }
+          return res.text();
+        })
+        .then(data => { alert(data); })
+        .catch(err => {
+          console.log(err);
+        });
+    }
   }
 
-  handleJustifyClick = (value) => {
-    if (value === this.state.justifyActive) {
+  const handleJustifyClick = (value) => {
+    if (value === justifyActive) {
       return;
     }
-    this.setState({ justifyActive: value });
+    setJustifyActive(value);
   };
 
-  handleUserSubmit = (event) => {
-  
+  const handleUserSubmit = (event) => {
+    event.preventDefault();
+    const username = document.getElementById("username").value;
+    const pwd = document.getElementById("pwd").value;
+    const userInfo = {
+      username: username,
+      pwd: pwd
+    };
+
+    fetch(BACK_END + "login/user", {
+      method: "POST",
+      body: JSON.stringify(userInfo),
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(res => {
+        if (res.status === 201) {
+          setLogin(true);
+          setMode('user');
+          login(username, 'user');
+        }
+        return res.text();
+      })
+      .then(data => {
+        if (data == 'Login As Admin Successfully!\n') {
+          setLogin(true);
+          setMode('admin');
+          login(username, 'admin');
+        } alert(data)
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
-  render() {
-    return (this.state.login === false ? 
-      (<MDBContainer className="p-3 my-5 d-flex flex-column w-50">
+  return (login === false ?
+    (<MDBContainer className="p-3 my-5 d-flex flex-column w-50">
 
-        <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
-          <MDBTabsItem>
-            <MDBTabsLink onClick={() => this.handleJustifyClick('login')} active={this.state.justifyActive === 'login'}>
-              Login
-            </MDBTabsLink>
-          </MDBTabsItem>
-          <MDBTabsItem>
-            <MDBTabsLink onClick={() => this.handleJustifyClick('signup')} active={this.state.justifyActive === 'signup'}>
-              Register
-            </MDBTabsLink>
-          </MDBTabsItem>
-        </MDBTabs>
+      <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
+        <MDBTabsItem>
+          <MDBTabsLink
+            onClick={() => handleJustifyClick('login')}
+            active={justifyActive === 'login'}
+            color={justifyActive === 'login' ? "secondary" : "light"}
+            className={justifyActive === 'login' ? "text-white" : "text-secondary"}
+          >
+            Login
+          </MDBTabsLink>
+        </MDBTabsItem>
+        <MDBTabsItem>
+          <MDBTabsLink
+            onClick={() => handleJustifyClick('register')}
+            active={justifyActive === 'register'}
+            color={justifyActive === 'register' ? "secondary" : "light"}
+            className={justifyActive === 'register' ? "text-white" : "text-secondary"}
+          >
+            Register
+          </MDBTabsLink>
+        </MDBTabsItem>
+      </MDBTabs>
 
-        <MDBTabsContent>
-        <MDBTabsPane show={this.state.justifyActive === 'signup'}>
+      <MDBTabsContent>
 
+        <MDBTabsPane show={justifyActive === 'login'}>
 
-            <MDBInput wrapperClass='mb-4' label='Username' id='newusername' type='text' />
-            <MDBInput wrapperClass='mb-4' label='Password' id='newpwd' type='password' />
-            <MDBInput wrapperClass='mb-4' label='Recheck Password' id='newpwd2' type='password' />
-            <MDBInput wrapperClass='mb-4' label='Age' id='age' type='number' width={12} />
-            <MDBInput wrapperClass='mb-4' label='Email' id='email' type='email' />
-            <button className="mb-4 w-100" style={{ backgroundColor: "#6c757d", color: "white", fontSize: "17px", borderRadius: "4px",}} onClick={this.handleUserSignup}>Sign up</button>
+          <div className="form-group mb-4">
+            <label htmlFor="newusername">Username</label>
+            <input type="text" className="form-control" id="username" />
+          </div>
+          <div className="form-group mb-4">
+            <label htmlFor="newpwd">Password</label>
+            <input type="password" className="form-control" id="pwd" />
+          </div>
+          <button
+            className="mb-4 w-100"
+            style={{
+              backgroundColor: "#6c757d",
+              color: "white",
+              fontSize: "17px",
+              borderRadius: "4px",
+              border: "white",
+              height: "40px"
+            }}
+            onClick={handleUserSubmit}
+          >
+            Login
+          </button>
+        </MDBTabsPane>
+        <MDBTabsPane show={justifyActive === 'register'}>
+
+          <div className="form-group mb-4">
+            <label htmlFor="newusername">Username</label>
+            <input type="text" className="form-control" id="newusername" />
+          </div>
+          <div className="form-group mb-4">
+            <label htmlFor="newpwd">Password</label>
+            <input type="password" className="form-control" id="newpwd" />
+          </div>
+          <div className="form-group mb-4">
+            <label htmlFor="newpwd2">Recheck Password</label>
+            <input type="password" className="form-control" id="newpwd2" />
+          </div>
+          <div className="mb-5">
+            <label htmlFor="gender" className="col-form-label"> Gender: </label>
+            <div className="d-flex">
+              <div className="form-check me-4">
+                <input className="form-check-input" type="radio" name="radio-gender" id="radio-male" value="Male" />
+                <label className="form-check-label" htmlFor="radio-male">
+                  Male
+                </label>
+              </div>
+              <div className="form-check me-4">
+                <input className="form-check-input" type="radio" name="radio-gender" id="radio-female" value="Female" />
+                <label className="form-check-label" htmlFor="radio-female">
+                  Female
+                </label>
+              </div>
+              <div className="form-check me-4">
+                <input className="form-check-input" type="radio" name="radio-gender" id="radio-others" value="Others" />
+                <label className="form-check-label" htmlFor="radio-others">
+                  Others
+                </label>
+              </div>
+              <div className="form-check">
+                <input className="form-check-input" type="radio" name="radio-gender" id="radio-nottospecify" value="NottoSpecify" />
+                <label className="form-check-label" htmlFor="radio-nottospecify">
+                  Not to Specify
+                </label>
+              </div>
+            </div>
+          </div>
+          <button
+            className="mb-4 w-100"
+            style={{
+              backgroundColor: "#6c757d",
+              color: "white",
+              fontSize: "17px",
+              borderRadius: "4px",
+              border: "white",
+              height: "40px"
+            }}
+            onClick={handleRegister}
+          >
+            Register
+          </button>
 
         </MDBTabsPane>
 
-        </MDBTabsContent>
+      </MDBTabsContent>
 
-      </MDBContainer>) :(this.state.mode === 'user' ? <Navigate to='/'/> : <Navigate to='/admin'/>)
-    );
-  }
+    </MDBContainer>) : (mode === 'user' ? <Navigate to='/' /> : <Navigate to='/admin' />)
+  );
 }
 export default Login;
 

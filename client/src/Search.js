@@ -1,8 +1,13 @@
+import TweetListView from './Tweet';
 import React from 'react';
+//import UserListView from './User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
+//import SearchUser from './SearchUser';
+//import SearchTweet from './SearchTweet';
 import { Link } from 'react-router-dom';
+import {BACK_END} from './App';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 class Search extends React.Component{
