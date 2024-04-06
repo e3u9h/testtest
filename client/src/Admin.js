@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import { BACK_END } from './App';
 import { Link } from 'react-router-dom';
+import UserListView from './User';
 
 class Admin extends React.Component {
 
@@ -26,42 +27,6 @@ class ListUser extends React.Component {
     this.state = { userList: [] };
   }
 
-<<<<<<< HEAD
-  componentDidMount() {
-    this.getAllUser();
-  }
-
-  getAllUser = async () => {
-    try {
-      const res = await fetch(BACK_END + 'reportusers', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-      const userList = await res.json();
-      this.setState({ userList });
-    } catch (error) {
-      console.error("Failed to fetch users:", error);
-    }
-  }
-
-  render() {
-    return (
-      <InfiniteScroll
-        dataLength={this.state.userList.length}
-        next={null}
-        hasMore={false}
-        scrollableTarget="scrollableDiv"
-        endMessage={
-          <p style={{ textAlign: 'center' }}>
-            <ViewUserList userInfos={this.state.userList} />
-            <h6>That's all user :)</h6>
-          </p>
-        }>
-      </InfiniteScroll>
-=======
   async getAllUser() {
     let res = await fetch(BACK_END + 'reportusers', {
       method: 'GET',
@@ -87,7 +52,6 @@ class ListUser extends React.Component {
         </p>}>
       </InfiniteScroll>
     </>
->>>>>>> a1ee0a34b5d4edd7d860101622386aa3cd5f8c49
     );
   }
 }
