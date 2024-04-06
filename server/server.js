@@ -177,11 +177,11 @@ app.post('/login/user', (req, res) => {
 
 const server = app.listen(8000);
 
-/* -------------------------------------------------------------- */
-    /* --------------------Search------------------------*/
-    /* ---------------------------------------------------------------*/
+    /* ----------------------------------------------------------------*/
+    /* --------------------LI Peiran Search----------------------------*/
+    /* ----------------------------------------------------------------*/
 
-    //search for users (whose username contains the keywords)
+    //search for users by user name keywords
     app.get('/searchuser/:selfname/:targetname', (req, res) => {
         res.set('Content-Type', 'text/plain');
         let self = req.params['selfname'];
@@ -246,7 +246,7 @@ const server = app.listen(8000);
         });
     });
 
-    //search for tweets whose tags contain the tag.    
+    //search for posts with specified tag    
     app.get('/searchtag/:tag', (req, res) => {
         res.set('Content-Type', 'text/plain');
         Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
@@ -283,13 +283,13 @@ const server = app.listen(8000);
         });
     })
 
-    // get the first 10 tags which are contained most in the tweets
+    // recommendation part: get the most used tag (limitation 10)
     app.get('/search/trend', (req, res) => {
         res.set('Content-Type', 'text/plain');
         Tag.aggregate([
             { $project: { "tag": "$tag", cnt: { $size: '$tid' } } },
             { $sort: { cnt: -1 } },
-            { $limit: 8 }]).then((tweets) => {
+            { $limit: 10 }]).then((tweets) => {
                 if (!tweets) {
                     console.log("no tags");
                     res, send(404);
@@ -302,8 +302,6 @@ const server = app.listen(8000);
                 res.send(err);
             })
     })
-    // darft
-    // get the first 8 tags which are contained most in the tweets
 ;
 
 
