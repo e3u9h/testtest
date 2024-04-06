@@ -133,7 +133,7 @@ class Trend extends React.Component {
                 <TrendListView trendInfos={trendList} />
               ) : (
                 <p style={{ textAlign: 'center' }}>
-                  <b>No trends to display.</b>
+                  
                 </p>
               )
             }
