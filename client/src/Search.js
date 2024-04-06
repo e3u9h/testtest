@@ -1,17 +1,12 @@
-import TweetListView from './Tweet';
 import React from 'react';
-//import UserListView from './User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
-//import SearchUser from './SearchUser';
-//import SearchTweet from './SearchTweet';
 import { Link } from 'react-router-dom';
-import {BACK_END} from './App';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 class Search extends React.Component{
-    // construct for the serch component
+    
     constructor(props){
         super(props);
         this.state = {viewMode:"search"}; 
@@ -64,17 +59,11 @@ class Search extends React.Component{
                         </Button>
                         <Dropdown.Toggle variant="secondary" split id="dropdown-split-basic" />
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchuser', "Search for Users by Username")}>
-                                Search for users by username
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchtweet', "Search for Tweets")}>
-                                Search for tweets
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchuserid', "Search for Users by Uid")}>
-                                Search for users by uid
-                            </Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search for Users by Username"; }}>Search for users by username</Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search for Tweets";}}>Search for tweets</Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search for Users by Uid";}}>Search for users by uid</Dropdown.Item>
                         </Dropdown.Menu>
-                    </Dropdown>
+                        </Dropdown>
                 </div>
                 <div className="row">
                     <Trend />
@@ -138,7 +127,7 @@ class Trend extends React.Component {
                 <TrendListView trendInfos={trendList} />
               ) : (
                 <p style={{ textAlign: 'center' }}>
-                  <b>No trends to display.</b>
+                  
                 </p>
               )
             }
