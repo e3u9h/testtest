@@ -268,7 +268,7 @@ function ForwardForm(props) {
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
 
-  
+
   const fetchAvailableTags = () => {
     fetch('http://localhost:8000/tags', {
       method: 'GET',
@@ -430,4 +430,4 @@ function TweetListView({ tweetInfos }) {
     </>)
 }
 
-export { TweetListView, TweetCard };
+export { TweetListView, TweetCard, ForwardForm};
