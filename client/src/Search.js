@@ -59,17 +59,11 @@ class Search extends React.Component{
                         </Button>
                         <Dropdown.Toggle variant="secondary" split id="dropdown-split-basic" />
                         <Dropdown.Menu>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchuser', "Search for Users by Username")}>
-                                Search for users by username
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchtweet', "Search for Tweets")}>
-                                Search for tweets
-                            </Dropdown.Item>
-                            <Dropdown.Item onClick={() => this.setViewMode('searchuserid', "Search for Users by Uid")}>
-                                Search for users by uid
-                            </Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search for Users by Username"; }}>Search for users by username</Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search for Tweets";}}>Search for tweets</Dropdown.Item>
+                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search for Users by Uid";}}>Search for users by uid</Dropdown.Item>
                         </Dropdown.Menu>
-                    </Dropdown>
+                        </Dropdown>
                 </div>
                 <div className="row">
                     <Trend />

@@ -177,4 +177,133 @@ app.post('/login/user', (req, res) => {
 
 const server = app.listen(8000);
 
+/* -------------------------------------------------------------- */
+    /* --------------------Search------------------------*/
+    /* ---------------------------------------------------------------*/
+
+    //search for users (whose username contains the keywords)
+    app.get('/searchuser/:selfname/:targetname', (req, res) => {
+        res.set('Content-Type', 'text/plain');
+        let self = req.params['selfname'];
+        let target = req.params['targetname'];
+        User.findOne({ 'username': self }).then((self) => {
+            User.find({ 'username': { $regex: target } }).then((user) => {
+                let retUsers = [];
+                user.forEach(innerUser => {
+                    let isFollowing = false;
+                    if (innerUser.followers.includes(self._id)) {
+                        isFollowing = true;
+                    }
+                    let userObj = {
+                        "username": innerUser['username'],
+                        "uid": innerUser['_id'],
+                        "following": innerUser['followings'].length,
+                        "follower": innerUser['followers'].length,
+                        "isFollowing": isFollowing,
+                        "portraitUrl": innerUser['portrait']
+                    };
+                    retUsers.push(userObj);
+                });
+                res.send(retUsers);
+            }).catch((err) => {
+                console.log(err);
+                res.send(err);
+            });
+        });
+    });
+
+    //search for users by uid
+    app.get('/searchuserbyid/:selfname/:targetname', (req, res) => {
+        res.set('Content-Type', 'text/plain');
+        let self = req.params['selfname'];
+        let target = req.params['targetname'];
+        var o_id = new ObjectId(target);
+        console.log(target)
+        User.findOne({ 'username': self }).then((self) => {
+            User.find({ '_id': o_id }).then((user) => {
+                console.log(user);
+                let retUsers = [];
+                user.forEach(innerUser => {
+                    let isFollowing = false;
+                    if (innerUser.followers.includes(self._id)) {
+                        isFollowing = true;
+                    }
+                    let userObj = {
+                        "username": innerUser['username'],
+                        "uid": innerUser['_id'],
+                        "following": innerUser['followings'].length,
+                        "follower": innerUser['followers'].length,
+                        "isFollowing": isFollowing,
+                        "portraitUrl": innerUser['portrait']
+                    };
+                    retUsers.push(userObj);
+                });
+                res.send(retUsers);
+            }).catch((err) => {
+                console.log(err);
+                res.send(err);
+            });
+        });
+    });
+
+    //search for tweets whose tags contain the tag.    
+    app.get('/searchtag/:tag', (req, res) => {
+        res.set('Content-Type', 'text/plain');
+        Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
+            tweet = tweet.filter((tweet) => {
+                return tweet.poster != null;
+            });
+            let obj = [];
+            if (!tweet) {
+                console.log("no such tweet");
+                res.sendStatus(404);
+            }
+            else {
+                tweet.forEach(tweet => {
+                    let tweetObj = {
+                        "tid": tweet['_id'],
+                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
+                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
+                        "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
+                        "content": tweet.tweet_content,
+                        "commentCount": tweet['comments'].length,
+                        "retweetCount": tweet['retweets'].length,
+                        "time": tweet['post_time'],
+                        "portraitUrl": tweet.poster['portrait'],
+                        "tags": tweet['tags'],
+                        'private': tweet['private']
+                    }
+                    obj.push(tweetObj);
+                });
+                console.log(obj);
+                res.send(obj);
+            }
+        }).catch((err) => {
+            res.send(err);
+        });
+    })
+
+    // get the first 10 tags which are contained most in the tweets
+    app.get('/search/trend', (req, res) => {
+        res.set('Content-Type', 'text/plain');
+        Tag.aggregate([
+            { $project: { "tag": "$tag", cnt: { $size: '$tid' } } },
+            { $sort: { cnt: -1 } },
+            { $limit: 8 }]).then((tweets) => {
+                if (!tweets) {
+                    console.log("no tags");
+                    res, send(404);
+                }
+                else {
+                    console.log(tweets);
+                    res.send(tweets)
+                }
+            }).catch((err) => {
+                res.send(err);
+            })
+    })
+    // darft
+    // get the first 8 tags which are contained most in the tweets
+;
+
 
