@@ -10,6 +10,7 @@ import Search from './Search'
 import { Admin } from './Admin';
 import ProfileWrapper from './Profile';
 import cookie from 'react-cookies';
+import Header from './component/header';
 
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -47,9 +48,9 @@ function App() {
     };
     return (<>
       {<div className="col-md-2 p-3 text-bg-light">
-        <div className="d-flex justify-content-center text-center">
+        {/* <div className="d-flex justify-content-center text-center">
           <img className="w-75 d-flex justify-content-center" src={[require('./img/c3ulogo.jpg')]} alt='logo.png'></img>
-        </div>
+        </div> */}
         <hr />
         <ul className="nav nav-pills flex-column mb-auto">
           <li className="nav-item">
@@ -95,24 +96,29 @@ function App() {
   }
 
   const Layout = () => {
-    return (
+    return (<>
+      <Header />
       <div className="row" style={{ height: "100vh" }}>
         <Navbar mode="user" />
         <div className="col-md-10 p-3 bg-light overflow-auto">
           <Outlet />
         </div>
       </div>
+    </>
     );
   }
 
   const LayoutAdmin = () => {
     return (
-      <div className="row" style={{ height: "100vh" }}>
-        <Navbar mode="admin" />
-        <div className="col-md-10 p-3 bg-light overflow-auto">
-          <Outlet />
+      <>
+        <Header />
+        <div className="row" style={{ height: "100vh" }}>
+          <Navbar mode="admin" />
+          <div className="col-md-10 p-3 bg-light overflow-auto">
+            <Outlet />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -147,7 +153,6 @@ function App() {
     <>
       <main className="container-fluid">
         <RouterProvider router={router} />
-
       </main>
 
     </>

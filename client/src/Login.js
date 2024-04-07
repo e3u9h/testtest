@@ -11,6 +11,7 @@ import {
   from 'mdb-react-ui-kit';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { BACK_END } from './App';
+import Header from './component/header';
 
 export const getLoginInfo = () => {
   return cookie.load('userInfo');
@@ -24,7 +25,7 @@ export const login = (username, mode) => {
 
 
 const Login = (props) => {
-  const [loggedin, setLoggedin] = useState(false);
+  const [loggedin, setLoggedin] = useState(getLoginInfo() !== undefined);
   const [mode, setMode] = useState('user');
   const [justifyActive, setJustifyActive] = useState('login');
   const navigate = useNavigate();
@@ -124,121 +125,123 @@ const Login = (props) => {
       });
   };
   return (loggedin === false ?
-    (<MDBContainer className="p-3 my-5 d-flex flex-column w-50">
+    (<>
+      <Header />
+      <MDBContainer className="p-3 my-5 d-flex flex-column w-50">
 
-      <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
-        <MDBTabsItem>
-          <MDBTabsLink
-            onClick={() => handleJustifyClick('login')}
-            active={justifyActive === 'login'}
-            color={justifyActive === 'login' ? "secondary" : "light"}
-            className={justifyActive === 'login' ? "text-white" : "text-secondary"}
-          >
-            Login
-          </MDBTabsLink>
-        </MDBTabsItem>
-        <MDBTabsItem>
-          <MDBTabsLink
-            onClick={() => handleJustifyClick('register')}
-            active={justifyActive === 'register'}
-            color={justifyActive === 'register' ? "secondary" : "light"}
-            className={justifyActive === 'register' ? "text-white" : "text-secondary"}
-          >
-            Register
-          </MDBTabsLink>
-        </MDBTabsItem>
-      </MDBTabs>
+        <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
+          <MDBTabsItem>
+            <MDBTabsLink
+              onClick={() => handleJustifyClick('login')}
+              active={justifyActive === 'login'}
+              color={justifyActive === 'login' ? "secondary" : "light"}
+              className={justifyActive === 'login' ? "text-white" : "text-secondary"}
+            >
+              Login
+            </MDBTabsLink>
+          </MDBTabsItem>
+          <MDBTabsItem>
+            <MDBTabsLink
+              onClick={() => handleJustifyClick('register')}
+              active={justifyActive === 'register'}
+              color={justifyActive === 'register' ? "secondary" : "light"}
+              className={justifyActive === 'register' ? "text-white" : "text-secondary"}
+            >
+              Register
+            </MDBTabsLink>
+          </MDBTabsItem>
+        </MDBTabs>
 
-      <MDBTabsContent>
+        <MDBTabsContent>
 
-        <MDBTabsPane show={justifyActive === 'login'}>
+          <MDBTabsPane show={justifyActive === 'login'}>
 
-          <div className="form-group mb-4">
-            <label htmlFor="newusername">Username</label>
-            <input type="text" className="form-control" id="username" />
-          </div>
-          <div className="form-group mb-4">
-            <label htmlFor="newpwd">Password</label>
-            <input type="password" className="form-control" id="pwd" />
-          </div>
-          <button
-            className="mb-4 w-100"
-            style={{
-              backgroundColor: "#6c757d",
-              color: "white",
-              fontSize: "17px",
-              borderRadius: "4px",
-              border: "white",
-              height: "40px"
-            }}
-            onClick={handleUserSubmit}
-          >
-            Login
-          </button>
-        </MDBTabsPane>
-        <MDBTabsPane show={justifyActive === 'register'}>
+            <div className="form-group mb-4">
+              <label htmlFor="newusername">Username</label>
+              <input type="text" className="form-control" id="username" />
+            </div>
+            <div className="form-group mb-4">
+              <label htmlFor="newpwd">Password</label>
+              <input type="password" className="form-control" id="pwd" />
+            </div>
+            <button
+              className="mb-4 w-100"
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                fontSize: "17px",
+                borderRadius: "4px",
+                border: "white",
+                height: "40px"
+              }}
+              onClick={handleUserSubmit}
+            >
+              Login
+            </button>
+          </MDBTabsPane>
+          <MDBTabsPane show={justifyActive === 'register'}>
 
-          <div className="form-group mb-4">
-            <label htmlFor="newusername">Username</label>
-            <input type="text" className="form-control" id="newusername" />
-          </div>
-          <div className="form-group mb-4">
-            <label htmlFor="newpwd">Password</label>
-            <input type="password" className="form-control" id="newpwd" />
-          </div>
-          <div className="form-group mb-4">
-            <label htmlFor="newpwd2">Recheck Password</label>
-            <input type="password" className="form-control" id="newpwd2" />
-          </div>
-          <div className="mb-5">
-            <label htmlFor="gender" className="col-form-label"> Gender: </label>
-            <div className="d-flex">
-              <div className="form-check me-4">
-                <input className="form-check-input" type="radio" name="radio-gender" id="radio-male" value="Male" />
-                <label className="form-check-label" htmlFor="radio-male">
-                  Male
-                </label>
-              </div>
-              <div className="form-check me-4">
-                <input className="form-check-input" type="radio" name="radio-gender" id="radio-female" value="Female" />
-                <label className="form-check-label" htmlFor="radio-female">
-                  Female
-                </label>
-              </div>
-              <div className="form-check me-4">
-                <input className="form-check-input" type="radio" name="radio-gender" id="radio-others" value="Others" />
-                <label className="form-check-label" htmlFor="radio-others">
-                  Others
-                </label>
-              </div>
-              <div className="form-check">
-                <input className="form-check-input" type="radio" name="radio-gender" id="radio-nottospecify" value="NottoSpecify" />
-                <label className="form-check-label" htmlFor="radio-nottospecify">
-                  Not to Specify
-                </label>
+            <div className="form-group mb-4">
+              <label htmlFor="newusername">Username</label>
+              <input type="text" className="form-control" id="newusername" />
+            </div>
+            <div className="form-group mb-4">
+              <label htmlFor="newpwd">Password</label>
+              <input type="password" className="form-control" id="newpwd" />
+            </div>
+            <div className="form-group mb-4">
+              <label htmlFor="newpwd2">Recheck Password</label>
+              <input type="password" className="form-control" id="newpwd2" />
+            </div>
+            <div className="mb-5">
+              <label htmlFor="gender" className="col-form-label"> Gender: </label>
+              <div className="d-flex">
+                <div className="form-check me-4">
+                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-male" value="Male" />
+                  <label className="form-check-label" htmlFor="radio-male">
+                    Male
+                  </label>
+                </div>
+                <div className="form-check me-4">
+                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-female" value="Female" />
+                  <label className="form-check-label" htmlFor="radio-female">
+                    Female
+                  </label>
+                </div>
+                <div className="form-check me-4">
+                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-others" value="Others" />
+                  <label className="form-check-label" htmlFor="radio-others">
+                    Others
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-nottospecify" value="NottoSpecify" />
+                  <label className="form-check-label" htmlFor="radio-nottospecify">
+                    Not to Specify
+                  </label>
+                </div>
               </div>
             </div>
-          </div>
-          <button
-            className="mb-4 w-100"
-            style={{
-              backgroundColor: "#6c757d",
-              color: "white",
-              fontSize: "17px",
-              borderRadius: "4px",
-              border: "white",
-              height: "40px"
-            }}
-            onClick={handleRegister}
-          >
-            Register
-          </button>
+            <button
+              className="mb-4 w-100"
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                fontSize: "17px",
+                borderRadius: "4px",
+                border: "white",
+                height: "40px"
+              }}
+              onClick={handleRegister}
+            >
+              Register
+            </button>
 
-        </MDBTabsPane>
+          </MDBTabsPane>
 
-      </MDBTabsContent>
+        </MDBTabsContent>
 
-    </MDBContainer>) : (mode === 'user' ? <Navigate to='/' /> : <Navigate to='/admin' />)
+      </MDBContainer></>) : (mode === 'user' ? <Navigate to='/' /> : <Navigate to='/admin' />)
   );
 }
 export default Login;
