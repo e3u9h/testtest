@@ -1,17 +1,18 @@
-import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
+import { useState, useEffect } from 'react';
+import UserListView from './User';
+import { TweetListView } from './Tweet';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { randomSelect } from './Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState, useRef } from 'react';
-import { Editor } from '@tinymce/tinymce-react';
-import { timeDifference } from './Utils';
-import { Link } from "react-router-dom";
+import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { getLoginInfo } from './Login';
 import { BACK_END } from './App';
-import { randomSelect } from './Utils';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { Dropdown } from 'react-bootstrap';
+import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { PlusOutlined } from '@ant-design/icons';
+import { Image, Upload, Form, Input, message } from 'antd';
 
-export const tinyMCEApiKey = "sectfzujjivlo90kpiqptvlao0lrn8b79rf326hs1v6b9oyu"
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
@@ -134,7 +135,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             <div className="d-flex justify-content-center text-center">
               {/* link to the user profile */}
               <Link to={"/" + username}>
-                <img src={portraitUrl} alt="Generic placeholder image" className="img-fluid rounded-circle w-75" />
+                <img src={BACK_END+portraitUrl} alt="Generic placeholder image" className="img-fluid rounded-circle w-75" />
               </Link>
             </div>
             <h3 className="my-2 text-bold text-center">{username}</h3>
@@ -164,12 +165,11 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
         <Image
           key={index}
           width={200}
-          src={"http://localhost:8000/uploads/"+src}
+          src={BACK_END+src}
           style={{ margin: '8px' }} 
         />
       ))}
     </Image.PreviewGroup> 
-              {/* <DisplayRichText content={tweetContent} /> */}
             </div>
             <div className="col-12">
 
@@ -267,6 +267,7 @@ function ForwardForm(props) {
   const [tags, setTags] = useState([]);
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
+
 
 
   const fetchAvailableTags = () => {
@@ -430,4 +431,4 @@ function TweetListView({ tweetInfos }) {
     </>)
 }
 
-export { TweetListView, TweetCard, ForwardForm};
+export { TweetListView, TweetCard };

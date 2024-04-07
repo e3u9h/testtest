@@ -1,0 +1,8 @@
+.custom-input:hover {
+    border-color: gray;
+  }
+
+.rounded-toggle::after {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+  }
