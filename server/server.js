@@ -8,7 +8,8 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
-app.use('/uploads',express.static('uploads'))
+app.use('/uploads', express.static('uploads'))
+app.use('/img', express.static('img'))
 const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 console.log("Connecting to MongoDB...");
 mongoose.connect(uri);
@@ -22,7 +23,7 @@ const AccountSchema = mongoose.Schema({
 const TweetSchema = mongoose.Schema({
     poster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     tweet_content: { type: String },
-    files: [{type: String}],
+    files: [{ type: String }],
     tags: [{ type: String, required: true }],
     comments: [{
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -107,7 +108,7 @@ app.post('/createuser', (req, res) => {
             }).then(() => {
                 let default_portrait = "./img/defaultPortrait.jpg"
                 let gender = ''
-                if(req.body['gender'] !== 'NottoSpecify'){
+                if (req.body['gender'] !== 'NottoSpecify') {
                     gender = req.body['gender']
                 }
                 let user = {
@@ -175,133 +176,177 @@ app.post('/login/user', (req, res) => {
     });
 });
 
-const server = app.listen(8000);
+app.get('/portrait/:username', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const username = req.params['username'];
+    User.findOne({ 'username': username }, 'portrait -_id').exec().then((user) => {
+        console.log(user);
+        if (user) {
+            console.log(user['portrait']);
+            res.send(user['portrait']);
+        }
+        else {
+            console.log("no such user");
+            res.sendStatus(404);
+        }
+    }).catch((err) => {
+        console.log(err);
+        res.send(err);
+    });
+});
 
-    /* ----------------------------------------------------------------*/
-    /* --------------------LI Peiran Search----------------------------*/
-    /* ----------------------------------------------------------------*/
+app.get('/profile/:username', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const username = req.params['username'];
+    User.findOne({ 'username': username }).populate('tweets').exec().then((user) => {
+        let userObj = null;
+        if (user != null && user != '') {
+            userObj = {
+                'uid': user['_id'],
+                'username': user['username'],
+                'gender': user['gender'],
+                'interests': user['interests'],
+                'follower_counter': user['follower_counter'],
+                'following_counter': user['following_counter'],
+                'about': user['about'],
+                'portrait': user['portrait']
+            }
+        }
+        res.send(userObj);
+    }).catch((err) => {
+        console.log(err);
+        res.send(err);
+    });
+});
 
-    //search for users by user name keywords
-    app.get('/searchuser/:selfname/:targetname', (req, res) => {
-        res.set('Content-Type', 'text/plain');
-        let self = req.params['selfname'];
-        let target = req.params['targetname'];
-        User.findOne({ 'username': self }).then((self) => {
-            User.find({ 'username': { $regex: target } }).then((user) => {
-                let retUsers = [];
-                user.forEach(innerUser => {
-                    let isFollowing = false;
-                    if (innerUser.followers.includes(self._id)) {
-                        isFollowing = true;
-                    }
-                    let userObj = {
-                        "username": innerUser['username'],
-                        "uid": innerUser['_id'],
-                        "following": innerUser['followings'].length,
-                        "follower": innerUser['followers'].length,
-                        "isFollowing": isFollowing,
-                        "portraitUrl": innerUser['portrait']
-                    };
-                    retUsers.push(userObj);
-                });
-                res.send(retUsers);
-            }).catch((err) => {
-                console.log(err);
-                res.send(err);
+/* ----------------------------------------------------------------*/
+/* --------------------LI Peiran Search----------------------------*/
+/* ----------------------------------------------------------------*/
+
+//search for users by user name keywords
+app.get('/searchuser/:selfname/:targetname', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    let self = req.params['selfname'];
+    let target = req.params['targetname'];
+    User.findOne({ 'username': self }).then((self) => {
+        User.find({ 'username': { $regex: target } }).then((user) => {
+            let retUsers = [];
+            user.forEach(innerUser => {
+                let isFollowing = false;
+                if (innerUser.followers.includes(self._id)) {
+                    isFollowing = true;
+                }
+                let userObj = {
+                    "username": innerUser['username'],
+                    "uid": innerUser['_id'],
+                    "following": innerUser['followings'].length,
+                    "follower": innerUser['followers'].length,
+                    "isFollowing": isFollowing,
+                    "portraitUrl": innerUser['portrait']
+                };
+                retUsers.push(userObj);
             });
+            res.send(retUsers);
+        }).catch((err) => {
+            console.log(err);
+            res.send(err);
         });
     });
+});
 
-    //search for users by uid
-    app.get('/searchuserbyid/:selfname/:targetname', (req, res) => {
-        res.set('Content-Type', 'text/plain');
-        let self = req.params['selfname'];
-        let target = req.params['targetname'];
-        var o_id = new ObjectId(target);
-        console.log(target)
-        User.findOne({ 'username': self }).then((self) => {
-            User.find({ '_id': o_id }).then((user) => {
-                console.log(user);
-                let retUsers = [];
-                user.forEach(innerUser => {
-                    let isFollowing = false;
-                    if (innerUser.followers.includes(self._id)) {
-                        isFollowing = true;
-                    }
-                    let userObj = {
-                        "username": innerUser['username'],
-                        "uid": innerUser['_id'],
-                        "following": innerUser['followings'].length,
-                        "follower": innerUser['followers'].length,
-                        "isFollowing": isFollowing,
-                        "portraitUrl": innerUser['portrait']
-                    };
-                    retUsers.push(userObj);
-                });
-                res.send(retUsers);
-            }).catch((err) => {
-                console.log(err);
-                res.send(err);
+//search for users by uid
+app.get('/searchuserbyid/:selfname/:targetname', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    let self = req.params['selfname'];
+    let target = req.params['targetname'];
+    var o_id = new ObjectId(target);
+    console.log(target)
+    User.findOne({ 'username': self }).then((self) => {
+        User.find({ '_id': o_id }).then((user) => {
+            console.log(user);
+            let retUsers = [];
+            user.forEach(innerUser => {
+                let isFollowing = false;
+                if (innerUser.followers.includes(self._id)) {
+                    isFollowing = true;
+                }
+                let userObj = {
+                    "username": innerUser['username'],
+                    "uid": innerUser['_id'],
+                    "following": innerUser['followings'].length,
+                    "follower": innerUser['followers'].length,
+                    "isFollowing": isFollowing,
+                    "portraitUrl": innerUser['portrait']
+                };
+                retUsers.push(userObj);
             });
+            res.send(retUsers);
+        }).catch((err) => {
+            console.log(err);
+            res.send(err);
         });
     });
+});
 
-    //search for posts with specified tag    
-    app.get('/searchtag/:tag', (req, res) => {
-        res.set('Content-Type', 'text/plain');
-        Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
-            tweet = tweet.filter((tweet) => {
-                return tweet.poster != null;
+//search for posts with specified tag    
+app.get('/searchtag/:tag', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
+        tweet = tweet.filter((tweet) => {
+            return tweet.poster != null;
+        });
+        let obj = [];
+        if (!tweet) {
+            console.log("no such tweet");
+            res.sendStatus(404);
+        }
+        else {
+            tweet.forEach(tweet => {
+                let tweetObj = {
+                    "tid": tweet['_id'],
+                    "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
+                    "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
+                    "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
+                    "content": tweet.tweet_content,
+                    "commentCount": tweet['comments'].length,
+                    "retweetCount": tweet['retweets'].length,
+                    "time": tweet['post_time'],
+                    "portraitUrl": tweet.poster['portrait'],
+                    "tags": tweet['tags'],
+                    'private': tweet['private']
+                }
+                obj.push(tweetObj);
             });
-            let obj = [];
-            if (!tweet) {
-                console.log("no such tweet");
-                res.sendStatus(404);
+            console.log(obj);
+            res.send(obj);
+        }
+    }).catch((err) => {
+        res.send(err);
+    });
+})
+
+// recommendation part: get the most used tag (limitation 10)
+app.get('/search/trend', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    Tag.aggregate([
+        { $project: { "tag": "$tag", cnt: { $size: '$tid' } } },
+        { $sort: { cnt: -1 } },
+        { $limit: 10 }]).then((tweets) => {
+            if (!tweets) {
+                console.log("no tags");
+                res, send(404);
             }
             else {
-                tweet.forEach(tweet => {
-                    let tweetObj = {
-                        "tid": tweet['_id'],
-                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
-                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
-                        "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
-                        "content": tweet.tweet_content,
-                        "commentCount": tweet['comments'].length,
-                        "retweetCount": tweet['retweets'].length,
-                        "time": tweet['post_time'],
-                        "portraitUrl": tweet.poster['portrait'],
-                        "tags": tweet['tags'],
-                        'private': tweet['private']
-                    }
-                    obj.push(tweetObj);
-                });
-                console.log(obj);
-                res.send(obj);
+                console.log(tweets);
+                res.send(tweets)
             }
         }).catch((err) => {
             res.send(err);
-        });
-    })
+        })
+})
+    ;
 
-    // recommendation part: get the most used tag (limitation 10)
-    app.get('/search/trend', (req, res) => {
-        res.set('Content-Type', 'text/plain');
-        Tag.aggregate([
-            { $project: { "tag": "$tag", cnt: { $size: '$tid' } } },
-            { $sort: { cnt: -1 } },
-            { $limit: 10 }]).then((tweets) => {
-                if (!tweets) {
-                    console.log("no tags");
-                    res, send(404);
-                }
-                else {
-                    console.log(tweets);
-                    res.send(tweets)
-                }
-            }).catch((err) => {
-                res.send(err);
-            })
-    })
-;
+// ------启动server------
+const server = app.listen(8000);
 
 

@@ -11,7 +11,7 @@ import {
   from 'mdb-react-ui-kit';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { BACK_END } from './App';
-import Header from './component/header';
+import Header from './components/header';
 
 export const getLoginInfo = () => {
   return cookie.load('userInfo');
