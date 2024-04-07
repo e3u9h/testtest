@@ -9,7 +9,7 @@ import {
   MDBTabsPane
 }
   from 'mdb-react-ui-kit';
-import { Navigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { BACK_END } from './App';
 
 export const getLoginInfo = () => {
@@ -21,16 +21,13 @@ export const login = (username, mode) => {
   cookie.save('userInfo', { username, mode }, { path: '/', maxAge: 3600 });
 };
 
-export const logout = () => {
-  console.log("Remove Login Cookie");
-  cookie.remove('userInfo');
-};
 
 
 const Login = (props) => {
-  const [login, setLogin] = useState(false);
+  const [loggedin, setLoggedin] = useState(false);
   const [mode, setMode] = useState('user');
   const [justifyActive, setJustifyActive] = useState('login');
+  const navigate = useNavigate();
 
   const handleRegister = (event) => {
     event.preventDefault();
@@ -66,9 +63,9 @@ const Login = (props) => {
       })
         .then(res => {
           if (res.status === 201) {
-            setLogin(true);
+            setLoggedin(true);
             setMode('user');
-            login(username, 'user');
+            loggedin(username, 'user');
           }
           return res.text();
         })
@@ -103,25 +100,30 @@ const Login = (props) => {
       },
     })
       .then(res => {
+        console.log(res);
         if (res.status === 201) {
-          setLogin(true);
+          setLoggedin(true);
           setMode('user');
           login(username, 'user');
+          navigate('/');
+        }
+        else if (res.status === 200) {
+          console.log("Admin login");
+          setLoggedin(true);
+          setMode('admin');
+          login(username, 'admin');
+          navigate('/admin');
         }
         return res.text();
       })
       .then(data => {
-        if (data == 'Login As Admin Successfully!\n') {
-          setLogin(true);
-          setMode('admin');
-          login(username, 'admin');
-        } alert(data)
+        alert(data)
       })
       .catch(err => {
         console.log(err);
       });
   };
-  return (login === false ?
+  return (loggedin === false ?
     (<MDBContainer className="p-3 my-5 d-flex flex-column w-50">
 
       <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
