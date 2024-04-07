@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import UserListView from './User';
-import { TweetListView } from './Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { randomSelect } from './Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,6 +10,7 @@ import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
+import {Link} from "react-router-dom"
 import { Image, Upload, Form, Input, message } from 'antd';
 
 

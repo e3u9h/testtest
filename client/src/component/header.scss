@@ -1,0 +1,20 @@
+$lightGreen : #b9e7e7;
+
+.header{
+    .container{
+        padding: 10px 0px;
+        display: flex;
+        justify-content: space-between;
+        .logo img {
+            max-width: 100px;
+            height: auto; 
+        }
+        .links{
+            display: flex;
+            .link {
+                text-decoration: none;
+                color: inherit;
+            }
+        }
+    }
+}
