@@ -14,22 +14,27 @@ function randomSelect(arr, n) {
 }
 
 function timeDifference(time) {
+    const monthAbbreviations = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
     const now = new Date();
     const postTime = new Date(time);
     console.log(time + postTime);
     const year = postTime.getFullYear();
-    const month = postTime.getMonth() + 1;
+    const month = monthAbbreviations[postTime.getMonth()];
     const day = postTime.getDate();
     const hours = postTime.getHours();
     const minutes = postTime.getMinutes();
     const diffInDay = now.getDate() - day;
     const diffInYear = now.getFullYear() - year;
     if (diffInYear > 0) {
-        return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        return `${year}-${month.toString()} ${day.toString()}`;
     }
     if (diffInDay > 0) {
-        return `${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        return `${month.toString()} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
+
 export { randomSelect, timeDifference };
