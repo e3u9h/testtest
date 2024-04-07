@@ -4,7 +4,6 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import { BACK_END } from './App';
 import { Link } from 'react-router-dom';
-import UserListView from './User';
 
 class Admin extends React.Component {
 
@@ -13,6 +12,7 @@ class Admin extends React.Component {
       <Container fluid>
         <div id="scrollableDiv" className='border' style={{ height: "100vh", overflow: "auto" }}>
           <AddUser/>
+          <UpdateUser/>
           <ListUser />
           <DeleteUser />
         </div>
@@ -41,7 +41,7 @@ class AddUser extends React.Component {
       })
         .then(res => {
           if (res.status === 201) {
-            alert("Successfully create user");
+            
           }
           return res.text();
         }).then(data => {
@@ -77,13 +77,80 @@ class AddUser extends React.Component {
     );
   }
 }  
+
+class UpdateUser extends React.Component {
+  // To handle the action of updating a user
+  handleUpdate = (event) => {
+    event.preventDefault();
+    const username = document.querySelector("#updateOldUsername").value;
+    const newpwd = document.getElementById('updatePassword').value;
+
+    const newObj = {
+      username: username,
+      newpwd: newpwd
+    };
+
+    if (!username) {
+      window.alert("Invalid input :(\nPlease enter the original username.");
+    } else if (!newpwd) {
+      window.alert("Invalid input.\nPlease enter the updating attributes.");
+    } else if (newpwd.length <= 4 || newpwd.length >= 20) {
+      window.alert("Invalid input.\n The length of the password should be >4 and <20.");
+    } else {
+      fetch(BACK_END + 'adminchangepwd', {
+        method: 'PUT',
+        body: JSON.stringify(newObj),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+        .then(res => {
+          if (res.status === 200) {
+            
+          }
+          return res.text();
+        })
+        .then(data => {
+          alert(data);
+          window.location.reload(true);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    }
+  }
+
+  renderFormGroup = (label, id, type) => (
+    <div className="row mb-3">
+      <label htmlFor={id} className="col-sm-2 col-form-label">{label}</label>
+      <div className="col-sm-10">
+        <input type={type} className="form-control" id={id} />
+      </div>
+    </div>
+  );
+
+  render() {
+    return (
+      <div className='border' style={{ padding: '20px' }}>
+        <form onSubmit={this.handleUpdate}>
+          <div className="row mb-3">
+            <h3 id="updateTtitle">Update User</h3>
+          </div>
+          {this.renderFormGroup("Username:", "updateOldUsername", "text")}
+          {this.renderFormGroup("Updated Password:", "updatePassword", "password")}
+          <button type="submit" className="btn btn-secondary">Update</button>
+        </form>
+      </div>
+    );
+  }
+}
+
 class ListUser extends React.Component {
   constructor(props) {
     super(props);
     this.state = { userList: [] };
   }
 
-<<<<<<< HEAD
   componentDidMount() {
     this.getAllUser();
   }
@@ -118,33 +185,6 @@ class ListUser extends React.Component {
           </p>
         }>
       </InfiniteScroll>
-=======
-  async getAllUser() {
-    let res = await fetch(BACK_END + 'reportusers', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    });
-    let l = await res.json();
-    await this.setState({ userList: l });
-    console.log(this.state.userList);
-  }
-  componentDidMount() {
-    this.getAllUser()
-  }
-
-  render() {
-    return (<>
-      <InfiniteScroll dataLength={this.state.userList.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
-        endMessage={<p style={{ textAlign: 'center' }}>
-          <h6>That's all users :)</h6>
-          <UserListView userInfos={this.state.userList} />
-        </p>}>
-      </InfiniteScroll>
-    </>
->>>>>>> a1ee0a34b5d4edd7d860101622386aa3cd5f8c49
     );
   }
 }
@@ -170,6 +210,8 @@ const UserView = (props) => {
 };
 
 function ViewUserList({ userInfos }) {
+  const [userInfoList, setUserList] = useState(userInfos);
+
   return (
     <div className="container-fluid border" style={{ padding: '20px' }}>
       <div className="row mb-3">
@@ -236,7 +278,6 @@ class DeleteUser extends React.Component {
 }
 
 function DeleteUserList({ userInfos }) {
-
   const [userInfoList, setUserList] = useState(userInfos);
 
   return (
