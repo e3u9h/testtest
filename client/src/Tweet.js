@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import UserListView from './User';
-import { TweetListView } from './Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { randomSelect } from './Utils';
+import { randomSelect, timeDifference } from './Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { getLoginInfo } from './Login';
@@ -12,6 +11,8 @@ import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, Form, Input, message } from 'antd';
+import { Link } from "react-router-dom";
+import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
 
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
@@ -28,7 +29,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const tags = tweetInfo['tags'];
   const username = tweetInfo['user']['username'];
   const files = tweetInfo['files']
-  console.log("TWEETPART"+files)
+  console.log("TWEETPART" + files)
 
   // Update time
   useEffect(() => {
@@ -135,7 +136,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             <div className="d-flex justify-content-center text-center">
               {/* link to the user profile */}
               <Link to={"/" + username}>
-                <img src={BACK_END+portraitUrl} alt="Generic placeholder image" className="img-fluid rounded-circle w-75" />
+                <img src={BACK_END + portraitUrl} alt="Generic placeholder image" className="img-fluid rounded-circle w-75" />
               </Link>
             </div>
             <h3 className="my-2 text-bold text-center">{username}</h3>
@@ -156,20 +157,20 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             </div>
             <div><p>{tweetContent}</p></div>
             <div className="col-12 mb-2">
-            <Image.PreviewGroup
-      preview={{
-        onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
-      }}
-    >
-      {files.map((src, index) => (
-        <Image
-          key={index}
-          width={200}
-          src={BACK_END+src}
-          style={{ margin: '8px' }} 
-        />
-      ))}
-    </Image.PreviewGroup> 
+              <Image.PreviewGroup
+                preview={{
+                  onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
+                }}
+              >
+                {files.map((src, index) => (
+                  <Image
+                    key={index}
+                    width={200}
+                    src={BACK_END + src}
+                    style={{ margin: '8px' }}
+                  />
+                ))}
+              </Image.PreviewGroup>
             </div>
             <div className="col-12">
 
@@ -290,35 +291,35 @@ function ForwardForm(props) {
 
 
   const postRetweet = () => {
-    if (repostContent==="") {
-        setRepostContent(initialContent)
+    if (repostContent === "") {
+      setRepostContent(initialContent)
     }
-      let postBody = {
-        username: getLoginInfo()['username'],
-        tweet_content: repostContent,
-        tags: tags,
-        tid: props.tid,
-        private: privacy
-      }
-      console.log(postBody)
+    let postBody = {
+      username: getLoginInfo()['username'],
+      tweet_content: repostContent,
+      tags: tags,
+      tid: props.tid,
+      private: privacy
+    }
+    console.log(postBody)
 
-      fetch('http://localhost:8000/retweet', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(postBody)
-      }).then(res => {
-        console.log(res)
-        if (res.status === 201) {
-          setRepostContent(initialContent);
-          props.setRetweetCount(props.retweetCount + 1);
-          setTags([]);
-          alert("Repost success");
-        } else {
-          alert("Repost failed");
-        }
-      });
+    fetch('http://localhost:8000/retweet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(postBody)
+    }).then(res => {
+      console.log(res)
+      if (res.status === 201) {
+        setRepostContent(initialContent);
+        props.setRetweetCount(props.retweetCount + 1);
+        setTags([]);
+        alert("Repost success");
+      } else {
+        alert("Repost failed");
+      }
+    });
   };
 
 
@@ -367,16 +368,16 @@ function ForwardForm(props) {
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-            <Form>
-        <Form.Item>
-          <Input.TextArea
-            rows={4}
-            value={repostContent}
-            onChange={e => setRepostContent(e.target.value)}
-            placeholder="Repost"
-          />
-        </Form.Item>
-      </Form>
+              <Form>
+                <Form.Item>
+                  <Input.TextArea
+                    rows={4}
+                    value={repostContent}
+                    onChange={e => setRepostContent(e.target.value)}
+                    placeholder="Repost"
+                  />
+                </Form.Item>
+              </Form>
               <div className="modal-body">
                 <h5>Choose a tag</h5>
                 <hr></hr>
