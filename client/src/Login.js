@@ -64,7 +64,7 @@ const Login = (props) => {
       })
         .then(res => {
           if (res.status === 201) {
-            setLoggedin(true);
+            setLogin(true);
             setMode('user');
             loggedin(username, 'user');
           }
@@ -124,6 +124,10 @@ const Login = (props) => {
         console.log(err);
       });
   };
+  useEffect(() => {
+    setLoggedin(getLoginInfo() !== undefined);
+  }
+    , []);
   return (loggedin === false ?
     (<>
       <Header />

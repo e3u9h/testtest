@@ -18,6 +18,10 @@ import "./css/App.css"
 import { Followings } from './Followings';
 import { Followers } from './Followers';
 import Navbar from './components/navbar';
+import SearchUser from './SearchUser';
+import SearchTweet from './SearchTweet';
+import SearchUserid from './Searchid';
+import cookie from 'react-cookies';
 
 
 
@@ -28,7 +32,8 @@ function App() {
 
   function AuthRoute({ children, requiredMode }) {
     const userInfo = getLoginInfo();
-    if (userInfo === undefined || userInfo['mode'] !== requiredMode) {
+    if (userInfo === undefined || (requiredMode !== undefined && userInfo['mode'] !== requiredMode)) {
+      cookie.remove('userInfo');
       return <Navigate to="/login" replace />;
     } else {
       console.log("AuthRoute: ", userInfo, children);
@@ -67,7 +72,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: '/',
-      element: <AuthRoute requiredMode='user' ><Layout /></AuthRoute>,
+      element: <AuthRoute ><Layout /></AuthRoute>,
       children: [
         { path: '', element: <Main /> },
         { path: 'search', element: <Search /> },
@@ -76,6 +81,9 @@ function App() {
         { path: ':username/followings', element: <Followings /> },
         { path: ':username/followers', element: <Followers /> },
         { path: 'tweet/:tweetid', element: <TweetDetail /> },
+        { path: 'searchuser/:username', element: <SearchUser /> },
+        { path: 'searchtag/:tag', element: <SearchTweet /> },
+        { path: 'searchuserbyid/:id', element: <SearchUserid /> }
       ]
     },
     {
@@ -102,3 +110,4 @@ function App() {
 }
 
 export default App;
+
