@@ -1,7 +1,6 @@
 import * as React from 'react';
-import { useState,} from 'react';
-import { BrowserRouter, Routes, Route, Navigate, Outlet, NavLink } from 'react-router-dom';
-import { getLoginInfo, } from './Login';
+import { createBrowserRouter, RouterProvider, BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { getLoginInfo } from './Login';
 import Login from './Login';
 import Main from './Main';
 import TweetDetail from './TweetDetail';
@@ -10,51 +9,92 @@ import Search from './Search'
 import { Admin } from './Admin';
 import ProfileWrapper from './Profile';
 
+import Header from './components/header';
+
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 import "./css/App.css"
 import { Followings } from './Followings';
 import { Followers } from './Followers';
+import Navbar from './components/navbar';
 
 
 
 export const BACK_END = 'http://localhost:8000/'
 
 
-
-
 function App() {
-  const [isLogin, setLogin] = useState(getLoginInfo() ? getLoginInfo()['username'] : false);
-  const [mode, setMode] = useState(getLoginInfo() ? getLoginInfo()['mode'] : false);
-  const [userPortraitSrc, setUserPortraitSrc] = useState(null);
 
-  const switchLoginState = () => {
+  function AuthRoute({ children, requiredMode }) {
+    const userInfo = getLoginInfo();
+    if (userInfo === undefined || userInfo['mode'] !== requiredMode) {
+      return <Navigate to="/login" replace />;
+    } else {
+      console.log("AuthRoute: ", userInfo, children);
+      return children;
+    }
+  }
 
-  };
 
+  const Layout = () => {
+    return (<>
+      <Header />
+      <div className="row" style={{ height: "100vh" }}>
+        <Navbar mode="user" />
+        <div className="col-md-10 p-3 bg-light overflow-auto">
+          <Outlet />
+        </div>
+      </div>
+    </>
+    );
+  }
+
+  const LayoutAdmin = () => {
+    return (
+      <>
+        <Header />
+        <div className="row" style={{ height: "100vh" }}>
+          <Navbar mode="admin" />
+          <div className="col-md-10 p-3 bg-light overflow-auto">
+            <Outlet />
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <AuthRoute requiredMode='user' ><Layout /></AuthRoute>,
+      children: [
+        { path: '', element: <Main /> },
+        { path: 'search', element: <Search /> },
+        { path: 'notification', element: <Notification /> },
+        { path: ':username', element: <ProfileWrapper /> },
+        { path: ':username/followings', element: <Followings /> },
+        { path: ':username/followers', element: <Followers /> },
+        { path: 'tweet/:tweetid', element: <TweetDetail /> },
+      ]
+    },
+    {
+      path: '/login',
+      element: <Login />
+    },
+    {
+      path: '/admin',
+      element: <AuthRoute requiredMode='admin'><LayoutAdmin /></AuthRoute>,
+      children: [
+        { index: true, element: <Admin /> }
+      ]
+    },
+  ]);
 
   return (
     <>
       <main className="container-fluid">
-        <BrowserRouter>
-          <div className="row" style={{ height: "100vh" }}>
-            <div className="col-md-10 p-3 bg-light overflow-auto">
-              <Routes>
-                  <Route path='/' element={<Main />} />
-                  <Route path='/login' element={<Login onChangeLogin={switchLoginState} />} />
-                  <Route path='/search' element={<Search />} />
-                  <Route path="/:username" element={<ProfileWrapper />} />
-                  <Route path='/:username/followings' element={<Followings />} />
-                  <Route path='/:username/followers' element={<Followers />} />
-                  <Route path='/tweet/:tweetid' element={<TweetDetail />} />
-                  <Route path='/admin' element={<Admin />} />
-                  <Route path='/notification' element={<Notification ></Notification>} />
-              </Routes>
-            </div>
-          </div>
-        </BrowserRouter>
-
+        <RouterProvider router={router} />
       </main>
 
     </>

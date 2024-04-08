@@ -10,7 +10,6 @@ import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
-import {Link} from "react-router-dom"
 import { Image, Upload, Form, Input, message } from 'antd';
 import { Link } from "react-router-dom";
 import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
