@@ -7,8 +7,9 @@ import { faBell, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-ic
 import { BACK_END } from '../App';
 import './navbar.css';
 
-function Navbar({ mode }) {
+function Navbar() {
     const [userPortraitSrc, setUserPortraitSrc] = useState(null);
+    const [mode, setMode] = useState(getLoginInfo()['mode']);
     const navigate = useNavigate();
     const logout = () => {
         console.log("Remove Login Cookie");
@@ -17,6 +18,7 @@ function Navbar({ mode }) {
     };
     useEffect(() => {
         const username = getLoginInfo()['username'];
+        setMode(getLoginInfo()['mode']);
         console.log(BACK_END + "portrait/" + username);
         fetch(BACK_END + "portrait/" + username)
             .then(res => {

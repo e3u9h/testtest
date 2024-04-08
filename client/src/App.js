@@ -46,7 +46,7 @@ function App() {
     return (<>
       <Header />
       <div className="row" style={{ height: "100vh" }}>
-        <Navbar mode="user" />
+        <Navbar />
         <div className="col-md-10 p-3 bg-light overflow-auto">
           <Outlet />
         </div>
@@ -60,7 +60,7 @@ function App() {
       <>
         <Header />
         <div className="row" style={{ height: "100vh" }}>
-          <Navbar mode="admin" />
+          <Navbar />
           <div className="col-md-10 p-3 bg-light overflow-auto">
             <Outlet />
           </div>
