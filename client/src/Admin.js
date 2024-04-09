@@ -319,6 +319,7 @@ class DeleteUserCase extends React.Component {
 
             if (response.status === 204) {
                 alert('User successfully deleted.');
+                window.location.reload();
             } else {
                 const data = await response.text();
                 alert(data);
