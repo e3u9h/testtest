@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
 //Connect to MongoDB
-const uri = "mongodb+srv://dufz2003:21qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(uri) 
     .then(() => {
         console.log("Connected to MongoDB\n");

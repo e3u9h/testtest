@@ -67,6 +67,8 @@ function Profile() {
 
 
         setTarget(dataTarget);
+        console.log("dataTarget");
+        console.log(dataTarget);
         setTextAreaValue(dataTarget.about);
         console.log(self.users_blocked);
         // Follow, block, and report logic
@@ -307,12 +309,23 @@ function Profile() {
                         <Row>
                             <Col>
                                 <div className="btn-group d-flex mb-3" role="group" aria-label="...">
-                                    <button type="button" className={"btn btn-" + (viewMode !== 'MyPosts' ? "outline-" : "") + "secondary w-100"} onClick={() => setViewMode("MyPosts")} > My Tweets </button>
-                                    <button type="button" className={"btn btn-" + (viewMode !== 'Likes' ? "outline-" : "") + "secondary w-100"} onClick={() => setViewMode("Likes")}> Likes </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-underline-only w-100 ${viewMode === 'MyPosts' ? 'active' : ''}`}
+                                        onClick={() => setViewMode("MyPosts")}
+                                    >
+                                        My Posts
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-underline-only w-100 ${viewMode === 'Likes' ? 'active' : ''}`}
+                                        onClick={() => setViewMode("Likes")}
+                                    >
+                                        Likes
+                                    </button>
                                 </div>
 
                                 <div className="row">
-                                    <button style={{ visibility: "hidden" }} onClick={() => { console.log(target.username); }}></button>
                                     {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
                                     {viewMode === "Likes" && <LikesList />}
                                 </div>
@@ -321,7 +334,12 @@ function Profile() {
                     <Row>
                         <Col>
                             <div className="btn-group d-flex mb-3" role="group" aria-label="...">
-                                <button type="button" className={"btn btn-secondary w-100"}> Tweets </button>
+                                    <button
+                                        type="button"
+                                        className={`btn btn-underline-only w-100 'active'`}
+                                    >
+                                        Posts
+                                    </button>
                             </div>
                             <div className="row">
                                 {viewMode === "MyPosts" && <MyPostsList username={target.username} />}

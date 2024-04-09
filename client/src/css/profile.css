@@ -20,3 +20,13 @@
         flex-direction: column;
         justify-content: flex-end;
 }
+.btn-underline-only {
+    border: none !important;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent;
+}
+
+.btn-underline-only.active {
+    border-bottom: 2px solid #6c757d !important;
+    font-weight: bold;
+}

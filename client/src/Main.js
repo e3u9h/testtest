@@ -325,8 +325,20 @@ function Main() {
 
   return (<div>
     <div className="btn-group d-flex mb-3" role="group" aria-label="...">
-      <button type="button" className={"btn btn-" + (viewMode !== "following" ? "outline-" : "") + "secondary w-auto"} onClick={changeFollowingMode}>Following</button>
-      <button type="button" className={"btn btn-" + (viewMode !== "recommend" ? "outline-" : "") + "secondary w-auto"} onClick={changeRecommendMode}>Recommend</button>
+      <button
+        type="button"
+        className={`btn btn-underline-only w-100 ${viewMode === 'following' ? 'active' : ''}`}
+        onClick={changeFollowingMode}
+      >
+        Following
+      </button>
+      <button
+        type="button"
+        className={`btn btn-underline-only w-100 ${viewMode === 'recommend' ? 'active' : ''}`}
+        onClick={changeRecommendMode}
+      >
+        Recommend
+      </button>
     </div>
     <div className="container-fluid" style={{ height: "90vh" }}>
       <div id="scrollableDiv" style={{ height: "90vh", overflow: "auto" }}>
