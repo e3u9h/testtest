@@ -1,30 +1,462 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
-import { useParams } from 'react-router-dom';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import { Link, useParams } from 'react-router-dom'
+import { TweetListView } from './Tweet';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { getLoginInfo } from './Login';
+import { faWarning } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { BACK_END } from './App';
 import "./css/profile.css"
+import BackButton from './components/BackButton';
 
-class Profile extends React.Component {
+function Profile() {
+    const props = useParams();
+    const [viewMode, setViewMode] = useState("MyPosts");
+    const [mode] = useState(getLoginInfo()['mode']);
+    const [self, setSelf] = useState({
+        uid: "Loading",
+        username: getLoginInfo()['username'],
+        followings: "Loading",
+        users_blocked: "Loading",
+        users_reported: "Loading"
+    });
+    const [target, setTarget] = useState({
+        uid: "Loading",
+        username: props.username,
+        gender: "Loading",
+        following_counter: "Loading",
+        follower_counter: "Loading",
+        users_blocked: "Loading",
+        about: "Loading",
+        portrait: "Loading"
+    });
+    const [follow, setFollow] = useState(false);
+    const [block, setBlock] = useState(false);
+    const [report, setReport] = useState(false);
+    const [textAreaValue, setTextAreaValue] = useState("");
+    const [editgender, setEditgender] = useState(target.gender);
 
-    constructor(props) {
-        super(props);
+    const fetchInfo = async () => {
+        // Fetch self information
+        if (mode === 'user') {
+            const responseSelf = await fetch(BACK_END + "profile/" + self.username + "/actioninfo", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+            const dataSelf = await responseSelf.json();
+            setSelf(dataSelf);
+            console.log(dataSelf);
+        }
+
+        // Fetch target information
+        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const dataTarget = await responseTarget.json();
+
+
+        setTarget(dataTarget);
+        setTextAreaValue(dataTarget.about);
+        console.log(self.users_blocked);
+        // Follow, block, and report logic
+        setFollow(self.followings.includes(dataTarget.uid));
+        setBlock(self.users_blocked.includes(dataTarget.uid));
+        setReport(self.users_reported.includes(dataTarget.uid));
+    };
+
+    useEffect(() => {
+        fetchInfo();
+    }, [props.username, self.username]); // Depend on the username props and self.username.
+
+
+    const handleFollowClick = async () => {
+        const endpoint = follow ? 'unfollow' : 'follow';
+        const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/${endpoint}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.status === 200) {
+            setFollow(!follow);
+            const newFollowerCount = follow ? target.follower_counter - 1 : target.follower_counter + 1;
+            setTarget({
+                ...target,
+                follower_counter: newFollowerCount
+            });
+            alert(`You have ${follow ? 'unfollowed' : 'followed'} this user.`);
+        } else {
+            alert("There seems to be some error. Please try again.");
+        }
+    };
+
+    const handleBlockClick = async () => {
+        const endpoint = block ? 'unblock' : 'block';
+        const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/${endpoint}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.status === 200) {
+            setBlock(!block);
+            alert(`You have ${block ? 'unblocked' : 'blocked'} this user.`);
+        } else {
+            alert("There seems to be some error. Please try again.");
+        }
+    };
+
+    const handleReportClick = async () => {
+        if (!report) {
+            const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/report`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+
+            if (response.status === 200) {
+                setReport(true);
+                alert("You have reported this user.");
+            } else {
+                alert("There seems to be some error. Please try again.");
+            }
+        } else {
+            alert("You have reported this user.");
+        }
+    };
+
+    const handleEditClick = () => {
+        setEditgender(target.gender);
+        console.log(target.gender)
+        setTextAreaValue(target.about);
+    };
+
+    const handleEditSubmit = async (event) => {
+        event.preventDefault();
+        const portrait = document.getElementById("portrait").files[0];
+        let formData = new FormData();
+        if (portrait !== undefined) {
+            formData.append('portrait', portrait);
+        }
+        else {
+            formData.append('portrait', "");
+        }
+        formData.append('gender', editgender);
+        console.log(editgender);
+        formData.append('about', textAreaValue);
+
+        try {
+            const response = await fetch(`${BACK_END}profile/${self.username}`, {
+                method: 'PUT',
+                body: formData
+            });
+
+            if (response.status === 200) {
+                alert("Update Profile Successfully!");
+                window.location.reload(true);
+            } else if (response.status === 413) {
+                alert("Please upload a portrait with size less than 10 Mb.");
+            } else {
+                alert("There seems to be some error. Please try again.");
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const handleAboutChange = (event) => {
+        setTextAreaValue(event.target.value);
     }
+    const handleGenderChange = (event) => {
+        setEditgender(event.target.value);
+    };
 
-    async fetchInfo() {
 
-    }
+    return (<>
+        <Container fluid>
+            <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
+                {target['username'] !== self['username'] && <Row>
+                    <BackButton />
+                </Row>}
 
-    render() {
-        return (<>
-            <Container fluid>
-            </Container></>
-        );
-    }
+                <div class='row'>
+                    <div class='col-sm-3'>
+                        <img src={BACK_END + target.portrait} width={180} height={180} alt='avatar' class='profile-portrait' style={{ objectFit: 'cover' }}></img>
+                    </div>
+                    <div class='col-sm-7'>
+                        <div class='row' id='name-id'>
+                            <div className='ms-2 text-black' id='profile-username'>{target['username']}</div>
+                            <div className='ms-2 text-muted'> @{target['uid']} </div>
+                        </div>
+                        <div class='row'>
+                            <span className='ms-2 text-black'> {target['about']} </span>
+                        </div>
+                        <div class='row'>
+                            <span className='ms-2 text-muted'> {target['gender']} </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                            <Link
+                                to={"/" + target['username'] + "/followers"}
+                                id='followers'
+                                className='ms-2 text-muted'
+                                style={{
+                                    // textDecoration: 'none',
+                                    color: 'inherit',
+                                    marginRight: '10px'
+                                }}
+                            >
+                                Followers: {target['follower_counter']}
+                            </Link>
+                            <Link
+                                to={"/" + target['username'] + "/followings"}
+                                id='followings'
+                                className='ms-2 text-muted'
+                                style={{
+                                    // textDecoration: 'none',
+                                    color: 'inherit',
+                                }}
+                            >
+                                Following: {target['following_counter']}
+                            </Link>
+                        </div>
+                    </div>
+                    <div class='col'>
+                        <div className="btn-group-vertical" >
+                            {
+                                mode === 'user' && target['username'] === self['username'] &&
+                                <button type="button" onClick={handleEditClick} className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editProfileForm" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
+                                    Edit Profile
+                                </button>
+                            }
+                            {
+                                mode === 'user' && target['username'] !== self['username'] && (
+                                    <button type="button" onClick={handleFollowClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="follow" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                        {follow ? 'Unfollow' : 'Follow'}
+                                    </button>)
+                            }
+                            {
+                                mode === 'user' && target['username'] !== self['username'] && (
+                                    <button type="button" onClick={handleBlockClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                        {block ? 'Unblock' : 'Block'}
+                                    </button>)
+                            }
+                            {
+                                mode === 'user' && target['username'] !== self['username'] && (
+                                    <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
+                                        {report ? 'Reported' : 'Report'}
+                                    </button>)
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div className="modal fade" id="editProfileForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h1 className="modal-title fs-5" id="exampleModalLabel"> Edit Profile </h1>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                <form>
+                                    <div className="mb-3">
+                                        <label htmlFor="gender" className="col-form-label"> Gender: </label>
+                                        <Form.Select
+                                            aria-label="Default select example"
+                                            value={editgender}
+                                            onChange={handleGenderChange}
+                                        >
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Others">Others</option>
+                                            <option value="">Not to Specify</option>
+                                        </Form.Select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait (no larger than 10 Mb): </label>
+                                        <input type="file" className="form-control" id="portrait" />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="about-text" className="col-form-label"> About: </label>
+                                        <textarea onChange={handleAboutChange} className="form-control" id="about" rows="4" defaultValue={textAreaValue} />
+                                    </div>
+                                </form>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
+                                <button type="button" className="btn btn-primary" onClick={handleEditSubmit} data-bs-dismiss="modal"> Submit </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {
+                    (target['username'] === self['username'] &&
+                        <Row>
+                            <Col>
+                                <div className="btn-group d-flex mb-3" role="group" aria-label="...">
+                                    <button type="button" className={"btn btn-" + (viewMode !== 'MyPosts' ? "outline-" : "") + "secondary w-100"} onClick={() => setViewMode("MyPosts")} > My Tweets </button>
+                                    <button type="button" className={"btn btn-" + (viewMode !== 'Likes' ? "outline-" : "") + "secondary w-100"} onClick={() => setViewMode("Likes")}> Likes </button>
+                                </div>
 
+                                <div className="row">
+                                    <button style={{ visibility: "hidden" }} onClick={() => { console.log(target.username); }}></button>
+                                    {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
+                                    {viewMode === "Likes" && <LikesList />}
+                                </div>
+                            </Col>
+                        </Row>) ||
+                    <Row>
+                        <Col>
+                            <div className="btn-group d-flex mb-3" role="group" aria-label="...">
+                                <button type="button" className={"btn btn-secondary w-100"}> Tweets </button>
+                            </div>
+                            <div className="row">
+                                {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
+                            </div>
+
+                            <div className="modal fade" id="report-user" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div className="modal-dialog modal-dialog-centered">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h1 className="modal-title fs-5" id="staticBackdropLabel"><FontAwesomeIcon icon={faWarning}></FontAwesomeIcon>Warning</h1>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            Are you sure to report this user?
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" className="btn btn-primary" onClick={handleReportClick} data-bs-dismiss="modal">Confirm</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </Col>
+                    </Row>
+                }
+            </div>
+        </Container></>
+    );
 }
 
-function ProfileWrapper(props) {
-    const { username } = useParams();
-    return <Profile {...props} username={username} />;
+
+function MyPostsList({ username }) {
+    const [tweets, setTweets] = useState([]);
+    const [target, setTarget] = useState(username);
+
+    const fetchInfo = async () => {
+        const self = getLoginInfo()['username'];
+        const mode = getLoginInfo()['mode'];
+        let tweetrec;
+
+        if (mode === 'user') {
+            tweetrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/tweets", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+        } else {
+            tweetrec = await fetch(BACK_END + "profile/" + target + "/tweets", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+        }
+
+        let fetchedTweets = await tweetrec.json();
+        console.log(tweetrec);
+        console.log(fetchedTweets);
+        fetchedTweets.sort(compare);
+
+        setTweets(fetchedTweets);
+    }
+
+    useEffect(() => {
+        fetchInfo();
+    }, [target]);
+
+
+    const compare = (tweetA, tweetB) => {
+        if (tweetA.time > tweetB.time) {
+            return -1;
+        }
+        if (tweetA.time < tweetB.time) {
+            return 1;
+        }
+        return 0;
+    }
+
+
+    return (
+        <InfiniteScroll dataLength={tweets.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
+            endMessage={<p style={{ textAlign: 'center' }}>
+                <b>No More Posts</b>
+            </p>}>
+            <TweetListView tweetInfos={tweets} />
+        </InfiniteScroll>
+    );
 }
 
-export default ProfileWrapper;
+
+
+function LikesList() {
+    const [likes, setLikes] = useState([]);
+
+    const fetchInfo = async () => {
+        let username = getLoginInfo()['username'];
+        let tweetrec = await fetch(BACK_END + "profile/" + username + "/likes", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        let likes = await tweetrec.json();
+
+        likes.sort(compare);
+
+        setLikes(likes);
+    }
+
+    const compare = (tweetA, tweetB) => {
+        if (tweetA.time > tweetB.time) {
+            return -1;
+        }
+        if (tweetA.time < tweetB.time) {
+            return 1;
+        }
+        return 0;
+    }
+
+    useEffect(() => {
+        fetchInfo();
+    }, []);
+
+    return (
+        <InfiniteScroll dataLength={likes.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
+            endMessage={<p style={{ textAlign: 'center' }}>
+                <b>No More Posts</b>
+            </p>}>
+            <TweetListView tweetInfos={likes} />
+        </InfiniteScroll>
+    );
+}
+
+export default Profile;

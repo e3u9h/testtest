@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 const UserSchema = mongoose.Schema({
     username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
     gender: { type: String },
-    interests: [{ type: String }],
     about: { type: String },
     follower_counter: { type: Number },
     following_counter: { type: Number },

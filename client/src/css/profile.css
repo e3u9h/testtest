@@ -1,3 +1,22 @@
-.profile-portrait{
+.profile-portrait {
     border-radius: 100%;
+    margin: 7%;
+    }
+    
+    #profile-username {
+        padding-top: 5%;
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    
+    #name-id {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    
+    .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
 }

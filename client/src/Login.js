@@ -1,5 +1,5 @@
 import cookie from 'react-cookies';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   MDBContainer,
   MDBTabs,
@@ -12,6 +12,7 @@ import {
 import { useNavigate, Navigate } from 'react-router-dom';
 import { BACK_END } from './App';
 import Header from './components/header';
+import Form from 'react-bootstrap/Form';
 
 export const getLoginInfo = () => {
   return cookie.load('userInfo');
@@ -28,21 +29,21 @@ const Login = (props) => {
   const [loggedin, setLoggedin] = useState(getLoginInfo() !== undefined);
   const [mode, setMode] = useState('user');
   const [justifyActive, setJustifyActive] = useState('login');
+  const [editgender, setEditgender] = useState('Not to Specify');
   const navigate = useNavigate();
-
+  const handleGenderChange = (event) => {
+    setEditgender(event.target.value);
+  };
   const handleRegister = (event) => {
     event.preventDefault();
     const username = document.getElementById("newusername").value;
     const newpwd = document.getElementById("newpwd").value;
     const newpwd2 = document.getElementById("newpwd2").value;
-    const genderRadios = document.getElementsByName("radio-gender");
-    const genderRadio = document.querySelector('input[name="radio-gender"]:checked');
-    const gender = genderRadio ? genderRadio.value : null;
-    console.log(username, newpwd, gender)
+    console.log(username, newpwd)
     const userInfo = {
       newusername: username,
       newpwd: newpwd,
-      gender: gender
+      gender: editgender
     };
     if (username === '') {
       window.alert("Please enter a username.");
@@ -52,8 +53,6 @@ const Login = (props) => {
       window.alert("The length of the password should be larger than 4 and smaller than 20.");
     } else if (newpwd !== newpwd2) {
       window.alert("Password mismatch!");
-    } else if (!gender) {
-      window.alert("Please select a gender.");
     } else {
       fetch(BACK_END + "createuser", {
         method: "POST",
@@ -64,9 +63,9 @@ const Login = (props) => {
       })
         .then(res => {
           if (res.status === 201) {
-            setLogin(true);
+            setLoggedin(true);
             setMode('user');
-            loggedin(username, 'user');
+            login(username, 'user');
           }
           return res.text();
         })
@@ -197,34 +196,18 @@ const Login = (props) => {
               <label htmlFor="newpwd2">Recheck Password</label>
               <input type="password" className="form-control" id="newpwd2" />
             </div>
-            <div className="mb-5">
-              <label htmlFor="gender" className="col-form-label"> Gender: </label>
-              <div className="d-flex">
-                <div className="form-check me-4">
-                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-male" value="Male" />
-                  <label className="form-check-label" htmlFor="radio-male">
-                    Male
-                  </label>
-                </div>
-                <div className="form-check me-4">
-                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-female" value="Female" />
-                  <label className="form-check-label" htmlFor="radio-female">
-                    Female
-                  </label>
-                </div>
-                <div className="form-check me-4">
-                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-others" value="Others" />
-                  <label className="form-check-label" htmlFor="radio-others">
-                    Others
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input className="form-check-input" type="radio" name="radio-gender" id="radio-nottospecify" value="NottoSpecify" />
-                  <label className="form-check-label" htmlFor="radio-nottospecify">
-                    Not to Specify
-                  </label>
-                </div>
-              </div>
+            <div className="form-group mb-4">
+              <label htmlFor="gender" > Gender: </label>
+              <Form.Select
+                aria-label="Default select example"
+                value={editgender}
+                onChange={handleGenderChange}
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Others">Others</option>
+                <option value="">Not to Specify</option>
+              </Form.Select>
             </div>
             <button
               className="mb-4 w-100"
@@ -234,7 +217,8 @@ const Login = (props) => {
                 fontSize: "17px",
                 borderRadius: "4px",
                 border: "white",
-                height: "40px"
+                height: "40px",
+                marginTop: "10px"
               }}
               onClick={handleRegister}
             >

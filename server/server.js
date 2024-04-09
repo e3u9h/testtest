@@ -8,6 +8,7 @@ import User from './models/User.js';
 import Notification from './models/Notification.js';
 import Tag from './models/Tag.js';
 import Message from './models/Message.js';
+import upload from './upload.js';
 const app = express();
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -26,7 +27,7 @@ db.once('open', function () {
 // 在这里添加后端各种function
 app.post('/createuser', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    let _username = req.body['username'];
+    const _username = req.body['username'];
     Account.findOne({ username: _username }).then((acc) => {
         if (acc) { console.log(acc); return res.status(401).send("The username has already been used. Please change a username."); }
         else {
@@ -35,7 +36,7 @@ app.post('/createuser', (req, res) => {
                 pwd: req.body['newpwd'],
                 identity: 'user'
             }).then(() => {
-                let default_portrait = "./img/defaultPortrait.jpg"
+                const default_portrait = "./img/defaultPortrait.jpg"
                 let gender = ''
                 if (req.body['gender'] !== 'NottoSpecify') {
                     gender = req.body['gender']
@@ -75,8 +76,8 @@ app.post('/createuser', (req, res) => {
 
 app.post('/login/user', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    let _username = req.body['username'];
-    let _pwd = req.body['pwd'];
+    const _username = req.body['username'];
+    const _pwd = req.body['pwd'];
     Account.findOne({ username: _username }).then((val) => {
         if (!val) {
             res.status(404).send("Username does not exist.");
@@ -134,7 +135,6 @@ app.get('/profile/:username', (req, res) => {
                 'uid': user['_id'],
                 'username': user['username'],
                 'gender': user['gender'],
-                'interests': user['interests'],
                 'follower_counter': user['follower_counter'],
                 'following_counter': user['following_counter'],
                 'about': user['about'],
@@ -142,6 +142,47 @@ app.get('/profile/:username', (req, res) => {
             }
         }
         res.send(userObj);
+    }).catch((err) => {
+        console.log(err);
+        res.send(err);
+    });
+});
+
+app.get('/profile/:username/actioninfo', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    let username = req.params['username'];
+    User.findOne({ 'username': username }).then((user) => {
+        let userObj = {
+            'uid': user['_id'],
+            'username': user['username'],
+            'followings': user['followings'],
+            'users_blocked': user['users_blocked'],
+            'users_reported': user['users_reported']
+        }
+        // console.log(userObj);
+        res.send(userObj);
+    }).catch((err) => {
+        console.log(err);
+        res.send(err);
+    });
+});
+
+app.put('/profile/:username', upload.single('portrait'), (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const username = req.params['username'];
+    const updateGender = req.body.gender;
+    const updatePortrait = req.file ? req.file.path : '';
+    const updateAbout = req.body.about;
+
+    User.findOne({ 'username': username }).then((user) => {
+        if (updateGender != '')
+            user.gender = updateGender;
+        if (updatePortrait != '')
+            user.portrait = updatePortrait;
+        if (updateAbout != '')
+            user.about = updateAbout;
+        user.save();
+        res.status(200).send(JSON.stringify(user));
     }).catch((err) => {
         console.log(err);
         res.send(err);

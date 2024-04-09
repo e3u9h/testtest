@@ -7,7 +7,7 @@ import TweetDetail from './TweetDetail';
 import { Notification } from './Notification';
 import Search from './Search'
 import { Admin } from './Admin';
-import ProfileWrapper from './Profile';
+import Profile from './Profile';
 
 import Header from './components/header';
 
@@ -77,7 +77,7 @@ function App() {
         { path: '', element: <Main /> },
         { path: 'search', element: <Search /> },
         { path: 'notification', element: <Notification /> },
-        { path: ':username', element: <ProfileWrapper /> },
+        { path: ':username', element: <Profile /> },
         { path: ':username/followings', element: <Followings /> },
         { path: ':username/followers', element: <Followers /> },
         { path: 'tweet/:tweetid', element: <TweetDetail /> },
