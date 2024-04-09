@@ -329,7 +329,7 @@ const server = app.listen(8000);
 
 
 //-------Admin User-------
-//change password by admin
+//update: change password by admin
 app.put('/adminupdate', async (req, res) => {
     res.set('Content-Type', 'text/plain');
     const { username, newpwd } = req.body;
@@ -353,3 +353,41 @@ app.put('/adminupdate', async (req, res) => {
       return res.status(500).send('An error occurred while updating the password.');
     }
   });
+
+//delete user by admin
+app.delete('/user/:username', async (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const { username } = req.params;
+
+    try {
+        //delete user
+        const accResult = await Account.deleteOne({ username: username });
+        if (accResult.deletedCount === 0) {
+            return res.status(404).send('User does not exist in Account db.');
+        }
+        console.log(`Successfully deleted user ${username} in Account db`);
+        const userResult = await User.deleteOne({ username: username });
+        if (userResult.deletedCount === 0) {
+            return res.status(404).send('User does not exist in User db.');
+        }
+        console.log(`Successfully deleted user ${username} in User db`);
+        // delete all posts of the user
+        const tweetResult = await Tweet.deleteMany({ poster: userResult._id });
+        console.log(`Deleted tweets count: ${tweetResult.deletedCount}`);
+        console.log(`Successfully deleted user ${username}'s tweets`);
+        return res.status(204).send(`Successfully deleted user ${username}`);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).send('An error occurred while deleting the user.');
+    }
+});
+
+//get all users sorted by report_counter
+app.get('/reportusers', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    User.find().sort({ "report_counter": -1 }).then((users) => {
+        res.send(users);
+    }).catch((err) => {
+        res.send(err);
+    });
+});
