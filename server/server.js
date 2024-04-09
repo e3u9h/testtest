@@ -328,3 +328,28 @@ app.get('/search/trend', (req, res) => {
 const server = app.listen(8000);
 
 
+//-------Admin User-------
+//change password by admin
+app.put('/adminupdate', async (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const { username, newpwd } = req.body;
+  
+    if (!newpwd) {
+      return res.status(400).send('Please input a valid new password.');
+    }
+  
+    try {
+      const acc = await Account.findOne({ username: username });
+      
+      if (!acc) {
+        return res.status(404).send("No such user.");
+      }
+      console.log(`Changing password for user: ${username}`);
+      acc.pwd = newpwd;
+      await acc.save();
+      return res.status(200).send("Update Successfully!");
+    } catch (err) {
+      console.error(err);
+      return res.status(500).send('An error occurred while updating the password.');
+    }
+  });
