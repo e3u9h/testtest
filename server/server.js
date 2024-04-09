@@ -391,3 +391,13 @@ app.get('/reportusers', (req, res) => {
         res.send(err);
     });
 });
+
+//get all users sorted by name
+app.get('/listusers', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 }).then((users) => {
+        res.send(users);
+    }).catch((err) => {
+        res.send(err);
+    });
+});
