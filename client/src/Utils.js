@@ -4,11 +4,12 @@ function randomSelect(arr, n) {
     if (n > len)
         n = len
     let taken = new Array(len);
-    for (let i = n; i > 0; i--) {
-        let x = Math.floor(Math.random() * len);
+    for (let i = n - 1; i >= 0; i--) {
+        let x = Math.floor(Math.random() * (len));
         result[i] = arr[x in taken ? taken[x] : x];
-        taken[x] = len in taken ? taken[len] : len;
+        taken[x] = len - 1 in taken ? taken[len - 1] : len - 1;
         len--
+        console.log("hereselect" + result + " " + taken + " " + len)
     }
     return result;
 }
