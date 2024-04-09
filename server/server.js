@@ -10,15 +10,23 @@ import Tag from './models/Tag.js';
 import Message from './models/Message.js';
 import upload from './upload.js';
 const app = express();
+
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
-const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-console.log("Connecting to MongoDB...");
-mongoose.connect(uri);
+//Connect to MongoDB
+const uri = "mongodb+srv://dufz2003:21qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+mongoose.connect(uri) 
+    .then(() => {
+        console.log("Connected to MongoDB\n");
+      })
+      .catch((error) => {
+        console.error("Error connecting to MongoDB\n\n", error);
+      });
+
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
 db.once('open', function () {
