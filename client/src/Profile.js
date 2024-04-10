@@ -299,7 +299,7 @@ function Profile() {
                             </div>
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
-                                <button type="button" className="btn btn-primary" onClick={handleEditSubmit} data-bs-dismiss="modal"> Submit </button>
+                                <button type="button" className="btn btn-secondary" onClick={handleEditSubmit} data-bs-dismiss="modal"> Submit </button>
                             </div>
                         </div>
                     </div>
@@ -357,7 +357,7 @@ function Profile() {
                                         </div>
                                         <div className="modal-footer">
                                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="button" className="btn btn-primary" onClick={handleReportClick} data-bs-dismiss="modal">Confirm</button>
+                                            <button type="button" className="btn btn-secondary" onClick={handleReportClick} data-bs-dismiss="modal">Confirm</button>
                                         </div>
                                     </div>
                                 </div>

@@ -12,7 +12,7 @@ class Admin extends React.Component {
             <Container fluid>
                 <div id="scrollableDiv" className='border' style={{ height: "100vh", overflow: "auto" }}>
                     <AddUser />
-                    <UpdateUser />
+                    <updatePassword />
                     <ListUser />
                     <DeleteUser />
                 </div>
@@ -78,8 +78,8 @@ class AddUser extends React.Component {
     }
 }
 
-class UpdateUser extends React.Component {
-    // To handle the action of updating a user
+class updatePassword extends React.Component {
+
     handleUpdate = (event) => {
         event.preventDefault();
         const username = document.querySelector("#updateOldUsername").value;
@@ -91,9 +91,9 @@ class UpdateUser extends React.Component {
         };
 
         if (!username) {
-            window.alert("Invalid input :(\nPlease enter the original username.");
+            window.alert("Invalid input.\nPlease enter the original username.");
         } else if (!newpwd) {
-            window.alert("Invalid input.\nPlease enter the updating attributes.");
+            window.alert("Invalid input.\nPlease enter the updating password.");
         } else if (newpwd.length <= 4 || newpwd.length >= 20) {
             window.alert("Invalid input.\n The length of the password should be >4 and <20.");
         } else {
@@ -134,7 +134,7 @@ class UpdateUser extends React.Component {
             <div className='border' style={{ padding: '20px' }}>
                 <form onSubmit={this.handleUpdate}>
                     <div className="row mb-3">
-                        <h3 id="updateTtitle">Update User</h3>
+                        <h3 id="updateTtitle">Update Password</h3>
                     </div>
                     {this.renderFormGroup("Username:", "updateOldUsername", "text")}
                     {this.renderFormGroup("Updated Password:", "updatePassword", "password")}
@@ -210,7 +210,6 @@ const UserView = (props) => {
 };
 
 function ViewUserList({ userInfos }) {
-    const [userInfoList, setUserList] = useState(userInfos);
 
     return (
         <div className="container-fluid border" style={{ padding: '20px' }}>
@@ -234,6 +233,7 @@ function ViewUserList({ userInfos }) {
 }
 
 class DeleteUser extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = { userList: [] };
@@ -278,7 +278,6 @@ class DeleteUser extends React.Component {
 }
 
 function DeleteUserList({ userInfos }) {
-    const [userInfoList, setUserList] = useState(userInfos);
 
     return (
         <>

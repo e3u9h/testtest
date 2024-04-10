@@ -12,12 +12,12 @@ import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, Form, Input, message } from 'antd';
-import {Row, Col} from 'antd';
+import { Row, Col } from 'antd';
 import './css/custom-input.css';
 
 function NewPost() {
-  const[availableTags, setAvailableTags] = useState([]);
-  const[tags, setTags] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [tags, setTags] = useState([]);
   const [privacy, setPrivacy] = useState('false');
   const [fileList, setFileList] = useState([]);
   const [postContent, setPostContent] = useState('');
@@ -25,7 +25,7 @@ function NewPost() {
   const [previewImage, setPreviewImage] = useState('');
 
   const fetchAvailableTags = () => {
-    fetch('http://localhost:8000tags',{
+    fetch('http://localhost:8000tags', {
       mothod: 'GET',
       headers: {
         'Content-type': 'application/json'
@@ -40,15 +40,15 @@ function NewPost() {
 
   // convert a file to a Base64 string
   const getBase64 = (file) =>
-  new Promise((resolve, reject) =>{
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
 
-  const handlePreview = async(file) => {
-    if(!file.url && !file.preview){
+  const handlePreview = async (file) => {
+    if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
       setPreviewImage(file.url || file.preview)
       setPreviewOpen(true);
@@ -56,20 +56,20 @@ function NewPost() {
   }
 
   // Updates the fileList state with a new value
-  const handleChange = ({fileList: newFileList}) => setFileList(newFileList);
+  const handleChange = ({ fileList: newFileList }) => setFileList(newFileList);
 
   // define the upload button
   const uploadButton = (
     <button
-      style = {{
+      style={{
         border: 0,
         background: 'none'
       }}
-      type = "button"
+      type="button"
     >
       <PlusOutlined />
       <div
-        style = {{
+        style={{
           marginTop: 8,
         }}
       >
@@ -84,6 +84,7 @@ function NewPost() {
     console.log(fileList)
 
     // send data to server
+
     // format like label:data
     let formData = new FormData();
     formData.append('username', getLoginInfo()['username'])
@@ -117,11 +118,11 @@ function NewPost() {
   const addNewTags = () => {
     let newTags = document.getElementById("new-tag").value;
     // check if the tag is already in the list
-    if (!availableTags.includes(newTags)){
+    if (!availableTags.includes(newTags)) {
       // insert the new tags into the database
       fetch('http://localhost:8000/new-tag', {
         method: 'POST',
-        body: JSON.stringify({tag: newTags}),
+        body: JSON.stringify({ tag: newTags }),
         headers: {
           'content-Type': 'application/json'
         }
@@ -147,78 +148,78 @@ function NewPost() {
 
   return (
     <div className='container-fluid'>
-      <div className='card p-2 m-2 mb-4'>
+      <div className='card p-2 m-2 mb-4' style={{ borderRadius: '25px' }}>
         <div className='card-body p-1 mx-1 mb-2 row'>
-        <Form>
-        <Form.Item>
-          <Input.TextArea
-            className = "custom-input"
-            rows={10}
-            value={postContent}
-            onChange={e => setPostContent(e.target.value)}
-            placeholder="What's on your mind?"
-          />
-        </Form.Item>
+          <Form>
+            <Form.Item>
+              <Input.TextArea
+                className="custom-input"
+                rows={10}
+                value={postContent}
+                onChange={e => setPostContent(e.target.value)}
+                placeholder="What's on your mind?"
+              />
+            </Form.Item>
 
-        <Row justify="space-between" align="stretch">
-          <Col>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
-              <Form.Item>
-                <Upload
-                  listType="picture-card"
-                  fileList={fileList}
-                  onPreview={handlePreview} 
-                  beforeUpload={(file) => {
-                    setFileList((prevFileList) => [...prevFileList, file]);
-                    return false;
-                  }} 
-                  onChange={handleChange}
-                >
-                  {fileList.length >= 8 ? null : uploadButton}
-                </Upload>
-                {previewImage && (
-                  <Image
-                    wrapperStyle={{
-                      display: 'none',
-                    }}
-                    preview={{
-                      visible: previewOpen,
-                      onVisibleChange: (visible) => setPreviewOpen(visible),
-                      afterOpenChange: (visible) => !visible && setPreviewImage(''),
-                    }}
-                    src={previewImage}
-                  />
-                )}
-              </Form.Item>
-            </div>
-          </Col>
+            <Row justify="space-between" align="stretch">
+              <Col>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-start' }}>
+                  <Form.Item>
+                    <Upload
+                      listType="picture-card"
+                      fileList={fileList}
+                      onPreview={handlePreview}
+                      beforeUpload={(file) => {
+                        setFileList((prevFileList) => [...prevFileList, file]);
+                        return false;
+                      }}
+                      onChange={handleChange}
+                    >
+                      {fileList.length >= 8 ? null : uploadButton}
+                    </Upload>
+                    {previewImage && (
+                      <Image
+                        wrapperStyle={{
+                          display: 'none',
+                        }}
+                        preview={{
+                          visible: previewOpen,
+                          onVisibleChange: (visible) => setPreviewOpen(visible),
+                          afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                        }}
+                        src={previewImage}
+                      />
+                    )}
+                  </Form.Item>
+                </div>
+              </Col>
 
-          <Col>
-          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-              <div>
-                {tags != undefined && tags.map((tag, index) => {
-                  return (
-                    <span className="badge bg-secondary my-1 mx-2" key={index}>{tag}</span>
-                  );
-                })}
-                <button type='button' className='btn btn-outline-secondary mx-2' data-bs-toggle="modal" data-bs-target="#add-tag" data-bs-whatever="@mdo" onClick={() => { fetchAvailableTags(); }}>Add Tag</button>
-              </div>
+              <Col>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                  <div>
+                    {tags != undefined && tags.map((tag, index) => {
+                      return (
+                        <span className="badge bg-secondary my-1 mx-2" key={index}>{tag}</span>
+                      );
+                    })}
+                    <button type='button' className='btn btn-outline-secondary mx-2' data-bs-toggle="modal" data-bs-target="#add-tag" data-bs-whatever="@mdo" onClick={() => { fetchAvailableTags(); }}>Add Tag</button>
+                  </div>
 
-              <Dropdown as={ButtonGroup}>
-                <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>New post</Button>
-                <Dropdown.Toggle split variant="secondary" id="dropdown-split-privacy" className="rounded-toggle" />
-                <Dropdown.Menu>
-                  <Dropdown.Item onClick={() => { setPrivacy('false'); document.getElementById('privacy').innerHTML = "New Public Post" }}>Public</Dropdown.Item>
-                  <Dropdown.Item onClick={() => { setPrivacy('true'); document.getElementById('privacy').innerHTML = "New Private Post"; }}>Private</Dropdown.Item>
-                </Dropdown.Menu>
-              </Dropdown>
-            </div>
-          </Col>
-        </Row>    
-      </Form>
-      </div> 
+                  <Dropdown as={ButtonGroup}>
+                    <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>New post</Button>
+                    <Dropdown.Toggle split variant="secondary" id="dropdown-split-privacy" style={{ borderTopRightRadius: '6px', borderBottomRightRadius: '6px' }}/>
+                    <Dropdown.Menu style={{ borderRadius: '6px'}}>
+                      <Dropdown.Item onClick={() => { setPrivacy('false'); document.getElementById('privacy').innerHTML = "New Public Post" }}>Public</Dropdown.Item>
+                      <Dropdown.Item onClick={() => { setPrivacy('true'); document.getElementById('privacy').innerHTML = "New Private Post"; }}>Private</Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </div>
       </div>
-      
+
       {/* Modal */}
       <div className="modal fade" id="add-tag" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered">
@@ -253,7 +254,13 @@ function NewPost() {
 
 
 function Main() {
+  const [viewMode, setViewMode] = useState("following");
+  const [recommendUsers, setRecommendUsers] = useState([]);
+  const [recommendTweets, setRecommendTweets] = useState([]);
+  const [followingsTweets, setFollowingsTweets] = useState([]);
+  const [dataLength, setDataLength] = useState(0);
   const fetchFollowingsTweet = () => {
+    console.log("hereFollowings tweets");
     fetch(BACK_END + "followings/" + getLoginInfo()['username'], { "method": "GET" },
     ).then((res) => {
       if (res.status === 200) {
@@ -279,22 +286,19 @@ function Main() {
   }
 
   const fetchRecommendTweets = () => {
+    console.log("hereRecommend tweets");
     fetch(BACK_END + "tweets/" + getLoginInfo()['username'], { "method": "GET" })
       .then((res) => res.json()).then((data) => {
         console.log("Recommend tweets");
         console.log(data);
-        setRecommendTweets(randomSelect(data, 12));
+        const newData = randomSelect(data, 12)
+        setRecommendTweets(newData);
+        console.log(newData);
       }).catch((err) => {
         console.log(err);
       });
   }
 
-
-  const [viewMode, setViewMode] = useState("following");
-  const [recommendUsers, setRecommendUsers] = useState([]);
-  const [recommendTweets, setRecommendTweets] = useState([]);
-  const [followingsTweets, setFollowingsTweets] = useState([]);
-  const [dataLength, setDataLength] = useState(0);
 
   useEffect(() => {
     if (viewMode === "following") {
@@ -324,24 +328,24 @@ function Main() {
 
 
   return (<div>
-    <div className="btn-group d-flex mb-3" role="group" aria-label="...">
-      <button
-        type="button"
-        className={`btn btn-underline-only w-100 ${viewMode === 'following' ? 'active' : ''}`}
-        onClick={changeFollowingMode}
-      >
-        Following
-      </button>
-      <button
-        type="button"
-        className={`btn btn-underline-only w-100 ${viewMode === 'recommend' ? 'active' : ''}`}
-        onClick={changeRecommendMode}
-      >
-        Recommend
-      </button>
-    </div>
     <div className="container-fluid" style={{ height: "90vh" }}>
-      <div id="scrollableDiv" style={{ height: "90vh", overflow: "auto" }}>
+      <div className="btn-group d-flex mb-3" role="group" aria-label="...">
+        <button
+          type="button"
+          className={`btn btn-underline-only w-100 ${viewMode === 'following' ? 'active' : ''}`}
+          onClick={changeFollowingMode}
+        >
+          Following
+        </button>
+        <button
+          type="button"
+          className={`btn btn-underline-only w-100 ${viewMode === 'recommend' ? 'active' : ''}`}
+          onClick={changeRecommendMode}
+        >
+          Recommend
+        </button>
+      </div>
+      <div id="scrollableDiv" style={{ height: "70vh", overflow: "auto" }}>
         <NewPost />
         <InfiniteScroll dataLength={dataLength} next={null} hasMore={false} loader={<h4>Loading...</h4>}
           endMessage={
