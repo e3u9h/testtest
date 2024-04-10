@@ -303,6 +303,44 @@ app.get('/searchtag/:tag', (req, res) => {
     });
 })
 
+// search for posts by keyword
+app.get('/searchtweet/:keyword', (req, res) => {
+    res.set('Content-Type', 'application/json');
+    const keyword = req.params.keyword;
+
+    Tweet.find({
+        tweet_content: { $regex: new RegExp(keyword, 'i') },
+        private: false
+    })
+        .populate('poster', 'username portrait')
+        .exec()
+        .then(tweets => {
+            tweets = tweets.filter(tweet => tweet.poster);
+
+            let searchResults = tweets.map(tweet => ({
+                tid: tweet._id,
+                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: false },
+                dislikeInfo: { dislikeCount: tweet.dislike_counter },
+                user: { uid: tweet.poster._id, username: tweet.poster.username },
+                content: tweet.tweet_content,
+                files: tweet.files,
+                commentCount: tweet.comments.length,
+                retweetCount: tweet.retweets.length,
+                time: tweet.post_time,
+                portraitUrl: tweet.poster.portrait,
+                tags: tweet.tags,
+                private: tweet.private
+            }));
+
+            console.log(searchResults);
+            res.json(searchResults);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).send(err);
+        });
+});
+
 // recommendation part: get the most used tag (limitation 10)
 app.get('/search/trend', (req, res) => {
     res.set('Content-Type', 'text/plain');

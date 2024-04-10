@@ -27,7 +27,7 @@ class Search extends React.Component{
                 window.location.href = '/searchuserbyid/' + search;
                 break;
             default:
-                alert("Please select what you want to search");
+            window.location = '/searchtweet/' + search;
                 break;
         }
 
@@ -59,9 +59,10 @@ class Search extends React.Component{
                         </Button>
                         <Dropdown.Toggle variant="secondary" split id="dropdown-split-basic" />
                         <Dropdown.Menu>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search for Users by Username"; }}>Search for users by username</Dropdown.Item>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search for Tweets";}}>Search for tweets</Dropdown.Item>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search for Users by Uid";}}>Search for users by uid</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchuser" }); document.getElementById('searchclick').innerHTML = "Search User by Username"; }}>Search User by Username</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchtweetbytag" }); document.getElementById('searchclick').innerHTML = "Search Post by Tag"; }}>Search Post by Tag</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchuserid" }); document.getElementById('searchclick').innerHTML = "Search Users by ID"; }}>Search Users by ID</Dropdown.Item>
+                  <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchtweetbykeyword" }); document.getElementById('searchclick').innerHTML = "Search Post by Keyword"; }}>Search Posts by Keyword</Dropdown.Item>
                         </Dropdown.Menu>
                         </Dropdown>
                 </div>
