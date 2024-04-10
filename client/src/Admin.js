@@ -27,7 +27,7 @@ class Admin extends React.Component {
               <button
                 type="submit"
                 className="btn btn-secondary"
-                style={{ flex: '0 0 50%' }}
+                style={{ width: '25%' }}
                 onClick={() => this.handleButtonClick('addUpdatePage')}
               >
                 Add User and Update Password
@@ -35,7 +35,7 @@ class Admin extends React.Component {
               <button
                 type="submit"
                 className="btn btn-secondary"
-                style={{ flex: '0 0 25%' }}
+                style={{ width: '25%' }}
                 onClick={() => this.handleButtonClick('deleteUserPage')}
               >
                 Delete User
@@ -43,7 +43,7 @@ class Admin extends React.Component {
               <button
                 type="submit"
                 className="btn btn-secondary"
-                style={{ flex: '0 0 25%' }}
+                style={{ width: '25%' }}
                 onClick={() => this.handleButtonClick('listUserPage')}
               >
                 List User
