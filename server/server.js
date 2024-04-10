@@ -25,7 +25,9 @@ app.use("/server/messages", messageRoute);
 
 
 //Connect to MongoDB
-const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+// const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const url = "mongodb+srv://qwerty:qwer4321@cluster0.5gm5w78.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+console.log("Connecting to MongoDB\n");
 mongoose.connect(uri) 
     .then(() => {
         console.log("Connected to MongoDB\n");
