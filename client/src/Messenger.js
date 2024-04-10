@@ -104,10 +104,13 @@ export default function Messenger(){
                 <div className="chatBoxWrapper">
                     {currentChat ? (
                         <>
-                            <div className="chatBoxTop">
+                            <div className="chatBoxTop" >
                                 {messages.map((m, index) => (
-                                    <div key ={index} ref={scrollRef}>
+                                    <div key ={index} >
+                                    {/* <div key ={index}> */}
+                                    <div ref={scrollRef}>
                                     <Message message={m} own={m.sender === currentUser.uid} />
+                                    </div>
                                     </div>
                                 ))}
                             </div>
