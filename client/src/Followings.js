@@ -1,33 +1,68 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
 import UserListView from './User';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {BACK_END} from './App';
+import { BACK_END } from './App';
 import { getLoginInfo } from './Login';
+import BackButton from './components/backbutton';
 
-class Followings extends React.Component {
+function Followings() {
+    const [followings, setFollowings] = useState([]);
 
-    constructor(props){
-        super(props);
-        this.state = { 
-            followings: []
-        };
+    async function fetchInfo() {
+        let self = getLoginInfo()['username'];
+        let target = window.location.pathname.split('/')[1];
+        let mode = getLoginInfo()['mode'];
+        let followingsrec;
+        if (mode === 'user') {
+            followingsrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/followings", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+        } else {
+            followingsrec = await fetch(BACK_END + "profile/" + target + "/followings", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+        }
+        const followingsData = await followingsrec.json();
+        setFollowings(followingsData);
     }
 
-    async fetchInfo() {
-    }
-    
-    componentWillMount(){
-        this.fetchInfo();
-    }
+    useEffect(() => {
+        fetchInfo();
+    }, []);
 
-    render() {
-        return (<>
+    return (
+        <>
             <Container fluid>
-            </Container></>
-        );
-    }
-
+                <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
+                    <div className='row'>
+                        <BackButton />
+                    </div>
+                    <InfiniteScroll
+                        dataLength={followings.length}
+                        next={null}
+                        hasMore={false}
+                        scrollableTarget="scrollableDiv"
+                        endMessage={
+                            <p style={{ textAlign: 'center' }}>
+                                <b>That's all</b>
+                            </p>
+                        }
+                    >
+                        <UserListView userInfos={followings} />
+                    </InfiniteScroll>
+                </div>
+            </Container>
+        </>
+    );
 }
 
 export { Followings };
