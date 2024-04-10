@@ -9,6 +9,8 @@ import Notification from './models/Notification.js';
 import Tag from './models/Tag.js';
 import Message from './models/Message.js';
 import upload from './upload.js';
+import conversationRoute from "./routes/conversations.js";
+import messageRoute from "./routes/messages.js";
 
 const app = express();
 
