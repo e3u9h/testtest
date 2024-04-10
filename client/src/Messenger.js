@@ -27,6 +27,19 @@ export default function Messenger(){
     //   const response = (await fetch(BACK_END + "profile/" + username));
     //   const user = await response.json();
 
+
+    useEffect(() => {
+        socket.current = io("ws://localhost:8900");
+        socket.current.on("getMessage", (data) => {
+          setArrivalMessage({
+            sender: data.senderId,
+            text: data.text,
+            createdAt: Date.now(),
+          });
+        });
+      }, []);
+      
+
     useEffect(() => {
         const getConversations = async () => {
           try {
