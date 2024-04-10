@@ -120,7 +120,7 @@ class AddUser extends React.Component {
     }
 }
 
-class updatePassword extends React.Component {
+class UpdatePassword extends React.Component {
 
     handleUpdate = (event) => {
         event.preventDefault();
