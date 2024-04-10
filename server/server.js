@@ -18,6 +18,10 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
+app.use("/server/conversations", conversationRoute);
+app.use("/server/messages", messageRoute);
+
+
 //Connect to MongoDB
 const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(uri) 
@@ -393,7 +397,7 @@ app.get("/auser/:userId", async (req, res) => {
     }
   });
 
-  
+
 // get all tweets
 app.get('/tweets', (req, res) => {
     res.set('Content-Type', 'text/plain');
