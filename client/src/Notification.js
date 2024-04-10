@@ -98,13 +98,14 @@ class SingleNotification extends React.Component{
         return(
             <div class="card list-group-item d-flex">
                 <div class="card-body">
-                    <img class="img d-inline-block m-2 rounded-circle" style={{width:"50px", height: "50px"}} src={BACK_END+this.props.portrait} alt="Card image cap"/>   
                     <div>
+                    <img class="img d-inline-block m-2 rounded-circle" style={{width:"50px", height: "50px"}} src={BACK_END+this.props.portrait} alt="Card image cap"/>   
                         <p class="card-text d-inline-block m-2">{this.props.name} {actionMap[this.props.action]}</p>
                         <p style={{ display: 'inline-block', fontStyle: 'italic', fontWeight: 'bold' }}>{this.props.content}</p>
                     </div>
-                    <p class="card-text"><small class="text-muted">Last updated: {timeDifference(this.props.time)} </small></p>
+                    <p class="card-text text-right"><small class="text-muted">Last updated: {timeDifference(this.props.time)} </small></p>
                 </div>
+                
             </div>
         )
     }
