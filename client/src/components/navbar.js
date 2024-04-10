@@ -48,27 +48,27 @@ function Navbar() {
             <hr />
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
-                    {mode == 'user' && <NavLink to="/" className="nav-link text-muted" activeclassname="active">
+                    {mode === 'user' && <NavLink to="/" className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faHome} className='me-2' />Home</span>
                     </NavLink>}
                 </li>
                 <li>
-                    {mode == 'user' && <NavLink to="/search" className="nav-link text-muted" activeclassname="active">
+                    {mode === 'user' && <NavLink to="/search" className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faSearch} className='me-2' />Search</span>
                     </NavLink>}
                 </li>
                 <li>
-                    {mode == 'user' && <NavLink to="/notification" className="nav-link text-muted" activeclassname="active">
+                    {mode === 'user' && <NavLink to="/notification" className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faBell} className='me-2' />Notification</span>
                     </NavLink>}
                 </li>
                 <li>
-                    {mode == 'user' && <NavLink to={"/" + getLoginInfo()['username']} className="nav-link text-muted" activeclassname="active">
+                    {mode === 'user' && <NavLink to={"/" + getLoginInfo()['username']} className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faUser} className='me-2' />Profile</span>
                     </NavLink>}
                 </li>
                 <li>
-                    {mode == 'admin' && <NavLink to={"/admin"} className="nav-link text-muted" activeclassname="active">
+                    {mode === 'admin' && <NavLink to={"/admin"} className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faUser} className='me-2' />Admin Actions</span>
                     </NavLink>}
                 </li>
@@ -77,7 +77,7 @@ function Navbar() {
                 <hr />
                 <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                    {userPortraitSrc && <img src={BACK_END + userPortraitSrc} alt="" width="32" height="32" className="rounded-circle" />}
+                    {userPortraitSrc && mode === 'user' && <img src={BACK_END + userPortraitSrc} alt="" width="32" height="32" className="rounded-circle" style={{ objectFit: 'cover' }} />}
                     <strong className='ms-2 text-muted'>{getLoginInfo()['username']}</strong>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow">

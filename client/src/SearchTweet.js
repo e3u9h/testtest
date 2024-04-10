@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { TweetListView } from './Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
+import BackButton from './components/backbutton';
 
 class SearchTweet extends React.Component {
   constructor(props) {
@@ -36,6 +37,9 @@ class SearchTweet extends React.Component {
   render() {
     return (
       <>
+        <div className='row'>
+          <BackButton />
+        </div>
         <div id='scrollabletweets' style={{ height: '95vh', overflow: 'auto' }}>
           <InfiniteScroll
             dataLength={this.state.tweetList.length}

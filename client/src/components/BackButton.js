@@ -6,7 +6,7 @@ function BackButton() {
 
     return (
         <button onClick={() => navigate(-1)} className="btn btn-light" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '20px', borderRadius: '30px' }}>
-            Return
+            Back
         </button>
     );
 }

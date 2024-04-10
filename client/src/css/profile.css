@@ -1,3 +1,32 @@
-.profile-portrait{
+.profile-portrait {
     border-radius: 100%;
+    margin: 7%;
+    }
+    
+    #profile-username {
+        padding-top: 5%;
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+    
+    #name-id {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    
+    .btn-group-vertical {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+}
+.btn-underline-only {
+    border: none !important;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent;
+}
+
+.btn-underline-only.active {
+    border-bottom: 2px solid #6c757d !important;
+    font-weight: bold;
 }

@@ -3,6 +3,7 @@ import UserListView from './User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
 import { getLoginInfo } from './Login';
+import BackButton from './components/backbutton';
 
 class SearchUserid extends React.Component{
         
@@ -39,7 +40,10 @@ class SearchUserid extends React.Component{
     render() {
         const { userList } = this.state;
       
-        return (
+      return (<>
+        <div className='row'>
+          <BackButton />
+        </div>
           <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
             <InfiniteScroll
               dataLength={userList.length}
@@ -55,6 +59,7 @@ class SearchUserid extends React.Component{
               <UserListView userInfos={userList} />
             </InfiniteScroll>
           </div>
+        </>
         );
       }   
     

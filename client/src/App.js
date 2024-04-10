@@ -7,7 +7,7 @@ import TweetDetail from './TweetDetail';
 import { Notification } from './Notification';
 import Search from './Search'
 import { Admin } from './Admin';
-import ProfileWrapper from './Profile';
+import Profile from './Profile';
 
 import Header from './components/header';
 
@@ -21,8 +21,9 @@ import Navbar from './components/navbar';
 import SearchUser from './SearchUser';
 import SearchTweet from './SearchTweet';
 import SearchUserid from './Searchid';
+import SearchTweetByKeyword from './SearchTweetByKeyword';
 import cookie from 'react-cookies';
-
+import Messenger from './messenger/Messenger';
 
 
 export const BACK_END = 'http://localhost:8000/'
@@ -75,15 +76,17 @@ function App() {
       element: <AuthRoute ><Layout /></AuthRoute>,
       children: [
         { path: '', element: <Main /> },
-        { path: 'search', element: <Search /> },
-        { path: 'notification', element: <Notification /> },
-        { path: ':username', element: <ProfileWrapper /> },
-        { path: ':username/followings', element: <Followings /> },
-        { path: ':username/followers', element: <Followers /> },
-        { path: 'tweet/:tweetid', element: <TweetDetail /> },
-        { path: 'searchuser/:username', element: <SearchUser /> },
-        { path: 'searchtag/:tag', element: <SearchTweet /> },
-        { path: 'searchuserbyid/:id', element: <SearchUserid /> }
+        { path: '/search', element: <Search /> },
+        { path: '/notification', element: <Notification /> },
+        { path: '/:username', element: <Profile /> },
+        { path: '/:username/followings', element: <Followings /> },
+        { path: '/:username/followers', element: <Followers /> },
+        { path: '/messenger', element: <Messenger /> },
+        { path: '/tweet/:tweetid', element: <TweetDetail /> },
+        { path: '/searchuser/:username', element: <SearchUser /> },
+        { path: '/searchtag/:tag', element: <SearchTweet /> },
+        { path: '/searchtweet/:keyword', element: <SearchTweetByKeyword /> },
+        { path: '/searchuserbyid/:id', element: <SearchUserid /> }
       ]
     },
     {
