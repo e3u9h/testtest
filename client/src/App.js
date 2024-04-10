@@ -23,7 +23,7 @@ import SearchTweet from './SearchTweet';
 import SearchUserid from './Searchid';
 import SearchTweetByKeyword from './SearchTweetByKeyword';
 import cookie from 'react-cookies';
-import Messenger from './messenger/Messenger';
+import Messenger from './Messenger';
 
 
 export const BACK_END = 'http://localhost:8000/'
