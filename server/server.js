@@ -374,6 +374,26 @@ app.get('/profile/:username/likes', (req, res) => {
 /***Main****/
 /***********/
 
+
+
+
+//get a user
+app.get("/auser/:userId", async (req, res) => {
+    const userId = req.params.userId; 
+    try {
+      const user = await User.findById(userId);
+      if (user) {
+        const { password, ...other } = user._doc;
+        res.status(200).json(other);
+      } else {
+        res.status(600).json({ message: "User not foundddddd" });
+      }
+    } catch (err) {
+      res.status(500).json(err); 
+    }
+  });
+
+  
 // get all tweets
 app.get('/tweets', (req, res) => {
     res.set('Content-Type', 'text/plain');
