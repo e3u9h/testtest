@@ -36,6 +36,7 @@ function Profile() {
     });
     const [follow, setFollow] = useState(false);
     const [block, setBlock] = useState(false);
+    const [beblocked, setBeblocked] = useState(false);
     const [report, setReport] = useState(false);
     const [textAreaValue, setTextAreaValue] = useState("");
     const [editgender, setEditgender] = useState(target.gender);
@@ -74,12 +75,13 @@ function Profile() {
         // Follow, block, and report logic
         setFollow(self.followings.includes(dataTarget.uid));
         setBlock(self.users_blocked.includes(dataTarget.uid));
+        setBeblocked(dataTarget.users_blocked.includes(self.uid));
         setReport(self.users_reported.includes(dataTarget.uid));
     };
 
     useEffect(() => {
         fetchInfo();
-    }, [props.username, self.username]); // Depend on the username props and self.username.
+    }, [props.username, self.username, self.users_blocked, self.users_reported]);
 
 
     const handleFollowClick = async () => {
@@ -133,6 +135,7 @@ function Profile() {
             if (response.status === 200) {
                 setReport(true);
                 alert("You have reported this user.");
+                window.location.reload(true);
             } else {
                 alert("There seems to be some error. Please try again.");
             }
@@ -189,7 +192,7 @@ function Profile() {
 
 
     return (<>
-        <Container fluid>
+        {mode === 'admin' || (!block && !beblocked) && <Container fluid>
             <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
                 {target['username'] !== self['username'] && <Row>
                     <BackButton />
@@ -366,9 +369,42 @@ function Profile() {
                     </Row>
                 }
             </div>
-        </Container></>
+        </Container>}
+        {block && <Container fluid>
+            <Row>
+                <BackButton />
+            </Row>
+            <div className="row">
+                <div className="col-md-3"></div>
+                <div className="col-md-6">
+                    <div className="alert alert-danger" role="alert">
+                        You have blocked this user.
+                    </div>
+                    <button type="button" onClick={handleBlockClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                        {block ? 'Unblock' : 'Block'}
+                    </button>
+                </div>
+                <div className="col-md-3"></div>
+            </div>
+        </Container>}
+        {beblocked && <Container fluid>
+            <Row>
+                <BackButton />
+            </Row>
+            <div className="row">
+                <div className="col-md-3"></div>
+                <div className="col-md-6">
+                    <div className="alert alert-danger" role="alert">
+                        This user has blocked you.
+                    </div>
+                </div>
+                <div className="col-md-3"></div>
+            </div>
+        </Container>}
+    </>
     );
 }
+
 
 
 function MyPostsList({ username }) {

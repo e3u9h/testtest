@@ -1,11 +1,5 @@
 import * as React from 'react';
 
-const iconMap = {
-    "like": faThumbsUp,
-    "comment": faComment,
-    "retweet": faRetweet,
-    "follow": faUser
-}
 
 const actionMap = {
     "like": "likes your tweet",
