@@ -1030,9 +1030,6 @@ app.post('/retweet', (req, res) => {
     });
 });
 
-/* ----------------------------------------------------------------*/
-/* --------------------LI Peiran Search----------------------------*/
-/* ----------------------------------------------------------------*/
 
 //search for users by user name keywords
 app.get('/searchuser/:selfname/:targetname', (req, res) => {
