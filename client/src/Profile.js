@@ -192,7 +192,7 @@ function Profile() {
 
 
     return (<>
-        {mode === 'admin' || (!block && !beblocked) && <Container fluid>
+        {(mode === 'admin' || (!block && !beblocked)) && <Container fluid>
             <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
                 {target['username'] !== self['username'] && <Row>
                     <BackButton />
