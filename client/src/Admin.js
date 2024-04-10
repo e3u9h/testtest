@@ -91,9 +91,9 @@ class updatePassword extends React.Component {
         };
 
         if (!username) {
-            window.alert("Invalid input :(\nPlease enter the original username.");
+            window.alert("Invalid input.\nPlease enter the original username.");
         } else if (!newpwd) {
-            window.alert("Invalid input.\nPlease enter the updating attributes.");
+            window.alert("Invalid input.\nPlease enter the updating password.");
         } else if (newpwd.length <= 4 || newpwd.length >= 20) {
             window.alert("Invalid input.\n The length of the password should be >4 and <20.");
         } else {
