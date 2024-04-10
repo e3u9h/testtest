@@ -1,37 +1,35 @@
-import { useState, useEffect } from 'react';
-import UserListView from './User';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { randomSelect, timeDifference } from './Utils';
+import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useState, useRef } from 'react';
+import { timeDifference } from './Utils';
+import { Link } from "react-router-dom";
 import { getLoginInfo } from './Login';
 import { BACK_END } from './App';
-import { Dropdown } from 'react-bootstrap';
-import { ButtonGroup } from '@material-ui/core';
+import { randomSelect } from './Utils';
+import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
-import { PlusOutlined } from '@ant-design/icons';
-import { Image, Upload, Form, Input, message } from 'antd';
-import { Link } from "react-router-dom";
-import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { Image, Form, Input } from 'antd';
+
 
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
+  // console.log("here1" + JSON.stringify(tweetInfo))
   const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
   const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
-
   const [timeInterval, setTimeInterval] = useState(timeDifference(tweetInfo['time']));
-
   const [isReported, setIsReported] = useState(tweetInfo['isReported']);
   const [commentCount, setCommentCount] = useState(tweetInfo['commentCount']);
-  const tweetContent = tweetInfo['content'];
   const [retweetCount, setRetweetCount] = useState(tweetInfo['retweetCount']);
+  const tweetContent = tweetInfo['content'];
   const portraitUrl = tweetInfo['portraitUrl'];
   const tags = tweetInfo['tags'];
   const username = tweetInfo['user']['username'];
   const files = tweetInfo['files']
-  console.log("TWEETPART" + files)
+  console.log("here2" + tweetContent + files)
 
-  // Update time
+
+  // update time interval every second
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeInterval(timeDifference(tweetInfo['time']));
@@ -39,7 +37,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     return () => clearInterval(interval);
   });
 
-  // Update component state based on tweetInfo changes
   useEffect(() => {
     setLikeInfo(tweetInfo['likeInfo']);
     setDislikeInfo(tweetInfo['dislikeInfo']);
@@ -48,7 +45,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setIsReported(tweetInfo['isReported']);
   }, [tweetInfo]);
 
-  // click like 
   const clickLikeTweet = () => {
     if (likeInfo.bLikeByUser) {
       updateTweetInfo("cancel-like");
@@ -57,7 +53,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     }
   }
 
-  // click dislike
   const clickDislikeTweet = () => {
     if (dislikeInfo.bDislikeByUser) {
       updateTweetInfo("cancel-dislike");
@@ -66,7 +61,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     }
   }
 
-  // update tweet info to database
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
     fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + getLoginInfo()['username'] + "/" + operation, {
@@ -89,7 +83,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     });
   }
 
-  // send report info to backend
   const handleTweetReport = () => {
     fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + getLoginInfo()['username'] + "/report", {
       method: 'PUT',
@@ -108,7 +101,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     });
   }
 
-  // Add comment to backend
   const addCommentMain = () => {
     let newCom = {
       content: document.getElementById('new-comment' + tweetInfo.tid).value,
@@ -128,28 +120,24 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setCommentCount(commentCount + 1);
   }
 
+
   return (
-    <div className="card p-2 m-2 mb-4" style={{ borderRadius: "30px" }}>
-      <div className="card-body row">
+    <div className="card p-2 m-2 mb-4" style={{ borderRadius: "25px"}}>
+      <div className="card-body row flex-column">
+        <div className="col-5">
 
-        <div className="col-2">
-          <div className="d-flex justify-content-center align-items-center text-center">
-            {/* link to the user profile */}
-            <Link to={"/" + username}>
-              <div className="rounded-circle overflow-hidden  w-100 d-flex justify-content-center align-items-center" style={{ aspectRatio: '1/1', backgroundPosition: 'center' }}>
-                <img src={BACK_END + portraitUrl} alt="Generic placeholder image" className="img-fluid h-100 w-100" style={{ objectFit: 'cover' }} />
-              </div>
-            </Link>
-          </div>
-          <h3 className="my-2 text-bold text-center">{username}</h3>
-          <hr />
-          <p className="opacity-50 text-nowrap text-center">{timeInterval}</p>
-        </div>
-
-        <div className="col-10">
-          <div className="row d-flex flex-column h-100">
-            <div className="row flex-grow-1">
-              <div className="d-flex justify-content-start">
+            <div className="d-flex ">
+              {/* link to the user profile */}
+              <Link to={"/" + username}>
+                <div className="rounded-circle overflow-hidden" style={{ width: "45px", height: "45px" }}>
+                  <img src={BACK_END + portraitUrl} alt="Generic placeholder image" className="img-fluid h-100 w-100" style={{ objectFit: 'cover'}} />
+                </div>
+              </Link>
+              <div style={{ display: 'flex', flexDirection: 'column', marginTop: '-5px', marginLeft: '15px' }}>
+                <h5 className="my-1">{username}</h5>
+                <p className="opacity-50 text-nowrap text-center" style={{ fontSize: '14px', marginTop: '-5px' }}>{timeInterval}</p>
+              </div>  
+              <div className="d-flex justify-content-start" style = {{marginLeft: '10px'}}>
                 {tags.map((tag, index) => {
                   if (tag) {
                     return (
@@ -159,6 +147,13 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
                   return null;
                 })}
               </div>
+            </div>
+          </div>
+    
+
+        <div className="col-12">
+          <div className="row d-flex flex-column h-100">
+            <div className="row flex-grow-1">
 
               <div><p>{tweetContent}</p></div>
 
@@ -181,46 +176,46 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             </div>
 
             <div className="d-flex align-items-end justify-content-end mt-autoo">
-              {!isDetailPage && <span className="m-1">
-                <Link to={"/tweet/" + tweetInfo["tid"]}>
-                  <button type="button" className="btn btn-secondary btn-floating">View Full Post</button>
-                </Link>
-              </span>}
-              {getLoginInfo() && getLoginInfo()['mode'] == 'user' &&
-                <>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (likeInfo.bLikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickLikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (dislikeInfo.bDislikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickDislikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className="btn btn-outline-secondary btn-floating" data-bs-toggle="modal" data-bs-target={"#tweetCommentForm" + tweetInfo.tid} data-bs-whatever="@mdo">
-                      <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{commentCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <a className="btn btn-outline-secondary btn-floating" href={"#tweetForwardForm" + tweetInfo.tid} data-bs-toggle="modal" role='button'>
-                      <FontAwesomeIcon icon={faRetweet}></FontAwesomeIcon>
-                    </a>
-                    <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-floating" + (isReported ? "btn-secondary disabled" : " btn-outline-secondary")} data-bs-toggle="modal" data-bs-target={"#report-popup" + tweetInfo['tid']}>
-                      <FontAwesomeIcon icon={faWarning}></FontAwesomeIcon>
-                    </button>
-                  </span>
-                </>
-              }
-            </div>
-          </div>
+            {!isDetailPage && <span className="m-1">
+              <Link to={"/tweet/" + tweetInfo["tid"]}>
+                <button type="button" className="btn btn-secondary btn-floating">View Full Post</button>
+              </Link>
+            </span>}
+            {getLoginInfo() && getLoginInfo()['mode'] == 'user' &&
+              <>
+               <span className="m-1">
+                  <button type="button" className={"btn btn-" + (likeInfo.bLikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickLikeTweet}>
+                  <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
+                  </button>
+                  <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
+                </span>
+                <span className="m-1">
+                  <button type="button" className={"btn btn-" + (dislikeInfo.bDislikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickDislikeTweet}>
+                    <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
+                  </button>
+                  <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
+                </span>
+                <span className="m-1">
+                   <button type="button" className="btn btn-outline-secondary btn-floating" data-bs-toggle="modal" data-bs-target={"#tweetCommentForm" + tweetInfo.tid} data-bs-whatever="@mdo">
+                    <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
+                  </button>
+                  <span className="ms-1 opacity-75">{commentCount}</span>
+                </span>
+                <span className="m-1">
+                  <a className="btn btn-outline-secondary btn-floating" href={"#tweetForwardForm" + tweetInfo.tid} data-bs-toggle="modal" role='button'>
+                    <FontAwesomeIcon icon={faRetweet}></FontAwesomeIcon>
+                  </a>
+                  <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
+                </span>
+                <span className="m-1">
+                  <button type="button" className={"btn btn-floating" + (isReported ? "btn-secondary disabled" : " btn-outline-secondary")} data-bs-toggle="modal" data-bs-target={"#report-popup" + tweetInfo['tid']}>
+                    <FontAwesomeIcon icon={faWarning}></FontAwesomeIcon>
+                  </button>
+                </span>
+              </>
+            }
+            </div>          
+          </div>  
         </div>
       </div>
 
@@ -274,6 +269,7 @@ function ForwardForm(props) {
   const [tags, setTags] = useState([]);
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
+
 
 
   const fetchAvailableTags = () => {
@@ -363,7 +359,6 @@ function ForwardForm(props) {
     // clear the input field
     newTagsDom.value = '';
   }
-
   return (
     <div>
       <div className="modal fade" id={"tweetForwardForm" + props.tid} aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabIndex="-1">
@@ -374,16 +369,16 @@ function ForwardForm(props) {
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              <Form>
-                <Form.Item>
-                  <Input.TextArea
-                    rows={4}
-                    value={repostContent}
-                    onChange={e => setRepostContent(e.target.value)}
-                    placeholder="Say something when repost!"
-                  />
-                </Form.Item>
-              </Form>
+            <Form>
+        <Form.Item>
+          <Input.TextArea
+            rows={4}
+            value={repostContent}
+            onChange={e => setRepostContent(e.target.value)}
+            placeholder="Say something when repost!"
+          />
+        </Form.Item>
+      </Form>
               <div className="modal-body">
                 <h5>Choose a tag</h5>
                 <hr></hr>
