@@ -25,10 +25,10 @@ function NewPost() {
   const [previewImage, setPreviewImage] = useState('');
 
   const fetchAvailableTags = () => {
-    fetch('http://localhost:8000tags', {
+    fetch(BACK_END + 'tags', {
       mothod: 'GET',
       headers: {
-        'Content-type': 'application/json'
+        'Content-Type': 'application/json'
       }
     }).then(res => res.json()).then(data => {
       const fetchedTags = data.map((item) => item['tag']);
@@ -89,14 +89,16 @@ function NewPost() {
     let formData = new FormData();
     formData.append('username', getLoginInfo()['username'])
     formData.append('tweet_content', postContent);
-    formData.append('tags', JSON.stringify(tags));
+    tags.forEach(tag => {
+      formData.append('tags', tag);
+    });
     formData.append('private', privacy);
 
     fileList.forEach((file) => {
       formData.append('files', file.originFileObj)
     });
 
-    fetch('http://localhost:8000/new-tweet', {
+    fetch(BACK_END + 'new-tweet', {
       method: 'POST',
       body: formData,
     }).then(res => {
@@ -120,23 +122,23 @@ function NewPost() {
     // check if the tag is already in the list
     if (!availableTags.includes(newTags)) {
       // insert the new tags into the database
-      fetch('http://localhost:8000/new-tag', {
+      fetch(BACK_END + 'new-tag', {
         method: 'POST',
         body: JSON.stringify({ tag: newTags }),
         headers: {
-          'content-Type': 'application/json'
+          'Content-Type': 'application/json'
         }
       }).then(res => {
         if (res.status === 201) {
           console.log("New tag inserted");
-        } else if (res.status === 400 && res.body === "Tag already exists") {
+        } else if (res.status === 400) {
           alert("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }
         setTags([...tags, newTags]);
         // close the modal
-        document.getElementaryById("close-modal").click();
+        document.getElementById("close-modal").click();
       });
     } else {
       alert("Tag already exists");

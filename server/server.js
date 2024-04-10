@@ -460,7 +460,7 @@ app.get('/tweets/:username', (req, res) => {
         });
 });
 
-// get all the followings' tweets of the user
+// get all the followings' tweets of the user (including the own posts)
 app.get('/followings/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
     // consecutive populate: first find the user, then populate the following field, then populate the tweet field
@@ -477,6 +477,15 @@ app.get('/followings/:username', (req, res) => {
                     select: 'username portrait'
                 }
             }
+        })
+        .populate({
+            path: 'tweets',
+            match: { 'private': false },
+            populate: {
+                path: 'poster',
+                model: 'User',
+                select: 'username portrait'
+            }
         }).exec().then((user) => {
             let following = user.followings;
             let tweets = [];
@@ -485,6 +494,7 @@ app.get('/followings/:username', (req, res) => {
                     tweets = [...tweets, ...following[i].tweets];
                 }
             }
+            tweets = [...tweets, ...user.tweets]
             let tweetsInfo = tweets.map((tweet) => {
                 return {
                     "tid": tweet['_id'],
@@ -778,15 +788,20 @@ app.get('/tag/:tagname', (req, res) => {
 // create new tag
 app.post('/new-tag', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    Tag.create(req.body).then((tag) => {
+    console.log("Create new tag");
+    console.log(req.body);
+    Tag.create({ tag: req.body.tag }).then((tag) => {
+        console.log("tag created");
         return res.status(201).send(tag);
     }).catch((err) => {
         // check if it is the duplicate key error
-        if (err.code == 11000) {
+        if (err.code === 11000) {
+            console.log("tag exists");
             return res.status(400).send('Tag already exists');
         } else {
+            console.log("error in creating tag");
             console.log(err);
-            return res.status(400).send(err);
+            return res.status(401).send(err);
         }
     });
 });
@@ -1192,9 +1207,6 @@ app.get('/search/trend', (req, res) => {
 })
     ;
 
-// ------启动server------
-const server = app.listen(8000);
-
 
 //-------Admin User-------
 //update: change password by admin
@@ -1269,3 +1281,7 @@ app.get('/listusers', (req, res) => {
         res.send(err);
     });
 });
+
+
+// ------启动server------
+const server = app.listen(8000);

@@ -140,8 +140,10 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
               <div className="d-flex justify-content-start" style = {{marginLeft: '10px'}}>
                 {tags.map((tag, index) => {
                   if (tag) {
+                    console.log("tag");
+                    console.log(tag);
                     return (
-                      <span className="badge bg-secondary m-1 tag" key={index}>{tag}</span>
+                      <span key={index} style={{ color: '#6c757d', marginLeft: '5px' }}>#{tag}</span>
                     );
                   }
                   return null;
