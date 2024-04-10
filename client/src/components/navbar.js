@@ -16,6 +16,44 @@ function Navbar() {
         cookie.remove('userInfo');
         navigate('/login');
     };
+    const changePwd = () => {
+        const changepwdusername = getLoginInfo()['username'];
+        const oldpwd = document.querySelector("#originalpwd").value;
+        const newpwd = document.querySelector("#changedpwd").value;
+        const newpwd2 = document.querySelector("#changedpwd2").value;
+        const userinfo = {
+            username: changepwdusername,
+            oldpwd: oldpwd,
+            newpwd: newpwd,
+            newpwd2: newpwd2
+        };
+        console.log(userinfo)
+        if (userinfo['newpwd'] === '') {
+            window.alert("Please enter a valid new password.");
+        } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
+            window.alert("The length of the new password should be >4 and <20.");
+        } else if (newpwd !== newpwd2) {
+            window.alert("Password mismatch!");
+        } else {
+            fetch(BACK_END + 'changepwd', {
+                method: 'PUT',
+                body: JSON.stringify(userinfo),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                    }
+                    return res.text();
+                })
+                .then(data => { alert(data); })
+                .catch(err => {
+                    console.log(err);
+                });
+        }
+    }
+
     useEffect(() => {
         const username = getLoginInfo()['username'];
         setMode(getLoginInfo()['mode']);
@@ -85,7 +123,30 @@ function Navbar() {
                     <li><a type="button" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changepasswordForm" data-bs-whatever="@mdo" >Change Password</a></li>
                 </ul>
             </div>}
-        </div>}</>
+        </div>}
+        <div className="modal fade" id="changepasswordForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div className="modal-dialog">
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                        <div className="mb-3">
+                            <label htmlFor="name" className="col-form-label"> Old Password: </label>
+                            <input type="password" className="form-control" id="originalpwd" />
+                            <label htmlFor="name" className="col-form-label"> New Password: </label>
+                            <input type="password" className="form-control" id="changedpwd" />
+                            <label htmlFor="name" className="col-form-label"> Recheck New Password: </label>
+                            <input type="password" className="form-control" id="changedpwd2" />
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
+                        <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={changePwd}> Submit </button>
+                    </div>
+                </div>
+            </div>
+        </div></>
     )
 }
 
