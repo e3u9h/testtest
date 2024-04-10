@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState, useRef } from 'react';
 import { BACK_END } from './App';
+import BackButton from './components/backbutton';
 
 
 
@@ -40,7 +41,9 @@ class SearchTweetByKeyword extends React.Component {
     render() {
         return (
             <>
-
+                <div className='row'>
+                    <BackButton />
+                </div>
                 <div id='scrollabletweets' style={{ height: "80vh", overflow: "auto" }}>
                     <InfiniteScroll dataLength={this.state.tweetList.length} next={null} hasMore={false} scrollableTarget="scrollabletweets"
                         endMessage={<p style={{ textAlign: 'center' }}><b>No more Tweets</b></p>}>
