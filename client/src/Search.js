@@ -1,141 +1,104 @@
 import React from 'react';
+import TweetListView from './Tweet';
+import UserListView from './User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
+import SearchUser from './SearchUser';
+import SearchTweet from './SearchTweet';
 import { Link } from 'react-router-dom';
+import {BACK_END} from './App';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
+
 class Search extends React.Component{
-    
     constructor(props){
         super(props);
-        this.state = {viewMode:"search"}; 
+        this.state = {viewMode:"search"}; // two viewmode, notification or message
         this.clickSearch = this.clickSearch.bind(this)
         this.onkeydown = this.onkeydown.bind(this)
     }
-    // jump to the required page after clicking the search button.
+    // Direct to the specific page after clicking the search button to search for something.
     async clickSearch(){
         var search=document.getElementById('search_input').value;
-        switch (this.state.viewMode) {
-            case 'searchuser':
-                window.location.href = '/searchuser/' + search;
-                break;
-            case 'searchtweet':
-                window.location.href = '/searchtag/' + search;
-                break;
-            case 'searchuserid':
-                window.location.href = '/searchuserbyid/' + search;
-                break;
-            default:
-                alert("Please select what you want to search");
-                break;
+        if(this.state.viewMode == 'searchuser'){
+            window.location = '/searchuser/'+search;
+        }
+        else if(this.state.viewMode  == 'searchtweet'){
+            window.location = '/searchtag/'+search;
+        }
+        else if(this.state.viewMode == 'searchuserid'){
+            window.location = '/searchuserbyid/'+search;
+        }
+        else{
+            alert("please select what you want to search")
         }
 
     }
     async onkeydown(e){
-		if (e.keyCode === 13) {
-			this.clickSearch()
-		}
-	}
+  if (e.keyCode === 13) {
+   this.clickSearch()
+  }
+ }
 
-    render() {
-        const { viewMode } = this.state;
-        const placeholderText = viewMode === 'search' ? "Please define the search type" : "Please input the keyword";
-        return (
+    render(){
+        return(
             <>
-                <div className="input-group">
-                    <input
-                        id='search_input'
-                        type="search"
-                        className="form-control rounded"
-                        onKeyDown={this.onKeyDown}
-                        placeholder={placeholderText}
-                        aria-label="Search"
-                        aria-describedby="search-addon"
-                    />
-                    <Dropdown as={ButtonGroup}>
-                        <Button variant="secondary" id="searchclick" onClick={this.clickSearch} ref={this.searchButtonRef}>
-                            Search
-                        </Button>
-                        <Dropdown.Toggle variant="secondary" split id="dropdown-split-basic" />
-                        <Dropdown.Menu>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search for Users by Username"; }}>Search for users by username</Dropdown.Item>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search for Tweets";}}>Search for tweets</Dropdown.Item>
-                        <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search for Users by Uid";}}>Search for users by uid</Dropdown.Item>
-                        </Dropdown.Menu>
-                        </Dropdown>
+            <div class="input-group">
+                <input id='search_input' type="search" class="form-control rounded" onKeyDown={(e)=>this.onkeydown(e)} placeholder={(this.state.viewMode == 'search' ? "Please select what you want to search" : "Please input the keyword")} aria-label="Search" aria-describedby="search-addon" />
+                <Dropdown as={ButtonGroup}>
+                <Button variant="secondary" id="searchclick" onClick={this.clickSearch} >Search</Button>
+                <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
+                <Dropdown.Menu>
+                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search User by Username"; }}>Search User by Username</Dropdown.Item>
+                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search Post by Tag";}}>Search Post by Tag</Dropdown.Item>
+                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search Users by ID";}}>Search Users by ID</Dropdown.Item>
+                </Dropdown.Menu>
+                </Dropdown>
                 </div>
                 <div className="row">
-                    <Trend />
-                </div>
+                <Trend/>
+            </div>
+            
             </>
-        );
+        )   
     }
-
-}
-
-class Trend extends React.Component {
+}       
+class Trend extends React.Component{
     constructor(props) {
-      super(props);
-      this.state = { trendList: [] };
-    }
-  
-    // get the hotest topic
-    getTrend = async () => {
-      try {
-        const response = await fetch('BACK_END/search/trend', {
-          method: 'GET',
-          headers: {
+        super(props);
+        this.state = { trendList: []};
+      }
+    // Get the hot topics
+    async getTrend(){
+        let res = await fetch(BACK_END + 'search/trend',{
+          method:'GET',
+          headers: { 
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           }
         });
-  
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
-        }
-  
-        const trendList = await response.json();
-        this.setState({ trendList });
-      } catch (error) {
-        console.error('There has been a problem with your fetch operation:', error);
+        let l = await res.json();
+        await this.setState({trendList:l});
+        console.log(this.state.trendList)
       }
-    }
-  
-    componentDidMount() {
-      this.getTrend();
-    }
-  
+      componentDidMount(){
+        this.getTrend()
+      }
+
     render() {
-      const { trendList } = this.state;
-  
-      return (
-        <div>
-          <InfiniteScroll
-            dataLength={trendList.length}
-            next={null}
-            hasMore={false}
-            loader={<h4>Loading...</h4>}
-            endMessage={
-              <p style={{ textAlign: 'center' }}>
-                <b>Connect, Create, Captivate: Explore the Extraordinary with C3U!</b>
-              </p>
-            }
-          >
-            {
-              trendList.length > 0 ? (
-                <TrendListView trendInfos={trendList} />
-              ) : (
-                <p style={{ textAlign: 'center' }}>
-                  
-                </p>
-              )
-            }
-          </InfiniteScroll>
-        </div>
-      );
+        return (<>
+            <InfiniteScroll dataLength={this.state.trendList.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
+                endMessage={<p style={{ textAlign: 'center' }}>
+                    <b> Current Hot Topics </b>
+                </p>}>
+                <TrendListView trendInfos={this.state.trendList}/>
+            </InfiniteScroll>
+        </>
+        );
     }
-  }
+} 
+
 
 function TrendListView({ trendInfos }) {
 
@@ -175,4 +138,3 @@ class TrendCard extends React.Component{
 
 
 export default Search;
-    
