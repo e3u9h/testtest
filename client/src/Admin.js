@@ -6,22 +6,64 @@ import { BACK_END } from './App';
 import { Link } from 'react-router-dom';
 
 class Admin extends React.Component {
-
-    render() {
-        return (<>
-            <Container fluid>
-                <div id="scrollableDiv" className='border' style={{ height: "100vh", overflow: "auto" }}>
-                    <AddUser />
-                    <updatePassword />
-                    <ListUser />
-                    <DeleteUser />
-                </div>
-            </Container>
-        </>
-        );
+    constructor(props) {
+      super(props);
+      this.state = {
+        currentPage: 'addUpdatePage',
+      };
     }
-
-}
+  
+    handleButtonClick = (page) => {
+      this.setState({ currentPage: page });
+    };
+  
+    render() {
+      const { currentPage } = this.state;
+  
+      return (
+        <>
+          <Container fluid>
+          <div style={{ display: 'flex', width: '100%' }}>
+              <button
+                type="submit"
+                className="btn btn-secondary"
+                style={{ flex: '0 0 50%' }}
+                onClick={() => this.handleButtonClick('addUpdatePage')}
+              >
+                Add User and Update Password
+              </button>
+              <button
+                type="submit"
+                className="btn btn-secondary"
+                style={{ flex: '0 0 25%' }}
+                onClick={() => this.handleButtonClick('deleteUserPage')}
+              >
+                Delete User
+              </button>
+              <button
+                type="submit"
+                className="btn btn-secondary"
+                style={{ flex: '0 0 25%' }}
+                onClick={() => this.handleButtonClick('listUserPage')}
+              >
+                List User
+              </button>
+            </div>
+            <div id="scrollableDiv" className="border" style={{ height: '80vh', overflow: 'auto' }}>
+              {currentPage === 'addUpdatePage' && (
+                <>
+                  <AddUser />
+                  <UpdatePassword />
+                </>
+              )}
+              {currentPage === 'deleteUserPage' && <DeleteUser />}
+              {currentPage === 'listUserPage' && <ListUser />}
+            </div>
+          </Container>
+        </>
+      );
+    }
+  }
 
 class AddUser extends React.Component {
 
