@@ -43,6 +43,21 @@ function Profile() {
     const navigate = useNavigate();
 
     const fetchInfo = async () => {
+
+        // Fetch target information
+        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const dataTarget = await responseTarget.json();
+        console.log("TARGET:");
+        console.log(dataTarget);
+
+        setTarget(dataTarget);
+        setTextAreaValue(dataTarget.about);
         // Fetch self information
         if (mode === 'user') {
             const responseSelf = await fetch(BACK_END + "profile/" + self.username + "/actioninfo", {
@@ -55,34 +70,18 @@ function Profile() {
             const dataSelf = await responseSelf.json();
             setSelf(dataSelf);
             console.log(dataSelf);
+            console.log(dataSelf.users_blocked);
+            // Follow, block, and report logic
+            setFollow(dataSelf.followings.includes(dataTarget.uid));
+            setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
+            setBeblocked(dataTarget.users_blocked.includes(dataSelf.uid));
+            setReport(dataSelf.users_reported.includes(dataTarget.uid));
         }
-
-        // Fetch target information
-        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-        const dataTarget = await responseTarget.json();
-
-
-        setTarget(dataTarget);
-        console.log("dataTarget");
-        console.log(dataTarget);
-        setTextAreaValue(dataTarget.about);
-        console.log(self.users_blocked);
-        // Follow, block, and report logic
-        setFollow(self.followings.includes(dataTarget.uid));
-        setBlock(self.users_blocked.includes(dataTarget.uid));
-        setBeblocked(dataTarget.users_blocked.includes(self.uid));
-        setReport(self.users_reported.includes(dataTarget.uid));
     };
 
     useEffect(() => {
         fetchInfo();
-    }, [props.username, self.username, self.users_blocked, self.users_reported]);
+    }, []);
 
 
     const handleFollowClick = async () => {
