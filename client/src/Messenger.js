@@ -10,12 +10,14 @@ import { io } from "socket.io-client";
 import { timeDifference } from "./Utils.js"
 
 // 
-export default function Messenger(){
+export default function Messenger(state){
     const [conversations, setConversations] = useState([]);
     const [currentChat, setCurrentChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const [currentUser, setCurrentUser] = useState("");
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filteredConversations, setFilteredConversations] = useState([]);
     const [arrivalMessage, setArrivalMessage] = useState(null);
     const [onlineUsers, setOnlineUsers] = useState([]);
     const socket = useRef();
@@ -27,9 +29,10 @@ export default function Messenger(){
     //   const response = (await fetch(BACK_END + "profile/" + username));
     //   const user = await response.json();
 
-
+    
     useEffect(() => {
-        socket.current = io("ws://localhost:8900");
+        // socket.current = io("ws://localhost:8900");
+        socket.current = io("ws://10.13.189.122:8900");
         socket.current.on("getMessage", (data) => {
           setArrivalMessage({
             sender: data.senderId,
@@ -38,7 +41,12 @@ export default function Messenger(){
           });
         });
       }, []);
-      
+
+    useEffect(() => {
+        arrivalMessage &&
+          currentChat?.members.includes(arrivalMessage.sender) &&
+          setMessages((prev) => [...prev, arrivalMessage]);
+    }, [arrivalMessage, currentChat]);
 
     useEffect(() => {
         const getConversations = async () => {
@@ -55,7 +63,6 @@ export default function Messenger(){
         getConversations();
       }, [current_username]);
 
-
     useEffect(() => {
         const getMessages = async () => {
           try {
@@ -70,6 +77,15 @@ export default function Messenger(){
     console.log(currentChat);
     console.log(messages);
 
+    useEffect(() => {
+        socket.current.emit("addUser", currentUser.uid);
+        socket.current.on("getUsers", (users) => {
+          setOnlineUsers(
+            currentUser.followings?.filter((f) => users.some((u) => u.userId === f))
+          );
+        });
+      }, [currentUser]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const message = {
@@ -80,32 +96,61 @@ export default function Messenger(){
 
         const receiverId = currentChat.members.find(
             (member) => member !== currentUser.uid
-          );
+        );
       
-        //   socket.current.emit("sendMessage", {
-        //     senderId: currentUser.uid,
-        //     receiverId,
-        //     text: newMessage,
-        //   });
+        socket.current.emit("sendMessage", {
+        senderId: currentUser.uid,
+        receiverId,
+        text: newMessage,
+        });
       
-          try {
+        try {
             const res = await axios.post(BACK_END + "server/messages", message);
             setMessages([...messages, res.data]);
             setNewMessage("");
-          } catch (err) {
+        } catch (err) {
             console.log(err);
           }
         };
 
+  const handleSearchChange = async (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+
+    if (value.trim()) {
+      try {
+        const response = await fetch(BACK_END+"searchuser/"+currentUser.username+"/"+value.trim());
+        const matchedUsers = await response.json();
+        const matchedUserIds = matchedUsers.map(user => user.uid);
+
+        const newFilteredConversations = conversations.filter(conversation =>
+          conversation.members.some(member => 
+            matchedUserIds.includes(member) && member !== currentUser.uid
+          )
+        );
+        setFilteredConversations(newFilteredConversations);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+        // Handle errors, possibly by setting an error state
+      }
+    } else {
+      setFilteredConversations([]);
+    }
+  };
+
+
+
+
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
+//   '/searchuser/:selfname/:targetname'
     return(
         <div className="Messenger">
             <div className="chatMenu">
                 <div className="chatMenuWrapper">
-                    <input placeholder="Search for friends" className="chatMenuInput" />
+                    <input placeholder="Search for friends" className="chatMenuInput" onChange={handleSearchChange}
+                    value = {searchTerm} />
                         {conversations.map((c, index) => (
                         <div key={index} onClick={() => setCurrentChat(c)}>
                             <Conversation conversation={c} currentUsername={current_username}/>
@@ -120,7 +165,6 @@ export default function Messenger(){
                             <div className="chatBoxTop" >
                                 {messages.map((m, index) => (
                                     <div key ={index} >
-                                    {/* <div key ={index}> */}
                                     <div ref={scrollRef}>
                                     <Message message={m} own={m.sender === currentUser.uid} />
                                     </div>
@@ -130,12 +174,12 @@ export default function Messenger(){
                             <div className="chatBoxBottom">
                                 <textarea className="chatMessageInput" placeholder="Write something..."
                                 onChange={(e) => setNewMessage(e.target.value)}
-                                value = {newMessage}
+                                value = {newMessage} {...handleSubmit}
                                 ></textarea>
                                 <button className="chatSubmitButton" onClick={handleSubmit}>Send</button>
                             </div>
                         </> 
-                        ) : (<span className="noCovText" >Open a conversation here</span>)}
+                        ) : (<span className="noCoversationText">Open a conversation here</span>)}
                 </div>
             </div>
             <div className="chatOnline">
