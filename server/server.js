@@ -28,7 +28,7 @@ app.use("/server/messages", messageRoute);
 // const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const url = "mongodb+srv://qwerty:qwer4321@cluster0.5gm5w78.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 console.log("Connecting to MongoDB\n");
-mongoose.connect(uri) 
+mongoose.connect(url) 
     .then(() => {
         console.log("Connected to MongoDB\n");
       })
@@ -125,6 +125,36 @@ app.post('/login/user', (req, res) => {
         res.send(err);
     });
 });
+app.put('/changepwd', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    const username = req.body.username;
+    const newpwd = req.body.newpwd;
+    const oldpwd = req.body.oldpwd;
+    console.log("newpwd:" + newpwd);
+    Account.findOne({ username: username }).then((acc) => {
+        if (!acc) {
+            console.log(username);
+            res.sendStatus(404);
+        }
+        else if (newpwd !== '') {
+            if (oldpwd !== acc.pwd) {
+                res.send("The old password is incorrect!").status(404);
+            }
+            else {
+                acc.pwd = newpwd;
+                acc.save();
+                res.send("Update Successfully!").status(200);
+            }
+
+        }
+        else {
+            return res.send('Failed to change password.').status(404);
+        }
+    }).catch((err) => {
+        res.send(err);
+    });
+});
+
 
 app.get('/portrait/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
