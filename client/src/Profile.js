@@ -3,7 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { TweetListView } from './Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getLoginInfo } from './Login';
@@ -40,6 +40,7 @@ function Profile() {
     const [report, setReport] = useState(false);
     const [textAreaValue, setTextAreaValue] = useState("");
     const [editgender, setEditgender] = useState(target.gender);
+    const navigate = useNavigate();
 
     const fetchInfo = async () => {
         // Fetch self information
@@ -189,6 +190,29 @@ function Profile() {
     const handleGenderChange = (event) => {
         setEditgender(event.target.value);
     };
+    const handleChatClick = async () => {
+        try {
+            fetch(BACK_END + 'server/conversations/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    senderId: self.uid,
+                    receiverId: target.uid
+                })
+            }).then(res => {
+                if (res.status === 200) {
+                    navigate(`/messenger`);
+                }
+                else {
+                    alert("There seems to be some error. Please try again.");
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
 
     return (<>
@@ -264,6 +288,12 @@ function Profile() {
                                     <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
                                         {report ? 'Reported' : 'Report'}
                                     </button>)
+                            }
+                            {
+                                mode === 'user' && target['username'] !== self['username'] &&
+                                <button type="button" onClick={handleChatClick} className="btn btn-secondary" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                    Chat
+                                </button>
                             }
                         </div>
                     </div>
