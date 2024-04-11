@@ -1313,6 +1313,8 @@ app.delete('/user/:username', async (req, res) => {
         const tweetResult = await Tweet.deleteMany({ poster: userResult._id });
         console.log(`Deleted tweets count: ${tweetResult.deletedCount}`);
         console.log(`Successfully deleted user ${username}'s tweets`);
+        // delete all the notifications of the user
+        const noteResult = await Notification.deleteMany({ actor_id: userResult._id });
         return res.status(204).send(`Successfully deleted user ${username}`);
     } catch (err) {
         console.error(err);
@@ -1353,7 +1355,7 @@ app.get('/notification/:username', (req, res) => {
         notes.forEach(note => {
             console.log("for each note")
             console.log(note);
-            if (note.action != 'follow') {
+            if (note.action !== 'follow') {
                 const content_len = note.tid.tweet_content.length > 30 ? 30 : note.tid.tweet_content.length;
                 const notification = {
                     "icon": note.action,
@@ -1368,7 +1370,7 @@ app.get('/notification/:username', (req, res) => {
                 notification_list.push(notification);
             }
             else {
-                let notification = {
+                const notification = {
                     "icon": note.action,
                     "tid": null,
                     "action": note.action,
