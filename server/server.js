@@ -11,6 +11,8 @@ import Message from './models/Message.js';
 import upload from './upload.js';
 import conversationRoute from "./routes/conversations.js";
 import messageRoute from "./routes/messages.js";
+import { createServer } from 'http';
+import { Server as SocketIOServer} from 'socket.io';
 
 const app = express();
 
@@ -27,20 +29,69 @@ app.use("/server/messages", messageRoute);
 //Connect to MongoDB
 // const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const url = "mongodb+srv://qwerty:qwer4321@cluster0.5gm5w78.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-console.log("Connecting to MongoDB\n");
-mongoose.connect(url) 
-    .then(() => {
-        console.log("Connected to MongoDB\n");
-      })
-      .catch((error) => {
-        console.error("Error connecting to MongoDB\n\n", error);
-      });
+console.log("Connecting to MongoDB...");
+mongoose.connect(url)
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Connection error:'));
-db.once('open', function () {
-    console.log("Connection is open...");
+
+const server = new createServer(app);
+/* -------------------------------------------------------------- */
+/* ------------------------Connect to Socket.io------------------------*/
+/* ---------------------------------------------------------------*/
+
+const io = new SocketIOServer(server, {
+    cors: {
+        origin: "http://localhost:3000",
+      },    
+})
+
+let users = [];
+
+const addUser = (userId, socketId) => {
+  !users.some((user) => user.userId === userId) &&
+    users.push({ userId, socketId });
+};
+
+const removeUser = (socketId) => {
+  users = users.filter((user) => user.socketId !== socketId);
+};
+
+const getUser = (userId) => {
+  return users.find((user) => user.userId === userId);
+};
+
+io.on("connection", (socket) => {
+  //when ceonnect
+  console.log("a user connected.");
+
+  //take userId and socketId from user
+  socket.on("addUser", (userId) => {
+    addUser(userId, socket.id);
+    io.emit("getUsers", users);
+  });
+
+  //send and get message
+  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
+    const user = getUser(receiverId);
+    io.to(user.socketId).emit("getMessage", {
+      senderId,
+      text,
+    });
+  });
+
+  //when disconnect
+  socket.on("disconnect", () => {
+    console.log("a user disconnected!");
+    removeUser(socket.id);
+    io.emit("getUsers", users);
+  });
 });
+
 // 在这里添加后端各种function
 /**********/
 /* log in */
