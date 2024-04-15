@@ -580,6 +580,12 @@ app.post('/tweet/comment', (req, res) => {
         Tweet.findById(tid).populate('poster').exec().then((tweet) => {
             if (!tweet) { return res.send('Tweet does not exist').status(404); }
             // console.log(tweet);
+            if (tweet.poster.users_blocked.includes(user._id)) {
+                return res.status(403).send('You have been blocked by the poster');
+            }
+            if (user.users_blocked.includes(tweet.poster._id)) {
+                return res.status(403).send('You have blocked the poster');
+            }
             let time = new Date();
             let floor_num;
             if (tweet.comments == null) { tweet.comments = []; floor_num = 1; }
@@ -695,11 +701,17 @@ app.post('/tweet/reply', (req, res) => {
     let floor_reply = req.body.floor_reply;
     Tweet.findById(tid).populate('poster').populate({ path: 'comments', populate: { path: 'user' } }).exec().then((tweet) => {
         if (!tweet) { return res.send('Tweet does not exist').status(404); }
-        let floor_num = tweet.comments.length + 1;
-        let time = new Date();
         User.findOne({ 'username': username }).then((user) => {
             if (!user) { return res.send('User does not exist').status(404); }
-            let content = "Re Floor " + floor_reply + ": " + req.body.content;
+            if (tweet.poster.users_blocked.includes(user._id)) {
+                return res.status(403).send('You have been blocked by the poster');
+            }
+            if (user.users_blocked.includes(tweet.poster._id)) {
+                return res.status(403).send('You have blocked the poster');
+            }
+            const floor_num = tweet.comments.length + 1;
+            const time = new Date();
+            const content = "Re Floor " + floor_reply + ": " + req.body.content;
             let new_reply = {
                 user: user._id,
                 portrait: user.portrait,
@@ -760,6 +772,12 @@ app.post('/retweet', (req, res) => {
         if (!user) { return res.send('User does not exist').status(404); }
         console.log('user found')
         Tweet.findById(parent_tid).populate('poster').exec().then((tweet) => {
+            if (tweet.poster.users_blocked.includes(user._id)) {
+                return res.status(403).send('You have been blocked by the poster');
+            }
+            if (user.users_blocked.includes(tweet.poster._id)) {
+                return res.status(403).send('You have blocked the poster');
+            }
             // create a new tweet
             let time = new Date();
             let new_tweet = {

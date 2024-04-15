@@ -114,8 +114,14 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(newCom),
-    }).then(com => com.json()).then(com_res =>
-      console.log(com_res));
+    })
+      .then(response => {
+        if (response.status === 403) {
+          response.text().then(text => alert(text));
+        }
+        return response.json();
+      })
+      .then(com_res => console.log(com_res));
     document.getElementById('new-comment' + tweetInfo.tid).value = '';
     setCommentCount(commentCount + 1);
   }
@@ -319,7 +325,10 @@ function ForwardForm(props) {
         props.setRetweetCount(props.retweetCount + 1);
         setTags([]);
         alert("Repost success");
-      } else {
+      } else if (res.status === 403) {
+        res.text().then(text => alert(text));
+      }
+      else {
         alert("Repost failed");
       }
     });

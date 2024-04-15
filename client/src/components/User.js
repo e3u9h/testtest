@@ -25,6 +25,8 @@ function UserCard({ userInfo }) {
       setIsFollowing(!isFollowing);
       setFollowerCount(newFollowerCount);
       alert(`You have ${isFollowing ? 'unfollowed' : 'followed'} this user.`);
+    } else if (response.status === 403) {
+      response.text().then(text => alert(text));
     } else {
       alert("There seems to be some error. Please try again.");
     }

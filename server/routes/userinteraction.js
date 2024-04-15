@@ -10,6 +10,12 @@ router.put('/:username/:target/follow', (req, res) => {
     let target = req.params['target'];
     User.findOne({ 'username': username }).then((user) => {
         User.findOne({ 'username': target }).then((target) => {
+            if (target.users_blocked.includes(user._id)) {
+                return res.status(403).send('You have been blocked by this user.');
+            }
+            if (user.users_blocked.includes(target._id)) {
+                return res.status(403).send('You have blocked this user.');
+            }
             user.followings.push(target._id);
             target.followers.push(user._id);
             user.following_counter += 1;
@@ -26,10 +32,9 @@ router.put('/:username/:target/follow', (req, res) => {
                     console.log(c);
                 });
             });
+            return res.sendStatus(200);
 
         });
-    }).then(() => {
-        res.sendStatus(200);
     }).catch((err) => {
         res.send(err);
     })

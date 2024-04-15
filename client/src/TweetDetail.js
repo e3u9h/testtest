@@ -79,14 +79,18 @@ class TweetDetail extends React.Component{
             },
             body: JSON.stringify(newCom),
         });
-        let com_res = await com.json();
-        console.log(com_res);
-        let new_comments = this.state.commentInfo;
-        new_comments.push({floor: com_res.floor, username: com_res.username, content:com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time)});
-        this.setState({commentInfo: new_comments});
-        this.setState({tweetInfo: {...this.state.tweetInfo, commentCount: this.state.tweetInfo.commentCount+1}})
-        console.log(this.state.commentInfo);
-        document.getElementById(newcommentId).value='';
+        if (com.status === 403) {
+            com.text().then(text => alert(text));
+        } else {
+            let com_res = await com.json();
+            console.log(com_res);
+            let new_comments = this.state.commentInfo;
+            new_comments.push({ floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time) });
+            this.setState({ commentInfo: new_comments });
+            this.setState({ tweetInfo: { ...this.state.tweetInfo, commentCount: this.state.tweetInfo.commentCount + 1 } })
+            console.log(this.state.commentInfo);
+            document.getElementById(newcommentId).value = '';
+        }
     }
 
     async addComment(){
@@ -103,16 +107,20 @@ class TweetDetail extends React.Component{
             },
             body: JSON.stringify(newCom),
         });
-        let com_res = await com.json();
-        console.log(com_res);
-        let new_comments = this.state.commentInfo;
-        new_comments.push({floor: com_res.floor, username: com_res.username, content:com_res.content, portrait: com_res.portrait, time: "Just now"});
-        console.log(new_comments)
-        this.setState({commentInfo: new_comments});
-        let com_count = this.state.tweetInfo.commentCount+1
-        this.setState({tweetInfo: {...this.state.tweetInfo, commentCount: com_count}});
-        console.log(this.state.commentInfo);
-        document.getElementById('new-comment'+this.state.tweetInfo.tid).value='';
+        if (com.status === 403) {
+            com.text().then(text => alert(text));
+        } else {
+            let com_res = await com.json();
+            console.log(com_res);
+            let new_comments = this.state.commentInfo;
+            new_comments.push({ floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" });
+            console.log(new_comments)
+            this.setState({ commentInfo: new_comments });
+            let com_count = this.state.tweetInfo.commentCount + 1
+            this.setState({ tweetInfo: { ...this.state.tweetInfo, commentCount: com_count } });
+            console.log(this.state.commentInfo);
+            document.getElementById('new-comment' + this.state.tweetInfo.tid).value = '';
+        }
     }
 
 
