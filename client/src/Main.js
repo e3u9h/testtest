@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import UserListView from './User';
-import { TweetListView } from './Tweet';
+import UserListView from './components/User';
+import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { randomSelect } from './Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

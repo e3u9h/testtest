@@ -57,8 +57,8 @@ function Navbar() {
     useEffect(() => {
         const username = getLoginInfo()['username'];
         setMode(getLoginInfo()['mode']);
-        console.log(BACK_END + "portrait/" + username);
-        fetch(BACK_END + "portrait/" + username)
+        console.log(BACK_END + "profile/portrait/" + username);
+        fetch(BACK_END + "profile/portrait/" + username)
             .then(res => {
                 if (!res.ok) {
                     throw new Error('Network response was not ok');

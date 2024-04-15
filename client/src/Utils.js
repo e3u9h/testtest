@@ -9,7 +9,7 @@ function randomSelect(arr, n) {
         result[i] = arr[x in taken ? taken[x] : x];
         taken[x] = len - 1 in taken ? taken[len - 1] : len - 1;
         len--
-        console.log("hereselect" + result + " " + taken + " " + len)
+        // console.log("hereselect" + result + " " + taken + " " + len)
     }
     return result;
 }
@@ -21,7 +21,7 @@ function timeDifference(time) {
     ];
     const now = new Date();
     const postTime = new Date(time);
-    console.log(time + postTime);
+    // console.log(time + postTime);
     const year = postTime.getFullYear();
     const month = monthAbbreviations[postTime.getMonth()];
     const day = postTime.getDate();

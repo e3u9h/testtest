@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
-import UserListView from './User';
+import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import { getLoginInfo } from './Login';
@@ -15,7 +15,7 @@ function Followings() {
         let mode = getLoginInfo()['mode'];
         let followingsrec;
         if (mode === 'user') {
-            followingsrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/followings", {
+            followingsrec = await fetch(BACK_END + "followinfo/" + self + "/" + target + "/followings", {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ function Followings() {
                 }
             });
         } else {
-            followingsrec = await fetch(BACK_END + "profile/" + target + "/followings", {
+            followingsrec = await fetch(BACK_END + "followinfo/" + target + "/followings", {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

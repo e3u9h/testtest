@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import UserListView from './User';
+import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import { getLoginInfo } from './Login';

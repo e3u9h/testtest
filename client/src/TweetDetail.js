@@ -1,7 +1,7 @@
 import * as React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Comment from './Comment';
-import { TweetCard } from './Tweet';
+import { TweetCard } from './components/Tweet';
 import { BACK_END } from './App';
 import { getLoginInfo } from './Login';
 import { timeDifference } from './Utils';

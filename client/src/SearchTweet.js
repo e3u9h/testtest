@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { TweetListView } from './Tweet';
+import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import BackButton from './components/backbutton';

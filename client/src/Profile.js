@@ -4,7 +4,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { TweetListView } from './Tweet';
+import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getLoginInfo } from './Login';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
@@ -74,6 +74,8 @@ function Profile() {
             // Follow, block, and report logic
             setFollow(dataSelf.followings.includes(dataTarget.uid));
             setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
+            console.log("here1111");
+            console.log(dataSelf.users_blocked);
             setBeblocked(dataTarget.users_blocked.includes(dataSelf.uid));
             setReport(dataSelf.users_reported.includes(dataTarget.uid));
         }
@@ -86,7 +88,7 @@ function Profile() {
 
     const handleFollowClick = async () => {
         const endpoint = follow ? 'unfollow' : 'follow';
-        const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/${endpoint}`, {
+        const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/${endpoint}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -108,7 +110,7 @@ function Profile() {
 
     const handleBlockClick = async () => {
         const endpoint = block ? 'unblock' : 'block';
-        const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/${endpoint}`, {
+        const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/${endpoint}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -125,7 +127,7 @@ function Profile() {
 
     const handleReportClick = async () => {
         if (!report) {
-            const response = await fetch(`${BACK_END}profile/${self.username}/${target.username}/report`, {
+            const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/report`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

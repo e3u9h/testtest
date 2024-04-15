@@ -2,7 +2,6 @@ import * as React from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import {Link} from "react-router-dom";
 // import MaterialIcon, {colorPalette} from 'material-icons-react';
-import ChatBox from './Chat';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
 import { getLoginInfo } from './Login';
@@ -21,9 +20,8 @@ class Notification extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            viewMode:"notification",
             notifications: []
-        }; // two viewmode, notification or message
+        }; 
         
     }
 
@@ -49,27 +47,17 @@ class Notification extends React.Component{
     render(){
         return(
             <div className="row" style = {{borderRadius: "25px" }}>
-                <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto"}}>
-                    {this.state.viewMode == "notification" && 
+                <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto" }}>
                         <InfiniteScroll dataLength={this.state.notifications.length} next={null} hasMore={false} scrollableTarget="scrollableNotification"
                             endMessage={<p style={{ textAlign: 'center' }}><b>No more notifications</b></p>} >
                             <NotificationListView notifications={this.state.notifications}/>
-                        </InfiniteScroll>
-                    }
-                    {this.state.viewMode == "message" && <MessageView />}
+                    </InfiniteScroll>
                 </div>  
             </div>
         )
     }
 }
 
-class MessageView extends React.Component{
-    render(){
-        return(
-            <div><ChatBox/></div>
-        )
-    }
-}
 
 class NotificationListView extends React.Component{
     constructor(props){
