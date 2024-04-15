@@ -1445,4 +1445,6 @@ app.get('/notification/:username', (req, res) => {
 
 
 // ------启动server------
-const server = app.listen(8000);
+server.listen(8000, ()=>{
+    console.log("Server is running on Port 8000");
+});
