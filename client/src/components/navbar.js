@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { getLoginInfo } from '../Login';
 import cookie from 'react-cookies';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faHome, faSearch, faUser } from '@fortawesome/free-solid-svg-icons';
+import { faBell, faHome, faSearch, faUser, faComment } from '@fortawesome/free-solid-svg-icons';
 import { BACK_END } from '../App';
 import './navbar.css';
 
@@ -98,6 +98,11 @@ function Navbar() {
                 <li>
                     {mode === 'user' && <NavLink to="/notification" className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faBell} className='me-2' />Notification</span>
+                    </NavLink>}
+                </li>
+                <li>
+                    {mode === 'user' && <NavLink to="/messenger" className="nav-link text-muted" activeclassname="active">
+                        <span><FontAwesomeIcon icon={faComment} className='me-2' />Private Chat</span>
                     </NavLink>}
                 </li>
                 <li>

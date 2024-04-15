@@ -1313,6 +1313,8 @@ app.delete('/user/:username', async (req, res) => {
         const tweetResult = await Tweet.deleteMany({ poster: userResult._id });
         console.log(`Deleted tweets count: ${tweetResult.deletedCount}`);
         console.log(`Successfully deleted user ${username}'s tweets`);
+        // delete all the notifications of the user
+        const noteResult = await Notification.deleteMany({ actor_id: userResult._id });
         return res.status(204).send(`Successfully deleted user ${username}`);
     } catch (err) {
         console.error(err);
@@ -1338,6 +1340,56 @@ app.get('/listusers', (req, res) => {
     }).catch((err) => {
         res.send(err);
     });
+});
+
+// get notificaqtions
+app.get('/notification/:username', (req, res) => {
+    res.set('Content-Type', 'text/plain');
+    console.log('before')
+    console.log(req.params)
+    Notification.find({ 'username': req.params['username'] }).sort({ 'time': -1 }).populate('actor_id').populate('tid').exec().then((notes) => {
+        console.log('notifications found');
+        console.log(req.params['username'])
+        console.log(notes)
+        let notification_list = [];
+        notes.forEach(note => {
+            console.log("for each note")
+            console.log(note);
+            if (note.action !== 'follow') {
+                const content_len = note.tid.tweet_content.length > 30 ? 30 : note.tid.tweet_content.length;
+                const notification = {
+                    "icon": note.action,
+                    "tid": note.tid._id,
+                    "action": note.action,
+                    "name": note.actor_id.username,
+                    "portrait": note.actor_id.portrait,
+                    "time": note.time,
+                    "content": note.tid.tweet_content.slice(0, content_len),
+                }
+                console.log(notification);
+                notification_list.push(notification);
+            }
+            else {
+                const notification = {
+                    "icon": note.action,
+                    "tid": null,
+                    "action": note.action,
+                    "name": note.actor_id.username,
+                    "portrait": note.actor_id.portrait,
+                    "time": note.time,
+                    "content": null
+                }
+                notification_list.push(notification);
+            }
+            console.log(notification_list);
+        });
+        console.log(notification_list);
+        res.status(201).send(JSON.stringify(notification_list));
+    }).catch((err) => {
+        console.log("-----Get Notification Error--------");
+        console.log(err);
+        return res.status(500).send(err);
+    })
 });
 
 

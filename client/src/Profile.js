@@ -3,7 +3,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { TweetListView } from './Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { getLoginInfo } from './Login';
@@ -40,8 +40,24 @@ function Profile() {
     const [report, setReport] = useState(false);
     const [textAreaValue, setTextAreaValue] = useState("");
     const [editgender, setEditgender] = useState(target.gender);
+    const navigate = useNavigate();
 
     const fetchInfo = async () => {
+
+        // Fetch target information
+        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+        const dataTarget = await responseTarget.json();
+        console.log("TARGET:");
+        console.log(dataTarget);
+
+        setTarget(dataTarget);
+        setTextAreaValue(dataTarget.about);
         // Fetch self information
         if (mode === 'user') {
             const responseSelf = await fetch(BACK_END + "profile/" + self.username + "/actioninfo", {
@@ -54,34 +70,18 @@ function Profile() {
             const dataSelf = await responseSelf.json();
             setSelf(dataSelf);
             console.log(dataSelf);
+            console.log(dataSelf.users_blocked);
+            // Follow, block, and report logic
+            setFollow(dataSelf.followings.includes(dataTarget.uid));
+            setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
+            setBeblocked(dataTarget.users_blocked.includes(dataSelf.uid));
+            setReport(dataSelf.users_reported.includes(dataTarget.uid));
         }
-
-        // Fetch target information
-        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
-        const dataTarget = await responseTarget.json();
-
-
-        setTarget(dataTarget);
-        console.log("dataTarget");
-        console.log(dataTarget);
-        setTextAreaValue(dataTarget.about);
-        console.log(self.users_blocked);
-        // Follow, block, and report logic
-        setFollow(self.followings.includes(dataTarget.uid));
-        setBlock(self.users_blocked.includes(dataTarget.uid));
-        setBeblocked(dataTarget.users_blocked.includes(self.uid));
-        setReport(self.users_reported.includes(dataTarget.uid));
     };
 
     useEffect(() => {
         fetchInfo();
-    }, [props.username, self.username, self.users_blocked, self.users_reported]);
+    }, []);
 
 
     const handleFollowClick = async () => {
@@ -189,6 +189,29 @@ function Profile() {
     const handleGenderChange = (event) => {
         setEditgender(event.target.value);
     };
+    const handleChatClick = async () => {
+        try {
+            fetch(BACK_END + 'server/conversations/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    senderId: self.uid,
+                    receiverId: target.uid
+                })
+            }).then(res => {
+                if (res.status === 200) {
+                    navigate(`/messenger`);
+                }
+                else {
+                    alert("There seems to be some error. Please try again.");
+                }
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    }
 
 
     return (<>
@@ -264,6 +287,12 @@ function Profile() {
                                     <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
                                         {report ? 'Reported' : 'Report'}
                                     </button>)
+                            }
+                            {
+                                mode === 'user' && target['username'] !== self['username'] &&
+                                <button type="button" onClick={handleChatClick} className="btn btn-secondary" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                    Chat
+                                </button>
                             }
                         </div>
                     </div>
