@@ -6,7 +6,7 @@ import Form from 'react-bootstrap/Form';
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BACK_END } from './App';
@@ -14,12 +14,12 @@ import "./css/profile.css"
 import BackButton from './components/backbutton';
 
 function Profile() {
+    const { username, mode } = useAuth();
     const props = useParams();
     const [viewMode, setViewMode] = useState("MyPosts");
-    const [mode] = useState(getLoginInfo()['mode']);
     const [self, setSelf] = useState({
         uid: "Loading",
-        username: getLoginInfo()['username'],
+        username: username,
         followings: "Loading",
         users_blocked: "Loading",
         users_reported: "Loading"
@@ -439,12 +439,11 @@ function Profile() {
 
 
 function MyPostsList({ username }) {
+    const { username: self, mode } = useAuth();
     const [tweets, setTweets] = useState([]);
     const [target, setTarget] = useState(username);
 
     const fetchInfo = async () => {
-        const self = getLoginInfo()['username'];
-        const mode = getLoginInfo()['mode'];
         let tweetrec;
 
         if (mode === 'user') {
@@ -503,9 +502,9 @@ function MyPostsList({ username }) {
 
 function LikesList() {
     const [likes, setLikes] = useState([]);
+    const { username, mode } = useAuth();
 
     const fetchInfo = async () => {
-        let username = getLoginInfo()['username'];
         let tweetrec = await fetch(BACK_END + "profile/" + username + "/likes", {
             method: 'GET',
             headers: {

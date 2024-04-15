@@ -13,21 +13,14 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { BACK_END } from './App';
 import Header from './components/header';
 import Form from 'react-bootstrap/Form';
+import { useAuth } from './provider/context';
 
-export const getLoginInfo = () => {
-  return cookie.load('userInfo');
-};
-
-export const login = (username, mode) => {
-  console.log("Save Login Cookie");
-  cookie.save('userInfo', { username, mode }, { path: '/', maxAge: 3600 });
-};
 
 
 
 const Login = (props) => {
-  const [loggedin, setLoggedin] = useState(getLoginInfo() !== undefined);
-  const [mode, setMode] = useState('user');
+  const { login, username, mode } = useAuth();
+  const [loggedin, setLoggedin] = useState(username !== undefined);
   const [justifyActive, setJustifyActive] = useState('login');
   const [editgender, setEditgender] = useState('Not to Specify');
   const navigate = useNavigate();
@@ -64,7 +57,6 @@ const Login = (props) => {
         .then(res => {
           if (res.status === 201) {
             setLoggedin(true);
-            setMode('user');
             login(username, 'user');
           }
           return res.text();
@@ -85,10 +77,10 @@ const Login = (props) => {
 
   const handleUserSubmit = (event) => {
     event.preventDefault();
-    const username = document.getElementById("username").value;
+    const username1 = document.getElementById("username").value;
     const pwd = document.getElementById("pwd").value;
     const userInfo = {
-      username: username,
+      username: username1,
       pwd: pwd
     };
 
@@ -103,16 +95,15 @@ const Login = (props) => {
         console.log(res);
         if (res.status === 201) {
           setLoggedin(true);
-          setMode('user');
-          login(username, 'user');
-          navigate('/');
+          login(username1, 'user');
+          console.log("loginin" + username);
+          // navigate('/');
         }
         else if (res.status === 200) {
           console.log("Admin login");
           setLoggedin(true);
-          setMode('admin');
-          login(username, 'admin');
-          navigate('/admin');
+          login(username1, 'admin');
+          // navigate('/admin');
         }
         return res.text();
       })
@@ -124,9 +115,14 @@ const Login = (props) => {
       });
   };
   useEffect(() => {
-    setLoggedin(getLoginInfo() !== undefined);
+    setLoggedin(username !== undefined);
   }
     , []);
+  useEffect(() => {
+    if (loggedin) {
+      navigate(mode === 'user' ? '/' : '/admin');
+    }
+  }, [loggedin, mode]);
   return (loggedin === false ?
     (<>
       <Header />

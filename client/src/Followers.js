@@ -3,17 +3,16 @@ import Container from 'react-bootstrap/Container';
 import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 
 function Followers() {
     const [followers, setFollowers] = useState([]);
+    const { username: self, mode } = useAuth();
 
     async function fetchInfo() {
         // fetch followers information
-        let self = getLoginInfo()['username'];
         let target = window.location.pathname.split('/')[1];
-        let mode = getLoginInfo()['mode'];
         let followersrec;
         if (mode === 'user') {
             followersrec = await fetch(BACK_END + "followinfo/" + self + "/" + target + "/followers", {

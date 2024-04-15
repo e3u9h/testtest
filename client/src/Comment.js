@@ -3,8 +3,7 @@ import {Link} from "react-router-dom";
 import {faStairs} from '@fortawesome/free-solid-svg-icons';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {BACK_END} from './App';
-import {getLoginInfo} from './Login';
+import { BACK_END } from './App';
 import {timeDifference} from './Utils';
 
 class Comment extends React.Component{

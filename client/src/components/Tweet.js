@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState, useRef } from 'react';
 import { timeDifference } from '../Utils';
 import { Link } from "react-router-dom";
-import { getLoginInfo } from '../Login';
+import { useAuth } from '../provider/context';
 import { BACK_END } from '../App';
 import { randomSelect } from '../Utils';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -14,7 +14,8 @@ import { Image, Form, Input } from 'antd';
 
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
-  // console.log("here1" + JSON.stringify(tweetInfo))
+  const { username: selfname, mode } = useAuth();
+  console.log("here1" + JSON.stringify(tweetInfo))
   const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
   const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
   const [timeInterval, setTimeInterval] = useState(timeDifference(tweetInfo['time']));
@@ -26,7 +27,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const tags = tweetInfo['tags'];
   const username = tweetInfo['user']['username'];
   const files = tweetInfo['files']
-  console.log("here2" + tweetContent + files)
+  console.log("here2" + tweetContent + files + tweetInfo['files'])
 
 
   // update time interval every second
@@ -63,7 +64,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
-    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + getLoginInfo()['username'] + "/" + operation, {
+    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + selfname + "/" + operation, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -84,7 +85,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   }
 
   const handleTweetReport = () => {
-    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + getLoginInfo()['username'] + "/report", {
+    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + selfname + "/report", {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -104,7 +105,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const addCommentMain = () => {
     let newCom = {
       content: document.getElementById('new-comment' + tweetInfo.tid).value,
-      username: getLoginInfo().username,
+      username: selfname,
       tid: tweetInfo.tid,
     };
     console.log(newCom);
@@ -189,7 +190,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
                   <button type="button" className="btn btn-secondary btn-floating">View Full Post</button>
                 </Link>
               </span>}
-              {getLoginInfo() && getLoginInfo()['mode'] == 'user' &&
+              {selfname && mode == 'user' &&
                 <>
                   <span className="m-1">
                     <button type="button" className={"btn btn-" + (likeInfo.bLikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickLikeTweet}>
@@ -272,6 +273,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 }
 
 function ForwardForm(props) {
+  const { username: selfname } = useAuth();
   const initialContent = 'Repost';
   const [availableTags, setAvailableTags] = useState([]);
   const [tags, setTags] = useState([]);
@@ -304,7 +306,7 @@ function ForwardForm(props) {
       setRepostContent(initialContent)
     }
     let postBody = {
-      username: getLoginInfo()['username'],
+      username: selfname,
       tweet_content: repostContent,
       tags: tags,
       tid: props.tid,

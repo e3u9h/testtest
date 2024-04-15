@@ -1,73 +1,60 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Comment from './Comment';
 import { TweetCard } from './components/Tweet';
 import { BACK_END } from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import { timeDifference } from './Utils';
 
+const TweetDetail = () => {
+    const [tweetInfo, setTweetInfo] = useState({
+        "tid": 0,
+        "likeInfo": { likeCount: 0, bLikeByUser: false },
+        "dislikeInfo": { dislikeCount: 0, bDislikeByUser: false },
+        "user": { uid: 0 },
+        "content": 'Loading',
+        "files": [],
+        "commentCount": 0,
+        "retweetCount": 0,
+        "time": "Loading",
+        "portraitUrl": "Loading",
+        "tags": []
+    });
+    const [commentInfo, setCommentInfo] = useState([]);
+    const { username } = useAuth();
 
-
-class TweetDetail extends React.Component{
-    constructor(props){
-        super(props);
-        this.state={
-            retweetCount:0,
-            tweetInfo: {
-                "tid": 0,
-                "likeInfo": {likeCount:0, bLikeByUser: false},
-                "dislikeInfo": {dislikeCount:0, bDislikeByUser: false},
-                "user": { uid: 0},
-                "content": 'Loading',
-                "files":[],
-                "commentCount": 0,
-                "retweetCount": 0,
-                "time": "Loading",
-                "portraitUrl": "Loading",
-                "tags": []
-            },
-            commentInfo: []
-        }
-        this.addReply = this.addReply.bind(this);
-        this.addComment = this.addComment.bind(this);
-    }
-
-    async fetchTweetDetail(){
+    const fetchTweetDetail = async () => {
         // fetch tweet info
-        let tweetInfo = await fetch(BACK_END+'fetchtweet/'+window.location.pathname.split('/')[2]+'/'+getLoginInfo().username, {
+        const tweetInfoRes = await fetch(BACK_END + 'fetchtweet/' + window.location.pathname.split('/')[2] + '/' + username, {
             method: 'GET',
             headers:{
                 'Content-Type': 'application/json', 
             }
-        });
-        let tweetInfoRes = await tweetInfo.json();
+        }).then(res => res.json());
 
-        this.setState({tweetInfo: tweetInfoRes},()=>console.log(this.state.tweetInfo));
-
+        setTweetInfo(tweetInfoRes);
 
         // fetch comment info
-        let commentInfo = await fetch(BACK_END+'tweet/'+window.location.pathname.split('/')[2]+'/comment', {
+        const commentInfoRes = await fetch(BACK_END + 'tweet/' + window.location.pathname.split('/')[2] + '/comment', {
             method: 'GET',
             headers:{
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
-        });
-        let commentInfoRes = await commentInfo.json();
-        
-        // just not right
-        this.setState({commentInfo: commentInfoRes},()=>console.log(this.state.commentInfo));
+        }).then(res => res.json());
+
+        setCommentInfo(commentInfoRes);
     }
 
-    componentWillMount(){
-        this.fetchTweetDetail()
-    }
+    useEffect(() => {
+        fetchTweetDetail();
+    }, []);
 
-    async addReply(clicked_floor){
-        let newcommentId = "new-comment"+clicked_floor;
+    const addReply = async (clicked_floor) => {
+        let newcommentId = "new-comment" + clicked_floor;
         let newCom = {
             content: document.getElementById(newcommentId).value,
-            username: getLoginInfo().username,
+            username: username,
             tid: window.location.pathname.split('/')[2],
             floor_reply: clicked_floor
         };
@@ -84,19 +71,18 @@ class TweetDetail extends React.Component{
         } else {
             let com_res = await com.json();
             console.log(com_res);
-            let new_comments = this.state.commentInfo;
-            new_comments.push({ floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time) });
-            this.setState({ commentInfo: new_comments });
-            this.setState({ tweetInfo: { ...this.state.tweetInfo, commentCount: this.state.tweetInfo.commentCount + 1 } })
-            console.log(this.state.commentInfo);
+            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time) }];
+            setCommentInfo(new_comments);
+            setTweetInfo({ ...tweetInfo, commentCount: tweetInfo.commentCount + 1 });
+            console.log(commentInfo);
             document.getElementById(newcommentId).value = '';
         }
     }
 
-    async addComment(){
+    const addComment = async () => {
         let newCom = {
-            content: document.getElementById('new-comment'+this.state.tweetInfo.tid).value,
-            username: getLoginInfo().username,
+            content: document.getElementById('new-comment' + tweetInfo.tid).value,
+            username: username,
             tid: window.location.pathname.split('/')[2],
         };
         console.log(newCom);
@@ -112,37 +98,31 @@ class TweetDetail extends React.Component{
         } else {
             let com_res = await com.json();
             console.log(com_res);
-            let new_comments = this.state.commentInfo;
-            new_comments.push({ floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" });
-            console.log(new_comments)
-            this.setState({ commentInfo: new_comments });
-            let com_count = this.state.tweetInfo.commentCount + 1
-            this.setState({ tweetInfo: { ...this.state.tweetInfo, commentCount: com_count } });
-            console.log(this.state.commentInfo);
-            document.getElementById('new-comment' + this.state.tweetInfo.tid).value = '';
+        let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" }];
+        console.log(new_comments)
+            setCommentInfo(new_comments);
+            let com_count = tweetInfo.commentCount + 1
+            setTweetInfo({ ...tweetInfo, commentCount: com_count });
+            console.log(commentInfo);
+            document.getElementById('new-comment' + tweetInfo.tid).value = '';
         }
     }
 
-
-    render(){
-        return(
-            <div> 
-                <div id="scrollableComment" style={{ height: "80vh", overflow: "auto" }}>
-                    <InfiniteScroll dataLength={this.state.commentInfo.length} next={null} hasMore={false} scrollableTarget="scrollableComment"
-                            endMessage={<p style={{ textAlign: 'center' }}><b>No more comments</b></p>}>
-                        <TweetCard tweetInfo={this.state.tweetInfo} addComment={this.addComment.bind(this)}/> 
-                        <div className="list-group w-auto" style={{borderRadius: "25px"}}>
-                            {this.state.commentInfo.map((comment,index)=>
-                                <Comment addReply = {this.addReply.bind(this)} key={index} name={comment.username} content={comment.content} portrait={comment.portrait} time={comment.time} floor={comment.floor} tid={this.props.tid}/>
-                            )}
-                        </div>
-                    </InfiniteScroll>
-                </div>            
+    return (
+        <div>
+            <div id="scrollableComment" style={{ height: "80vh", overflow: "auto" }}>
+                <InfiniteScroll dataLength={commentInfo.length} next={null} hasMore={false} scrollableTarget="scrollableComment"
+                    endMessage={<p style={{ textAlign: 'center' }}><b>No more comments</b></p>}>
+                    <TweetCard tweetInfo={tweetInfo} addComment={addComment} />
+                    <div className="list-group w-auto" style={{ borderRadius: "25px" }}>
+                        {commentInfo.map((comment, index) =>
+                            <Comment addReply={addReply} key={index} name={comment.username} content={comment.content} portrait={comment.portrait} time={comment.time} floor={comment.floor} tid={tweetInfo.tid} />
+                        )}
+                    </div>
+                </InfiniteScroll>
             </div>
-        )
-    }
+        </div>
+    )
 }
-
-
 
 export default TweetDetail;

@@ -908,6 +908,7 @@ app.get('/searchtag/:tag', (req, res) => {
                     "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
                     "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
                     "content": tweet.tweet_content,
+                    "files": tweet.files,
                     "commentCount": tweet['comments'].length,
                     "retweetCount": tweet['retweets'].length,
                     "time": tweet['post_time'],

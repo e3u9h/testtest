@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createBrowserRouter, RouterProvider, BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import Login from './Login';
 import Main from './Main';
 import TweetDetail from './TweetDetail';
@@ -32,12 +32,13 @@ export const BACK_END = 'http://localhost:8000/'
 function App() {
 
   function AuthRoute({ children, requiredMode }) {
-    const userInfo = getLoginInfo();
-    if (userInfo === undefined || (requiredMode !== undefined && userInfo['mode'] !== requiredMode)) {
+    const { username, mode } = useAuth();
+    if (username === undefined || (requiredMode !== undefined && mode !== requiredMode)) {
+      console.log("111AuthRoute: ", username, children);
       cookie.remove('userInfo');
       return <Navigate to="/login" replace />;
     } else {
-      console.log("AuthRoute: ", userInfo, children);
+      console.log("222AuthRoute: ", username, children);
       return children;
     }
   }

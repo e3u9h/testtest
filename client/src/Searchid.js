@@ -1,25 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 
-class SearchUserid extends React.Component{
-        
-    constructor(props){
-        super(props);
-        this.state = {
-            username: window.location.pathname.split('/')[2],
-            selfname : getLoginInfo()['username'],
-            userList:[]
-        };
+const SearchUserid = () => {
+  const { username: selfname } = useAuth();
+  const username = window.location.pathname.split('/')[2];
+  const [userList, setUserList] = useState([]);
 
-
-    }
-    
-    async getAllUser() {
-        let res = await fetch(BACK_END + "searchuserbyid/" + this.state.selfname + "/" + this.state.username, {
+  const getAllUser = async () => {
+    let res = await fetch(BACK_END + "searchuserbyid/" + selfname + "/" + username, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -27,42 +19,36 @@ class SearchUserid extends React.Component{
             }
         });
         let l = await res.json();
-        this.state.userList = await l;
-        this.setState((prevState) => ({ userList: l }));
-        console.log(this.state.userList);
+      setUserList(l);
+      console.log(l);
     }
-    
-    componentWillMount(){
-        this.getAllUser();
-    }
-  
-    
-    render() {
-        const { userList } = this.state;
-      
-      return (<>
-        <div className='row'>
-          <BackButton />
+
+  useEffect(() => {
+    getAllUser();
+  }, []);
+
+  return (
+    <>
+      <div className='row'>
+        <BackButton />
+      </div>
+      <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
+        <InfiniteScroll
+          dataLength={userList.length}
+            next={null}
+            hasMore={false}
+            scrollableTarget="scrollabletweets"
+            endMessage={
+              <p style={{ textAlign: 'center' }}>
+                <b>No more Users</b>
+              </p>
+            }
+          >
+            <UserListView userInfos={userList} />
+          </InfiniteScroll>
         </div>
-          <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
-            <InfiniteScroll
-              dataLength={userList.length}
-              next={null} // Since you have hasMore set to false, next is not needed. You can remove it if you are not planning to implement it in the future.
-              hasMore={false} // If you're never loading more, this might not be needed.
-              scrollableTarget="scrollabletweets"
-              endMessage={
-                <p style={{ textAlign: 'center' }}>
-                  <b>No more Users</b>
-                </p>
-              }
-            >
-              <UserListView userInfos={userList} />
-            </InfiniteScroll>
-          </div>
         </>
-        );
-      }   
-    
+    );
 }
 
 export default SearchUserid;

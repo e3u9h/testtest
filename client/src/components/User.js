@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import { getLoginInfo } from '../Login';
+import { useAuth } from '../provider/context';
 import { BACK_END } from '../App';
 
 function UserCard({ userInfo }) {
+  const { username: selfname, mode } = useAuth();
   const [isFollowing, setIsFollowing] = useState(userInfo["isFollowing"]);
   const [followingCount, setFollowingCount] = useState(userInfo["following"]);
   const [followerCount, setFollowerCount] = useState(userInfo["follower"]);
@@ -13,7 +14,7 @@ function UserCard({ userInfo }) {
 
   const handleFollowClick = async () => {
     const endpoint = isFollowing ? 'unfollow' : 'follow';
-    const response = await fetch(`${BACK_END}interaction/${getLoginInfo()['username']}/${username}/${endpoint}`, {
+    const response = await fetch(`${BACK_END}interaction/${selfname}/${username}/${endpoint}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -57,7 +58,7 @@ function UserCard({ userInfo }) {
                   <p className="mb-0 d-flex flex-nowrap">{followerCount}</p>
                 </div>
               </div>
-              {getLoginInfo()['mode'] === 'user' && <div className="d-flex m-2 justify-content-center">
+              {mode === 'user' && <div className="d-flex m-2 justify-content-center">
                 <button type="button" className={"btn btn-" + (isFollowing ? "outline-" : "") + "secondary flex-grow-1"} onClick={handleFollowClick}>{isFollowing ? "Unfollow" : "Follow"}</button>
               </div>}
             </div>

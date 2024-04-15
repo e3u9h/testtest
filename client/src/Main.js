@@ -5,7 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { randomSelect } from './Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import { BACK_END } from './App';
 import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
@@ -16,6 +16,7 @@ import { Row, Col } from 'antd';
 import './css/custom-input.css';
 
 function NewPost() {
+  const { username } = useAuth();
   const [availableTags, setAvailableTags] = useState([]);
   const [tags, setTags] = useState([]);
   const [privacy, setPrivacy] = useState('false');
@@ -87,7 +88,7 @@ function NewPost() {
 
     // format like label:data
     let formData = new FormData();
-    formData.append('username', getLoginInfo()['username'])
+    formData.append('username', username)
     formData.append('tweet_content', postContent);
     tags.forEach(tag => {
       formData.append('tags', tag);
@@ -256,6 +257,7 @@ function NewPost() {
 
 
 function Main() {
+  const { username } = useAuth();
   const [viewMode, setViewMode] = useState("following");
   const [recommendUsers, setRecommendUsers] = useState([]);
   const [recommendTweets, setRecommendTweets] = useState([]);
@@ -263,7 +265,7 @@ function Main() {
   const [dataLength, setDataLength] = useState(0);
   const fetchFollowingsTweet = () => {
     console.log("hereFollowings tweets");
-    fetch(BACK_END + "followings/" + getLoginInfo()['username'], { "method": "GET" },
+    fetch(BACK_END + "followings/" + username, { "method": "GET" },
     ).then((res) => {
       if (res.status === 200) {
         return res.json();
@@ -277,7 +279,7 @@ function Main() {
   }
 
   const fetchRecommendUsers = () => {
-    fetch(BACK_END + "users/" + getLoginInfo()['username'], { "method": "GET" })
+    fetch(BACK_END + "users/" + username, { "method": "GET" })
       .then((res) => res.json()).then((data) => {
         console.log("Recommend users");
         console.log(data);
@@ -289,7 +291,7 @@ function Main() {
 
   const fetchRecommendTweets = () => {
     console.log("hereRecommend tweets");
-    fetch(BACK_END + "tweets/" + getLoginInfo()['username'], { "method": "GET" })
+    fetch(BACK_END + "tweets/" + username, { "method": "GET" })
       .then((res) => res.json()).then((data) => {
         console.log("Recommend tweets");
         console.log(data);

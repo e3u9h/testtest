@@ -3,7 +3,7 @@ import Conversation from "./components/conversations/Conversations";
 import Message from "./components/message/Message";
 import "./css/messenger.css"
 import { useEffect, useRef, useState } from "react";
-import { getLoginInfo } from './Login';
+import { useAuth } from "./provider/context.js";
 import axios from "axios";
 import { BACK_END } from "./App";
 import { io } from "socket.io-client";
@@ -23,7 +23,7 @@ export default function Messenger(state){
     const socket = useRef();
     const scrollRef = useRef();
 
-    const current_username = getLoginInfo()['username'];
+  const { username: current_username } = useAuth();
 
     //   fetch user info use this line
     //   const response = (await fetch(BACK_END + "profile/" + username));

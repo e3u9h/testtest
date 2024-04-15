@@ -1,10 +1,10 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import {Link} from "react-router-dom";
 // import MaterialIcon, {colorPalette} from 'material-icons-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import { timeDifference } from './Utils';
 
 const actionMap = {
@@ -16,18 +16,13 @@ const actionMap = {
     
 
 
-class Notification extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            notifications: []
-        }; 
-        
-    }
+const Notification = () => {
+    const [notifications, setNotifications] = useState([]);
+    const { username } = useAuth();
 
-    async fetchNotification(){
+    const fetchNotification = async () => {
         // fetch notification
-        let notification = await fetch(BACK_END+'notification/'+getLoginInfo().username, {
+        let notification = await fetch(BACK_END + 'notification/' + username, {
             method: 'GET',
             headers:{
                 'Content-Type': 'application/json',
@@ -35,27 +30,23 @@ class Notification extends React.Component{
         });
         let notificationRes = await notification.json();
         console.log(notificationRes);
-        this.setState({notifications: notificationRes},()=>console.log(this.state.notifications));
+        setNotifications(notificationRes);
     }
 
-    componentWillMount(){
-        this.fetchNotification();
-    }
+    useEffect(() => {
+        fetchNotification();
+    }, []);
 
-
-
-    render(){
-        return(
-            <div className="row" style = {{borderRadius: "25px" }}>
-                <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto" }}>
-                        <InfiniteScroll dataLength={this.state.notifications.length} next={null} hasMore={false} scrollableTarget="scrollableNotification"
-                            endMessage={<p style={{ textAlign: 'center' }}><b>No more notifications</b></p>} >
-                            <NotificationListView notifications={this.state.notifications}/>
-                    </InfiniteScroll>
-                </div>  
+    return (
+        <div className="row" style={{ borderRadius: "25px" }}>
+            <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto" }}>
+                <InfiniteScroll dataLength={notifications.length} next={null} hasMore={false} scrollableTarget="scrollableNotification"
+                    endMessage={<p style={{ textAlign: 'center' }}><b>No more notifications</b></p>} >
+                    <NotificationListView notifications={notifications} />
+                </InfiniteScroll>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 
