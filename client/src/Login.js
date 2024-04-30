@@ -14,6 +14,7 @@ import { BACK_END } from './App';
 import Header from './components/header';
 import Form from 'react-bootstrap/Form';
 import { useAuth } from './provider/context';
+import request from './utils/request';
 
 
 
@@ -22,46 +23,51 @@ const Login = (props) => {
   const { login, username, mode } = useAuth();
   const [loggedin, setLoggedin] = useState(username !== undefined);
   const [justifyActive, setJustifyActive] = useState('login');
+  const [editUsername, setEditUsername] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editPassword2, setEditPassword2] = useState('');
   const [editgender, setEditgender] = useState('Not to Specify');
   const navigate = useNavigate();
-  const handleGenderChange = (event) => {
-    setEditgender(event.target.value);
-  };
+
   const handleRegister = (event) => {
     event.preventDefault();
-    const username = document.getElementById("newusername").value;
-    const newpwd = document.getElementById("newpwd").value;
-    const newpwd2 = document.getElementById("newpwd2").value;
-    console.log(username, newpwd)
+    console.log(editUsername, editPassword, editPassword2, editgender)
     const userInfo = {
-      newusername: username,
-      newpwd: newpwd,
+      newusername: editUsername,
+      newpwd: editPassword,
       gender: editgender
     };
-    if (username === '') {
+    if (editUsername === '') {
       window.alert("Please enter a username.");
-    } else if (!newpwd || !newpwd2) {
+    } else if (!editPassword || !editPassword2) {
       window.alert("Please enter a password");
-    } else if (newpwd.length <= 4 || newpwd.length >= 20) {
+    } else if (editPassword.length <= 4 || editPassword.length >= 20) {
       window.alert("The length of the password should be larger than 4 and smaller than 20.");
-    } else if (newpwd !== newpwd2) {
+    } else if (editPassword !== editPassword2) {
       window.alert("Password mismatch!");
     } else {
-      fetch(BACK_END + "createuser", {
-        method: "POST",
-        body: JSON.stringify(userInfo),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      })
+      request.post("register/user", userInfo)
         .then(res => {
           if (res.status === 201) {
-            setLoggedin(true);
-            login(username, 'user');
+            request.post("login/user", {
+              username: editUsername,
+              pwd: editPassword
+            })
+              .then(res1 => {
+                console.log(res1);
+                if (res1.status === 201) {
+                  setLoggedin(true);
+                  login(editUsername, 'user', res1.token);
+                  console.log("loginin " + editUsername);
+                }
+              })
+              .catch(err => {
+                console.error("Login failed:", err);
+                alert(err.response.data.message);
+              });
           }
-          return res.text();
+          alert(res.message);
         })
-        .then(data => { alert(data); })
         .catch(err => {
           console.log(err);
         });
@@ -75,43 +81,33 @@ const Login = (props) => {
     setJustifyActive(value);
   };
 
-  const handleUserSubmit = (event) => {
+  const handleUserSubmit = async (event) => {
     event.preventDefault();
-    const username1 = document.getElementById("username").value;
-    const pwd = document.getElementById("pwd").value;
+    console.log(editUsername, editPassword);
     const userInfo = {
-      username: username1,
-      pwd: pwd
+      username: editUsername,
+      pwd: editPassword
     };
-
-    fetch(BACK_END + "login/user", {
-      method: "POST",
-      body: JSON.stringify(userInfo),
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    })
+    request.post("login/user", userInfo)
       .then(res => {
+        console.log('here login');
         console.log(res);
         if (res.status === 201) {
           setLoggedin(true);
-          login(username1, 'user');
-          console.log("loginin" + username);
+          login(editUsername, 'user', res.data.token);
+          console.log("loginin " + editUsername);
           // navigate('/');
-        }
-        else if (res.status === 200) {
+        } else if (res.status === 200) {
           console.log("Admin login");
           setLoggedin(true);
-          login(username1, 'admin');
+          login(editUsername, 'admin', res.data.token);
           // navigate('/admin');
-        }
-        return res.text();
-      })
-      .then(data => {
-        alert(data)
+        } 
+        alert(res.data.message);
       })
       .catch(err => {
-        console.log(err);
+        console.error("Login failed:", err);
+        alert(err.response.data.message);
       });
   };
   useEffect(() => {
@@ -157,11 +153,11 @@ const Login = (props) => {
 
             <div className="form-group mb-4">
               <label htmlFor="newusername">Username</label>
-              <input type="text" className="form-control" id="username" />
+              <input type="text" className="form-control" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
             </div>
             <div className="form-group mb-4">
               <label htmlFor="newpwd">Password</label>
-              <input type="password" className="form-control" id="pwd" />
+              <input type="password" className="form-control" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
             </div>
             <button
               className="mb-4 w-100"
@@ -182,22 +178,22 @@ const Login = (props) => {
 
             <div className="form-group mb-4">
               <label htmlFor="newusername">Username</label>
-              <input type="text" className="form-control" id="newusername" />
+              <input type="text" className="form-control" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
             </div>
             <div className="form-group mb-4">
               <label htmlFor="newpwd">Password</label>
-              <input type="password" className="form-control" id="newpwd" />
+              <input type="password" className="form-control" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
             </div>
             <div className="form-group mb-4">
               <label htmlFor="newpwd2">Recheck Password</label>
-              <input type="password" className="form-control" id="newpwd2" />
+              <input type="password" className="form-control" value={editPassword2} onChange={(e) => setEditPassword2(e.target.value)} />
             </div>
             <div className="form-group mb-4">
               <label htmlFor="gender" > Gender: </label>
               <Form.Select
                 aria-label="Default select example"
                 value={editgender}
-                onChange={handleGenderChange}
+                onChange={(e) => setEditgender(e.target.value)}
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>

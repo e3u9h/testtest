@@ -1,27 +1,31 @@
 import React, { createContext, useContext, useState } from 'react';
-import cookie from 'react-cookies';
+import { setAuthToken } from '../utils/request';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    const [username, setUsername] = useState(cookie.load('userInfo')?.username);
-    const [mode, setMode] = useState(cookie.load('userInfo')?.mode);
-    const login = (username, mode) => {
-        console.log("Save Login Cookie");
-        cookie.save('userInfo', { username, mode }, { path: '/', maxAge: 3600 });
+    const [username, setUsername] = useState(JSON.parse(localStorage.getItem('userInfo'))?.username);
+    const [mode, setMode] = useState(JSON.parse(localStorage.getItem('userInfo'))?.mode);
+    const [token, setToken] = useState(JSON.parse(localStorage.getItem('userInfo'))?.token);
+    const login = (username, mode, token) => {
+        localStorage.setItem('userInfo', JSON.stringify({ username, mode, token }));
         setUsername(username);
         setMode(mode);
-        console.log("loginhere" + username, mode)
+        setToken(token);
+        // setAuthToken(token);
+        console.log("loginhere" + username, mode, token);
+        console.log(localStorage.getItem('userInfo'));  
     };
     const logout = () => {
-        console.log("Remove Login Cookie");
-        cookie.remove('userInfo');
+        localStorage.removeItem('userInfo');
         setUsername(undefined);
         setMode(undefined);
+        setToken(undefined);
+        // setAuthToken(undefined);
     };
-    console.log({ username, mode });
+    console.log({ username, mode, token });
     return (
-        <AuthContext.Provider value={{ username, mode, login, logout }}>
+        <AuthContext.Provider value={{ username, mode, token, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

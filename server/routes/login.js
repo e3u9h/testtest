@@ -1,6 +1,8 @@
 import express from 'express';
+import jsonwebtoken from 'jsonwebtoken'
 const router = express.Router();
 import Account from "../models/Account.js";
+import { jwtKey } from '../config.js';
 
 
 router.post('/user', (req, res) => {
@@ -12,22 +14,25 @@ router.post('/user', (req, res) => {
             res.status(404).send("Username does not exist.");
         }
         else {
-            if (val.identity === 'user') {
-                if (val && _pwd === val.pwd) {
-                    res.status(201).send('Login As User Successfully!\n');
+            if (val && _pwd === val.pwd) {
+                const token = jsonwebtoken.sign({ username: _username, mode: val.identity }, jwtKey, { expiresIn: '1h', algorithm: 'HS256' });
+                if (val.identity === 'user') {
+                    res.status(201).send({
+                        message: 'Login As User Successfully!\n',
+                        token: 'Bearer ' + token,
+                    })
                 }
-                else {
-                    console.log("incorrect");
-                    res.status(401).send("Incorrect Username or Password.\n");
+                if (val.identity === 'admin') {
+                    res.status(200).send({
+                        message: 'Login As Admin Successfully!\n',
+                        token: 'Bearer ' + token,
+                    })
                 }
-            }
-            if (val.identity === 'admin') {
-                if (val && _pwd === val.pwd) {
-                    res.status(200).send('Login As Admin Successfully!\n');
-                }
-                else {
-                    res.status(401).send("Incorrect Username or Password.\n");
-                }
+            } else {
+                console.log("incorrect");
+                res.status(401).send({
+                    message: 'Incorrect Password!\n'
+                })
             }
         }
     }).catch((err) => {

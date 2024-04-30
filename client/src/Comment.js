@@ -4,7 +4,7 @@ import {faStairs} from '@fortawesome/free-solid-svg-icons';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BACK_END } from './App';
-import {timeDifference} from './Utils';
+import { timeDifference } from './utils/Utils';
 
 class Comment extends React.Component{
     constructor(props){

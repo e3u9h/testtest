@@ -7,7 +7,8 @@ import { useAuth } from "./provider/context.js";
 import axios from "axios";
 import { BACK_END } from "./App";
 import { io } from "socket.io-client";
-import { timeDifference } from "./Utils.js"
+import { timeDifference } from "./utils/Utils.js"
+import request from "./utils/request.js";
 
 // 
 export default function Messenger(state){
@@ -31,8 +32,8 @@ export default function Messenger(state){
 
     
     useEffect(() => {
-        // socket.current = io("ws://localhost:8900");
-        socket.current = io("ws://10.13.189.122:8900");
+      socket.current = io("ws://localhost:8000");
+      // socket.current = io("ws://10.13.189.122:8000");
         socket.current.on("getMessage", (data) => {
           setArrivalMessage({
             sender: data.senderId,
@@ -51,8 +52,8 @@ export default function Messenger(state){
     useEffect(() => {
         const getConversations = async () => {
           try {
-            const response = await (fetch(BACK_END + "profile/" + current_username));
-            const user = await response.json();
+            const response = await (request.get("profile/" + current_username));
+            const user = response.data;
             const res = await axios.get(BACK_END+"server/conversations/" + user.uid);
             setCurrentUser(user);
             setConversations(res.data);
@@ -119,8 +120,8 @@ export default function Messenger(state){
 
     if (value.trim()) {
       try {
-        const response = await fetch(BACK_END+"searchuser/"+currentUser.username+"/"+value.trim());
-        const matchedUsers = await response.json();
+        const response = await request.get("searchuser/" + currentUser.username + "/" + value.trim());
+        const matchedUsers = response.data;
         const matchedUserIds = matchedUsers.map(user => user.uid);
 
         const newFilteredConversations = conversations.filter(conversation =>

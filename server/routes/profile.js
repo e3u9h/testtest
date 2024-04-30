@@ -28,7 +28,7 @@ router.get('/:username', (req, res) => {
     const username = req.params['username'];
     User.findOne({ 'username': username }).populate('tweets').exec().then((user) => {
         let userObj = null;
-        if (user != null && user != '') {
+        if (user !== null) {
             userObj = {
                 'uid': user['_id'],
                 'username': user['username'],

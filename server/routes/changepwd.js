@@ -2,7 +2,7 @@ import express from 'express';
 const router = express.Router();
 import Account from "../models/Account.js";
 
-router.put('/changepwd', (req, res) => {
+router.put('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.body.username;
     const newpwd = req.body.newpwd;

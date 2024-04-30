@@ -4,7 +4,8 @@ import Comment from './Comment';
 import { TweetCard } from './components/Tweet';
 import { BACK_END } from './App';
 import { useAuth } from './provider/context';
-import { timeDifference } from './Utils';
+import { timeDifference } from './utils/Utils';
+import request from './utils/request';
 
 const TweetDetail = () => {
     const [tweetInfo, setTweetInfo] = useState({
@@ -25,23 +26,14 @@ const TweetDetail = () => {
 
     const fetchTweetDetail = async () => {
         // fetch tweet info
-        const tweetInfoRes = await fetch(BACK_END + 'fetchtweet/' + window.location.pathname.split('/')[2] + '/' + username, {
-            method: 'GET',
-            headers:{
-                'Content-Type': 'application/json', 
-            }
-        }).then(res => res.json());
+        const tweetInfoRes = await request.get("fetchtweet/" + window.location.pathname.split('/')[2] + "/" + username)
+            .then(res => res.data);
 
         setTweetInfo(tweetInfoRes);
 
         // fetch comment info
-        const commentInfoRes = await fetch(BACK_END + 'tweet/' + window.location.pathname.split('/')[2] + '/comment', {
-            method: 'GET',
-            headers:{
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        }).then(res => res.json());
+        const commentInfoRes = await request.get("tweet/" + window.location.pathname.split('/')[2] + "/comment")
+            .then(res => res.data);
 
         setCommentInfo(commentInfoRes);
     }
@@ -59,23 +51,22 @@ const TweetDetail = () => {
             floor_reply: clicked_floor
         };
         console.log(newCom);
-        let com = await fetch(BACK_END + 'tweet/reply', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newCom),
-        });
-        if (com.status === 403) {
-            com.text().then(text => alert(text));
-        } else {
-            let com_res = await com.json();
+        try {
+            const com = await request.post("tweet/reply", newCom);
+            let com_res = com.data;
             console.log(com_res);
             let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time) }];
             setCommentInfo(new_comments);
             setTweetInfo({ ...tweetInfo, commentCount: tweetInfo.commentCount + 1 });
             console.log(commentInfo);
             document.getElementById(newcommentId).value = '';
+        }
+        catch (err) {
+            if (err.response.status === 403) {
+                alert(err.response.data);
+            } else {
+                console.log(err);
+            }
         }
     }
 
@@ -86,25 +77,24 @@ const TweetDetail = () => {
             tid: window.location.pathname.split('/')[2],
         };
         console.log(newCom);
-        let com = await fetch(BACK_END + 'tweet/comment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newCom),
-        });
-        if (com.status === 403) {
-            com.text().then(text => alert(text));
-        } else {
-            let com_res = await com.json();
+        try {
+            const com = await request.post("tweet/comment", newCom);
+            let com_res = com.data;
             console.log(com_res);
-        let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" }];
-        console.log(new_comments)
+            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" }];
+            console.log(new_comments)
             setCommentInfo(new_comments);
             let com_count = tweetInfo.commentCount + 1
             setTweetInfo({ ...tweetInfo, commentCount: com_count });
             console.log(commentInfo);
             document.getElementById('new-comment' + tweetInfo.tid).value = '';
+        }
+        catch (err) {
+            if (err.response.status === 403) {
+                alert(err.response.data);
+            } else {
+                console.log(err);
+            }
         }
     }
 

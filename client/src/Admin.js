@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import { BACK_END } from './App';
 import { Link } from 'react-router-dom';
+import request from './utils/request';
 
 class Admin extends React.Component {
     constructor(props) {
@@ -74,23 +75,16 @@ class AddUser extends React.Component {
             newusername: username,
             newpwd: newpwd
         };
-        fetch(BACK_END + "createuser", {
-            method: "POST",
-            body: JSON.stringify(userInfo),
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        })
-            .then(res => {
-                if (res.status === 201) {
-
-                }
-                return res.text();
-            }).then(data => {
+        request.post("/createuser", userInfo)
+            .then(response => {
+                return response.data;
+            })
+            .then(data => {
                 alert(data);
                 window.location.reload(true);
-            }).catch(err => {
-                console.log(err);
+            })
+            .catch(error => {
+                console.log(error);
             });
         event.preventDefault();
 
@@ -139,25 +133,16 @@ class UpdatePassword extends React.Component {
         } else if (newpwd.length <= 4 || newpwd.length >= 20) {
             window.alert("Invalid input.\n The length of the password should be >4 and <20.");
         } else {
-            fetch(BACK_END + 'adminchangepwd', {
-                method: 'PUT',
-                body: JSON.stringify(newObj),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-                .then(res => {
-                    if (res.status === 200) {
-
-                    }
-                    return res.text();
+            request.put('/adminchangepwd', newObj)
+                .then(response => {
+                    return response.data;
                 })
                 .then(data => {
                     alert(data);
                     window.location.reload(true);
                 })
-                .catch(err => {
-                    console.log(err);
+                .catch(error => {
+                    console.log(error);
                 });
         }
     }
@@ -199,14 +184,12 @@ class ListUser extends React.Component {
 
     getAllUser = async () => {
         try {
-            const res = await fetch(BACK_END + 'reportusers', {
-                method: 'GET',
+            const res = await request.get('reportusers', {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
-            const userList = await res.json();
+            const userList = res.data;
             this.setState({ userList });
         } catch (error) {
             console.error("Failed to fetch users:", error);
@@ -287,14 +270,12 @@ class DeleteUser extends React.Component {
 
     getAllUser = async () => {
         try {
-            const res = await fetch(BACK_END + 'reportusers', {
-                method: 'GET',
+            const res = await request.get('reportusers', {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
-            const userList = await res.json();
+            const userList = res.data;
             this.setState({ userList });
         } catch (error) {
             console.error("Failed to fetch users:", error);
@@ -350,10 +331,8 @@ class DeleteUserCase extends React.Component {
 
     handleDelete = async () => {
         try {
-            const response = await fetch(`${BACK_END}user/${this.props.name}`, {
-                method: 'DELETE',
+            const response = await request.delete(`user/${this.props.name}`, {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
@@ -362,8 +341,7 @@ class DeleteUserCase extends React.Component {
                 alert('User successfully deleted.');
                 window.location.reload();
             } else {
-                const data = await response.text();
-                alert(data);
+                alert(response.data);
             }
         } catch (error) {
             console.error(error);

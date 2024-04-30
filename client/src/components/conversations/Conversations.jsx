@@ -3,6 +3,7 @@ import "./conversation.css";
 import axios from "axios";
 import React from "react";
 import { BACK_END } from "../../App";
+import request from "../../utils/request";
 
 export default function Conversation({ conversation , currentUsername}) {
   const [user, setUser] = useState(null);
@@ -11,8 +12,8 @@ export default function Conversation({ conversation , currentUsername}) {
   useEffect(() => {
     const getUser = async () => {
       try {        
-        const response = await (fetch(BACK_END + "profile/" + currentUsername));
-        const currentUser = await response.json();
+        const response = await (request.get("profile/" + currentUsername));
+        const currentUser = response.data;
         const friendId = conversation.members.find((m) => m !== currentUser.uid);
         const res = await axios(BACK_END+ "auser/" + friendId);
         setUser(res.data);

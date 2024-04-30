@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BACK_END } from './App';
 import "./css/profile.css"
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 function Profile() {
     const { username, mode } = useAuth();
@@ -45,14 +46,10 @@ function Profile() {
     const fetchInfo = async () => {
 
         // Fetch target information
-        const responseTarget = await fetch(BACK_END + "profile/" + target.username, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+        const responseTarget = await request.get("profile/" + target.username, {
+            headers: { 'Accept': 'application/json' }
         });
-        const dataTarget = await responseTarget.json();
+        const dataTarget = responseTarget.data;
         console.log("TARGET:");
         console.log(dataTarget);
 
@@ -60,14 +57,10 @@ function Profile() {
         setTextAreaValue(dataTarget.about);
         // Fetch self information
         if (mode === 'user') {
-            const responseSelf = await fetch(BACK_END + "profile/" + self.username + "/actioninfo", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
+            const responseSelf = await request.get("profile/" + self.username + "/actioninfo", {
+                headers: { 'Accept': 'application/json' }
             });
-            const dataSelf = await responseSelf.json();
+            const dataSelf = responseSelf.data;
             setSelf(dataSelf);
             console.log(dataSelf);
             console.log(dataSelf.users_blocked);
@@ -88,12 +81,7 @@ function Profile() {
 
     const handleFollowClick = async () => {
         const endpoint = follow ? 'unfollow' : 'follow';
-        const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/${endpoint}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
+        const response = await request.put("interaction/" + self.username + "/" + target.username + "/" + endpoint);
 
         if (response.status === 200) {
             setFollow(!follow);
@@ -110,12 +98,7 @@ function Profile() {
 
     const handleBlockClick = async () => {
         const endpoint = block ? 'unblock' : 'block';
-        const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/${endpoint}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
+        const response = await request.put("interaction/" + self.username + "/" + target.username + "/" + endpoint);
 
         if (response.status === 200) {
             setBlock(!block);
@@ -127,12 +110,7 @@ function Profile() {
 
     const handleReportClick = async () => {
         if (!report) {
-            const response = await fetch(`${BACK_END}interaction/${self.username}/${target.username}/report`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const response = await request.put("interaction/" + self.username + "/" + target.username + "/report");
 
             if (response.status === 200) {
                 setReport(true);
@@ -167,9 +145,8 @@ function Profile() {
         formData.append('about', textAreaValue);
 
         try {
-            const response = await fetch(`${BACK_END}profile/${self.username}`, {
-                method: 'PUT',
-                body: formData
+            const response = await request.put("profile/" + self.username, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
             if (response.status === 200) {
@@ -193,16 +170,10 @@ function Profile() {
     };
     const handleChatClick = async () => {
         try {
-            fetch(BACK_END + 'server/conversations/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    senderId: self.uid,
-                    receiverId: target.uid
-                })
-            }).then(res => {
+            await request.post("server/conversations", JSON.stringify({
+                senderId: self.uid,
+                receiverId: target.uid
+            })).then(res => {
                 if (res.status === 200) {
                     navigate(`/messenger`);
                 }
@@ -447,24 +418,20 @@ function MyPostsList({ username }) {
         let tweetrec;
 
         if (mode === 'user') {
-            tweetrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/tweets", {
-                method: 'GET',
+            tweetrec = await request.get("profile/" + self + "/" + target + "/tweets", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         } else {
-            tweetrec = await fetch(BACK_END + "profile/" + target + "/tweets", {
-                method: 'GET',
+            tweetrec = await request.get("profile/" + target + "/tweets", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         }
 
-        let fetchedTweets = await tweetrec.json();
+        let fetchedTweets = tweetrec.data;
         console.log(tweetrec);
         console.log(fetchedTweets);
         fetchedTweets.sort(compare);
@@ -505,14 +472,12 @@ function LikesList() {
     const { username, mode } = useAuth();
 
     const fetchInfo = async () => {
-        let tweetrec = await fetch(BACK_END + "profile/" + username + "/likes", {
-            method: 'GET',
+        let tweetrec = await request.get("profile/" + username + "/likes", {
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
         });
-        let likes = await tweetrec.json();
+        let likes = tweetrec.data;
 
         likes.sort(compare);
 

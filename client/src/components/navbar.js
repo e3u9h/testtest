@@ -5,6 +5,7 @@ import { faBell, faHome, faSearch, faUser, faComment } from '@fortawesome/free-s
 import { BACK_END } from '../App';
 import './navbar.css';
 import { useAuth } from '../provider/context';
+import request from '../utils/request';
 
 function Navbar() {
     const { logout, username, mode } = useAuth();
@@ -25,7 +26,7 @@ function Navbar() {
             newpwd: newpwd,
             newpwd2: newpwd2
         };
-        console.log(userinfo)
+        // console.log(userinfo)
         if (userinfo['newpwd'] === '') {
             window.alert("Please enter a valid new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
@@ -33,17 +34,11 @@ function Navbar() {
         } else if (newpwd !== newpwd2) {
             window.alert("Password mismatch!");
         } else {
-            fetch(BACK_END + 'changepwd', {
-                method: 'PUT',
-                body: JSON.stringify(userinfo),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
+            request.put("changepwd", userinfo)
                 .then(res => {
                     if (res.status === 200) {
                     }
-                    return res.text();
+                    return res.data;
                 })
                 .then(data => { alert(data); })
                 .catch(err => {
@@ -54,12 +49,13 @@ function Navbar() {
 
     useEffect(() => {
         console.log(BACK_END + "profile/portrait/" + username);
-        fetch(BACK_END + "profile/portrait/" + username)
+        request.get("profile/portrait/" + username)
             .then(res => {
-                if (!res.ok) {
+                console.log(res);
+                if (res.status !== 200) {
                     throw new Error('Network response was not ok');
                 }
-                return res.text();
+                return res.data;
             })
             .then(text => {
                 console.log(text);

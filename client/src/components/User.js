@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../provider/context';
 import { BACK_END } from '../App';
+import request from '../utils/request';
 
 function UserCard({ userInfo }) {
   const { username: selfname, mode } = useAuth();
@@ -14,22 +15,22 @@ function UserCard({ userInfo }) {
 
   const handleFollowClick = async () => {
     const endpoint = isFollowing ? 'unfollow' : 'follow';
-    const response = await fetch(`${BACK_END}interaction/${selfname}/${username}/${endpoint}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    });
+    try {
+      const response = await request.put(`interaction/${selfname}/${username}/${endpoint}`);
 
-    if (response.status === 200) {
-      const newFollowerCount = isFollowing ? followerCount - 1 : followerCount + 1;
-      setIsFollowing(!isFollowing);
-      setFollowerCount(newFollowerCount);
-      alert(`You have ${isFollowing ? 'unfollowed' : 'followed'} this user.`);
-    } else if (response.status === 403) {
-      response.text().then(text => alert(text));
-    } else {
-      alert("There seems to be some error. Please try again.");
+      if (response.status === 200) {
+        const newFollowerCount = isFollowing ? followerCount - 1 : followerCount + 1;
+        setIsFollowing(!isFollowing);
+        setFollowerCount(newFollowerCount);
+        alert(`You have ${isFollowing ? 'unfollowed' : 'followed'} this user.`);
+      }
+    }
+    catch (err) {
+      if (err.response.status === 403) {
+        alert(err.response.data);
+      } else {
+        alert("There seems to be some error. Please try again.");
+      }
     }
   };
 

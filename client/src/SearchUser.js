@@ -4,6 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 const SearchUser = () => {
   const { username: selfname } = useAuth();
@@ -13,14 +14,12 @@ const SearchUser = () => {
 
   const getAllUser = async () => {
     try {
-        const res = await fetch(BACK_END + 'searchuser/' + selfname + '/' + username, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          });
-        const userList = await res.json();
+      const res = await request.get("searchuser/" + selfname + "/" + username, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      const userList = res.data;
       setUserList(userList);
       console.log(userList);
     } catch (error) {

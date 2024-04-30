@@ -5,6 +5,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 function Followings() {
     const [followings, setFollowings] = useState([]);
@@ -14,23 +15,19 @@ function Followings() {
         let target = window.location.pathname.split('/')[1];
         let followingsrec;
         if (mode === 'user') {
-            followingsrec = await fetch(BACK_END + "followinfo/" + self + "/" + target + "/followings", {
-                method: 'GET',
+            followingsrec = await request.get("followinfo/" + self + "/" + target + "/followings", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         } else {
-            followingsrec = await fetch(BACK_END + "followinfo/" + target + "/followings", {
-                method: 'GET',
+            followingsrec = await request.get("followinfo/" + target + "/followings", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         }
-        const followingsData = await followingsrec.json();
+        const followingsData = followingsrec.data;
         setFollowings(followingsData);
     }
 

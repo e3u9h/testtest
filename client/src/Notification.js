@@ -5,7 +5,8 @@ import {Link} from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
 import { useAuth } from './provider/context';
-import { timeDifference } from './Utils';
+import { timeDifference } from './utils/Utils';
+import request from './utils/request';
 
 const actionMap = {
     "like": "liked your tweet",
@@ -22,13 +23,8 @@ const Notification = () => {
 
     const fetchNotification = async () => {
         // fetch notification
-        let notification = await fetch(BACK_END + 'notification/' + username, {
-            method: 'GET',
-            headers:{
-                'Content-Type': 'application/json',
-            }
-        });
-        let notificationRes = await notification.json();
+        const notification = await request.get("notification/" + username);
+        let notificationRes = notification.data;
         console.log(notificationRes);
         setNotifications(notificationRes);
     }

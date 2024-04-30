@@ -1,15 +1,16 @@
 import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState, useRef } from 'react';
-import { timeDifference } from '../Utils';
+import { timeDifference } from '../utils/Utils';
 import { Link } from "react-router-dom";
 import { useAuth } from '../provider/context';
 import { BACK_END } from '../App';
-import { randomSelect } from '../Utils';
+import { randomSelect } from '../utils/Utils';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Image, Form, Input } from 'antd';
+import request from '../utils/request';
 
 
 
@@ -64,42 +65,34 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
-    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + selfname + "/" + operation, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    }).then(res => {
-      if (res.status === 201) {
-        return res.json();
-      } else {
-        console.log("Like tweet failed");
-        throw new Error("Like tweet failed");
-      }
-    }).then(data => {
-      setLikeInfo(data['likeInfo']);
-      setDislikeInfo(data['dislikeInfo']);
-    }).catch(err => {
-      console.log(err);
-    });
+    request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/" + operation)
+      .then(res => {
+        if (res.status === 201) {
+          return res.json();
+        } else {
+          console.log("Like tweet failed");
+          throw new Error("Like tweet failed");
+        }
+      }).then(data => {
+        setLikeInfo(data['likeInfo']);
+        setDislikeInfo(data['dislikeInfo']);
+      }).catch(err => {
+        console.log(err);
+      });
   }
 
   const handleTweetReport = () => {
-    fetch(BACK_END + 'tweet/' + tweetInfo['tid'] + "/" + selfname + "/report", {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-    }).then(res => {
-      if (res.status === 201) {
-        console.log("Report tweet success");
-        setIsReported(true);
-      } else {
-        console.log("Report tweet failed");
-      }
-    }).catch(err => {
-      console.log(err);
-    });
+    request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/report")
+      .then(res => {
+        if (res.status === 201) {
+          console.log("Report tweet success");
+          setIsReported(true);
+        } else {
+          console.log("Report tweet failed");
+        }
+      }).catch(err => {
+        console.log(err);
+      });
   }
 
   const addCommentMain = () => {
@@ -109,22 +102,18 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
       tid: tweetInfo.tid,
     };
     console.log(newCom);
-    fetch(BACK_END + 'tweet/comment', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newCom),
-    })
+    request.post("tweet/comment", newCom)
       .then(response => {
-        if (response.status === 403) {
-          response.text().then(text => alert(text));
-        }
-        return response.json();
+        setCommentCount(commentCount + 1);
+        return response.data;
       })
-      .then(com_res => console.log(com_res));
+      .then(com_res => console.log(com_res))
+      .catch(err => {
+        if (err.response.status === 403) {
+          alert(err.response.data);
+        }
+      });
     document.getElementById('new-comment' + tweetInfo.tid).value = '';
-    setCommentCount(commentCount + 1);
   }
 
 
@@ -283,17 +272,13 @@ function ForwardForm(props) {
 
 
   const fetchAvailableTags = () => {
-    fetch('http://localhost:8000/tags', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => res.json()).then(data => {
-      const fetchedTags = data.map((item) => item['tag']);
-      setAvailableTags(fetchedTags);
-    }).catch(err => {
-      console.log(err);
-    });
+    request.get("tags")
+      .then(res => res.data).then(data => {
+        const fetchedTags = data.map((item) => item['tag']);
+        setAvailableTags(fetchedTags);
+      }).catch(err => {
+        console.log(err);
+      });
   };
 
   useEffect(() => {
@@ -314,26 +299,21 @@ function ForwardForm(props) {
     }
     console.log(postBody)
 
-    fetch('http://localhost:8000/retweet', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(postBody)
-    }).then(res => {
-      console.log(res)
-      if (res.status === 201) {
-        setRepostContent(initialContent);
-        props.setRetweetCount(props.retweetCount + 1);
-        setTags([]);
-        alert("Repost success");
-      } else if (res.status === 403) {
-        res.text().then(text => alert(text));
-      }
-      else {
-        alert("Repost failed");
-      }
-    });
+    request.post("retweet", postBody)
+      .then(res => {
+        console.log(res)
+        if (res.status === 201) {
+          setRepostContent(initialContent);
+          props.setRetweetCount(props.retweetCount + 1);
+          setTags([]);
+          alert("Repost success");
+        } else if (res.status === 403) {
+          res.text().then(text => alert(text));
+        }
+        else {
+          alert("Repost failed");
+        }
+      });
   };
 
 
@@ -348,17 +328,12 @@ function ForwardForm(props) {
     // check if the tag is already in the list
     if (!availableTags.includes(newTags)) {
       // insert the new tag into the database
-      fetch('http://localhost:8000/new-tag', {
-        method: 'POST',
-        body: JSON.stringify({ tag: newTags }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
+      request.post("new-tag", { tag: newTags }).then(res => {
         if (res.status === 201) {
           console.log("New tag inserted");
-        } else if (res.status === 400 && res.body === "Tag already exists") {
-          alert("Tag already exists");
+        } else if (res.status === 202 && res.body === "Tag already exists") {
+          // alert("Tag already exists");
+          console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }

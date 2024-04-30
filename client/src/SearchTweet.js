@@ -3,6 +3,7 @@ import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 class SearchTweet extends React.Component {
   constructor(props) {
@@ -19,14 +20,12 @@ class SearchTweet extends React.Component {
 
   async getAllTweets() {
     try {
-      const res = await fetch(BACK_END + 'searchtag/' + this.state.tag, {
-        method: 'GET',
+      const res = await request.get('searchtag/' + this.state.tag, {
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          'Accept': 'application/json',
         },
       });
-      const tweetList = await res.json();
+      const tweetList = res.data;
       this.setState({ tweetList });
       console.log(this.state.tweetList);
     } catch (error) {

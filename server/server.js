@@ -19,6 +19,9 @@ import changepwdRoute from "./routes/changepwd.js";
 import profileRoute from "./routes/profile.js";
 import followinfoRote from "./routes/getfollowinfo.js";
 import interactionRoute from "./routes/userinteraction.js";
+import { mongoUrl } from './config.js';
+import { expressjwt } from 'express-jwt';
+import { jwtKey } from './config.js';
 
 const app = express();
 
@@ -26,6 +29,9 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
+
+app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/] }));
+
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
 app.use("/server/conversations", conversationRoute);
@@ -37,11 +43,17 @@ app.use('/profile', profileRoute);
 app.use('/followinfo', followinfoRote);
 app.use('/interaction', interactionRoute);
 
+app.use((err, req, res, next) => {
+    if (err.name === 'UnauthorizedError') {
+        res.status(401).send('invalid token');
+        console.log(err);
+    }
+});
 
 
 //Connect to MongoDB
 // const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
-const url = "mongodb+srv://qwerty:qwer4321@cluster0.5gm5w78.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const url = mongoUrl;
 console.log("Connecting to MongoDB...");
 mongoose.connect(url)
   .then(() => {
@@ -556,7 +568,7 @@ app.post('/new-tag', (req, res) => {
         // check if it is the duplicate key error
         if (err.code === 11000) {
             console.log("tag exists");
-            return res.status(400).send('Tag already exists');
+            return res.status(202).send('Tag already exists');
         } else {
             console.log("error in creating tag");
             console.log(err);
