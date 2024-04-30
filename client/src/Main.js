@@ -204,7 +204,7 @@ function NewPost() {
                   </div>
 
                   <Dropdown as={ButtonGroup}>
-                    <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>{privacy === 'true' ? "New Public Post" : "New Private Post"}</Button>
+                    <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>{privacy === 'true' ? "New Private Post" : "New Public Post"}</Button>
                     <Dropdown.Toggle split variant="secondary" id="dropdown-split-privacy" style={{ borderTopRightRadius: '6px', borderBottomRightRadius: '6px' }}/>
                     <Dropdown.Menu style={{ borderRadius: '6px'}}>
                       <Dropdown.Item onClick={() => setPrivacy('false')}>Public</Dropdown.Item>

@@ -54,7 +54,7 @@ export default function Messenger(state){
           try {
             const response = await (request.get("profile/" + current_username));
             const user = response.data;
-            const res = await axios.get(BACK_END+"server/conversations/" + user.uid);
+            const res = await request.get("server/conversations/" + user.uid);
             setCurrentUser(user);
             setConversations(res.data);
           } catch (err) {
@@ -67,7 +67,11 @@ export default function Messenger(state){
     useEffect(() => {
         const getMessages = async () => {
           try {
-            const res = await axios.get(BACK_END+ "server/messages/" + currentChat?._id);
+            const res = await request.get("server/messages/" + currentChat?._id, {
+              headers: {
+                "Content-Type": undefined,
+              },
+            });
             setMessages(res.data);
           } catch (err) {
             console.log(err);
@@ -106,7 +110,7 @@ export default function Messenger(state){
         });
       
         try {
-            const res = await axios.post(BACK_END + "server/messages", message);
+          const res = await request.post("server/messages", message,);
             setMessages([...messages, res.data]);
             setNewMessage("");
         } catch (err) {

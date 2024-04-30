@@ -30,7 +30,7 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 
-app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/] }));
+app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/, /^\/img/] }));
 
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
@@ -102,11 +102,16 @@ io.on("connection", (socket) => {
 
   //send and get message
   socket.on("sendMessage", ({ senderId, receiverId, text }) => {
-    const user = getUser(receiverId);
-    io.to(user.socketId).emit("getMessage", {
-      senderId,
-      text,
-    });
+      try {
+        const user = getUser(receiverId);
+        io.to(user.socketId).emit("getMessage", {
+            senderId,
+            text,
+        });
+    }
+    catch (err) {
+        console.log(err);
+    }
   });
 
   //when disconnect
