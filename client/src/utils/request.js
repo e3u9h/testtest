@@ -20,6 +20,7 @@ request.interceptors.request.use(
         return config;
     },
     (error) => {
+        localStorage.removeItem('userInfo');
         return Promise.reject(error);
     }
 );

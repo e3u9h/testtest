@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from 'react';
-import { setAuthToken } from '../utils/request';
 
 const AuthContext = createContext(null);
 
@@ -12,7 +11,6 @@ export const AuthProvider = ({ children }) => {
         setUsername(username);
         setMode(mode);
         setToken(token);
-        // setAuthToken(token);
         console.log("loginhere" + username, mode, token);
         console.log(localStorage.getItem('userInfo'));  
     };
@@ -21,7 +19,6 @@ export const AuthProvider = ({ children }) => {
         setUsername(undefined);
         setMode(undefined);
         setToken(undefined);
-        // setAuthToken(undefined);
     };
     console.log({ username, mode, token });
     return (

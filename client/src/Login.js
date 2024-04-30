@@ -26,7 +26,7 @@ const Login = (props) => {
   const [editUsername, setEditUsername] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editPassword2, setEditPassword2] = useState('');
-  const [editgender, setEditgender] = useState('Not to Specify');
+  const [editgender, setEditgender] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = (event) => {
@@ -46,9 +46,10 @@ const Login = (props) => {
     } else if (editPassword !== editPassword2) {
       window.alert("Password mismatch!");
     } else {
-      request.post("register/user", userInfo)
+      request.post("createuser", userInfo)
         .then(res => {
           if (res.status === 201) {
+            console.log("here");
             request.post("login/user", {
               username: editUsername,
               pwd: editPassword
@@ -57,19 +58,20 @@ const Login = (props) => {
                 console.log(res1);
                 if (res1.status === 201) {
                   setLoggedin(true);
-                  login(editUsername, 'user', res1.token);
+                  login(editUsername, 'user', res1.data.token);
                   console.log("loginin " + editUsername);
                 }
               })
-              .catch(err => {
-                console.error("Login failed:", err);
-                alert(err.response.data.message);
+              .catch(err1 => {
+                console.error("Login failed:", err1);
+                alert(err1.response.data.message);
               });
           }
-          alert(res.message);
+          alert(res.data);
         })
         .catch(err => {
           console.log(err);
+          alert(err.response.data);
         });
     }
   }
@@ -192,6 +194,7 @@ const Login = (props) => {
               <label htmlFor="gender" > Gender: </label>
               <Form.Select
                 aria-label="Default select example"
+                defaultValue=""
                 value={editgender}
                 onChange={(e) => setEditgender(e.target.value)}
               >

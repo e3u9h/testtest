@@ -22,7 +22,6 @@ import SearchUser from './SearchUser';
 import SearchTweet from './SearchTweet';
 import SearchUserid from './Searchid';
 import SearchTweetByKeyword from './SearchTweetByKeyword';
-import cookie from 'react-cookies';
 import Messenger from './Messenger';
 
 
@@ -35,7 +34,7 @@ function App() {
     const { username, mode } = useAuth();
     if (username === undefined || (requiredMode !== undefined && mode !== requiredMode)) {
       console.log("111AuthRoute: ", username, children);
-      cookie.remove('userInfo');
+      localStorage.removeItem('userInfo');
       return <Navigate to="/login" replace />;
     } else {
       console.log("222AuthRoute: ", username, children);
