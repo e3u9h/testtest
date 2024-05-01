@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { timeDifference } from '../utils/Utils';
 import { Link } from "react-router-dom";
 import { useAuth } from '../provider/context';
-import { BACK_END } from '../App';
+import { BACK_END } from '../config';
 import { randomSelect } from '../utils/Utils';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';

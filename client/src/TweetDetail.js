@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Comment from './Comment';
 import { TweetCard } from './components/Tweet';
-import { BACK_END } from './App';
 import { useAuth } from './provider/context';
 import { timeDifference } from './utils/Utils';
 import request from './utils/request';

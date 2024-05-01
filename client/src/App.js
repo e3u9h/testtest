@@ -25,9 +25,6 @@ import SearchTweetByKeyword from './SearchTweetByKeyword';
 import Messenger from './Messenger';
 
 
-export const BACK_END = 'http://localhost:8000/'
-
-
 function App() {
 
   function AuthRoute({ children, requiredMode }) {

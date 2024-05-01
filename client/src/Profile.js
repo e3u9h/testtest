@@ -9,7 +9,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { BACK_END } from './App';
+import { BACK_END } from './config';
 import "./css/profile.css"
 import BackButton from './components/backbutton';
 import request from './utils/request';

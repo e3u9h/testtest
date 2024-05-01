@@ -4,8 +4,6 @@ import Message from "./components/message/Message";
 import "./css/messenger.css"
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./provider/context.js";
-import axios from "axios";
-import { BACK_END } from "./App";
 import { io } from "socket.io-client";
 import { timeDifference } from "./utils/Utils.js"
 import request from "./utils/request.js";

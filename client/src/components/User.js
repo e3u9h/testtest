@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../provider/context';
-import { BACK_END } from '../App';
+import { BACK_END } from '../config';
 import request from '../utils/request';
 
 function UserCard({ userInfo }) {
