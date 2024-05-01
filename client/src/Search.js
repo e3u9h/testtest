@@ -1,6 +1,6 @@
 import React from 'react';
-import TweetListView from './Tweet';
-import UserListView from './User';
+import TweetListView from './components/Tweet';
+import UserListView from './components/User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import {BACK_END} from './App';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
+import request from './utils/request';
 
 class Search extends React.Component{
     constructor(props){
@@ -72,14 +73,12 @@ class Trend extends React.Component{
       }
     // Get the hot topics
     async getTrend(){
-        let res = await fetch(BACK_END + 'search/trend',{
-          method:'GET',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
+        const res = await request.get("search/trend", {
+            headers: {
+                'Accept': 'application/json',
+            },
         });
-        let l = await res.json();
+        const l = res.data;
         await this.setState({trendList:l});
         console.log(this.state.trendList)
       }

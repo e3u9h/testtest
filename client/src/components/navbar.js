@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { getLoginInfo } from '../Login';
-import cookie from 'react-cookies';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faHome, faSearch, faUser, faComment } from '@fortawesome/free-solid-svg-icons';
 import { BACK_END } from '../App';
 import './navbar.css';
+import { useAuth } from '../provider/context';
+import request from '../utils/request';
 
 function Navbar() {
+    const { logout, username, mode } = useAuth();
     const [userPortraitSrc, setUserPortraitSrc] = useState(null);
-    const [mode, setMode] = useState(getLoginInfo()['mode']);
     const navigate = useNavigate();
-    const logout = () => {
-        console.log("Remove Login Cookie");
-        cookie.remove('userInfo');
+    const handleLogout = () => {
+        logout();
         navigate('/login');
     };
     const changePwd = () => {
-        const changepwdusername = getLoginInfo()['username'];
+        const changepwdusername = username;
         const oldpwd = document.querySelector("#originalpwd").value;
         const newpwd = document.querySelector("#changedpwd").value;
         const newpwd2 = document.querySelector("#changedpwd2").value;
@@ -27,7 +26,7 @@ function Navbar() {
             newpwd: newpwd,
             newpwd2: newpwd2
         };
-        console.log(userinfo)
+        // console.log(userinfo)
         if (userinfo['newpwd'] === '') {
             window.alert("Please enter a valid new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
@@ -35,17 +34,11 @@ function Navbar() {
         } else if (newpwd !== newpwd2) {
             window.alert("Password mismatch!");
         } else {
-            fetch(BACK_END + 'changepwd', {
-                method: 'PUT',
-                body: JSON.stringify(userinfo),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
+            request.put("changepwd", userinfo)
                 .then(res => {
                     if (res.status === 200) {
                     }
-                    return res.text();
+                    return res.data;
                 })
                 .then(data => { alert(data); })
                 .catch(err => {
@@ -55,15 +48,14 @@ function Navbar() {
     }
 
     useEffect(() => {
-        const username = getLoginInfo()['username'];
-        setMode(getLoginInfo()['mode']);
-        console.log(BACK_END + "portrait/" + username);
-        fetch(BACK_END + "portrait/" + username)
+        console.log(BACK_END + "profile/portrait/" + username);
+        request.get("profile/portrait/" + username)
             .then(res => {
-                if (!res.ok) {
+                console.log(res);
+                if (res.status !== 200) {
                     throw new Error('Network response was not ok');
                 }
-                return res.text();
+                return res.data;
             })
             .then(text => {
                 console.log(text);
@@ -106,7 +98,7 @@ function Navbar() {
                     </NavLink>}
                 </li>
                 <li>
-                    {mode === 'user' && <NavLink to={"/" + getLoginInfo()['username']} className="nav-link text-muted" activeclassname="active">
+                    {mode === 'user' && <NavLink to={"/" + username} className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faUser} className='me-2' />Profile</span>
                     </NavLink>}
                 </li>
@@ -121,10 +113,10 @@ function Navbar() {
                 <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     {userPortraitSrc && mode === 'user' && <img src={BACK_END + userPortraitSrc} alt="" width="32" height="32" className="rounded-circle" style={{ objectFit: 'cover' }} />}
-                    <strong className='ms-2 text-muted'>{getLoginInfo()['username']}</strong>
+                    <strong className='ms-2 text-muted'>{username}</strong>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a className="dropdown-item" onClick={logout}>Sign out</a></li>
+                    <li><a className="dropdown-item" onClick={handleLogout}>Sign out</a></li>
                     <li><a type="button" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changepasswordForm" data-bs-whatever="@mdo" >Change Password</a></li>
                 </ul>
             </div>}

@@ -1,12 +1,12 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
 import {Link} from "react-router-dom";
 // import MaterialIcon, {colorPalette} from 'material-icons-react';
-import ChatBox from './Chat';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {BACK_END} from './App';
-import { getLoginInfo } from './Login';
-import { timeDifference } from './Utils';
+import { useAuth } from './provider/context';
+import { timeDifference } from './utils/Utils';
+import request from './utils/request';
 
 const actionMap = {
     "like": "liked your tweet",
@@ -17,59 +17,34 @@ const actionMap = {
     
 
 
-class Notification extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            viewMode:"notification",
-            notifications: []
-        }; // two viewmode, notification or message
-        
-    }
+const Notification = () => {
+    const [notifications, setNotifications] = useState([]);
+    const { username } = useAuth();
 
-    async fetchNotification(){
+    const fetchNotification = async () => {
         // fetch notification
-        let notification = await fetch(BACK_END+'notification/'+getLoginInfo().username, {
-            method: 'GET',
-            headers:{
-                'Content-Type': 'application/json',
-            }
-        });
-        let notificationRes = await notification.json();
+        const notification = await request.get("notification/" + username);
+        let notificationRes = notification.data;
         console.log(notificationRes);
-        this.setState({notifications: notificationRes},()=>console.log(this.state.notifications));
+        setNotifications(notificationRes);
     }
 
-    componentWillMount(){
-        this.fetchNotification();
-    }
+    useEffect(() => {
+        fetchNotification();
+    }, []);
 
-
-
-    render(){
-        return(
-            <div className="row" style = {{borderRadius: "25px" }}>
-                <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto"}}>
-                    {this.state.viewMode == "notification" && 
-                        <InfiniteScroll dataLength={this.state.notifications.length} next={null} hasMore={false} scrollableTarget="scrollableNotification"
-                            endMessage={<p style={{ textAlign: 'center' }}><b>No more notifications</b></p>} >
-                            <NotificationListView notifications={this.state.notifications}/>
-                        </InfiniteScroll>
-                    }
-                    {this.state.viewMode == "message" && <MessageView />}
-                </div>  
+    return (
+        <div className="row" style={{ borderRadius: "25px" }}>
+            <div id="scrollableNotification" style={{ height: "70vh", overflow: "auto" }}>
+                <InfiniteScroll dataLength={notifications.length} next={null} hasMore={false} scrollableTarget="scrollableNotification"
+                    endMessage={<p style={{ textAlign: 'center' }}><b>No more notifications</b></p>} >
+                    <NotificationListView notifications={notifications} />
+                </InfiniteScroll>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
-class MessageView extends React.Component{
-    render(){
-        return(
-            <div><ChatBox/></div>
-        )
-    }
-}
 
 class NotificationListView extends React.Component{
     constructor(props){

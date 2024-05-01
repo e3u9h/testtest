@@ -3,11 +3,12 @@ import Conversation from "./components/conversations/Conversations";
 import Message from "./components/message/Message";
 import "./css/messenger.css"
 import { useEffect, useRef, useState } from "react";
-import { getLoginInfo } from './Login';
+import { useAuth } from "./provider/context.js";
 import axios from "axios";
 import { BACK_END } from "./App";
 import { io } from "socket.io-client";
-import { timeDifference } from "./Utils.js"
+import { timeDifference } from "./utils/Utils.js"
+import request from "./utils/request.js";
 
 // 
 export default function Messenger(state){
@@ -23,7 +24,7 @@ export default function Messenger(state){
     const socket = useRef();
     const scrollRef = useRef();
 
-    const current_username = getLoginInfo()['username'];
+  const { username: current_username } = useAuth();
 
     //   fetch user info use this line
     //   const response = (await fetch(BACK_END + "profile/" + username));
@@ -31,8 +32,8 @@ export default function Messenger(state){
 
     
     useEffect(() => {
-        // socket.current = io("ws://localhost:8900");
-        socket.current = io("ws://10.13.189.122:8900");
+      socket.current = io("ws://localhost:8000");
+      // socket.current = io("ws://10.13.189.122:8000");
         socket.current.on("getMessage", (data) => {
           setArrivalMessage({
             sender: data.senderId,
@@ -51,9 +52,9 @@ export default function Messenger(state){
     useEffect(() => {
         const getConversations = async () => {
           try {
-            const response = await (fetch(BACK_END + "profile/" + current_username));
-            const user = await response.json();
-            const res = await axios.get(BACK_END+"server/conversations/" + user.uid);
+            const response = await (request.get("profile/" + current_username));
+            const user = response.data;
+            const res = await request.get("server/conversations/" + user.uid);
             setCurrentUser(user);
             setConversations(res.data);
           } catch (err) {
@@ -66,7 +67,11 @@ export default function Messenger(state){
     useEffect(() => {
         const getMessages = async () => {
           try {
-            const res = await axios.get(BACK_END+ "server/messages/" + currentChat?._id);
+            const res = await request.get("server/messages/" + currentChat?._id, {
+              headers: {
+                "Content-Type": undefined,
+              },
+            });
             setMessages(res.data);
           } catch (err) {
             console.log(err);
@@ -105,7 +110,7 @@ export default function Messenger(state){
         });
       
         try {
-            const res = await axios.post(BACK_END + "server/messages", message);
+          const res = await request.post("server/messages", message,);
             setMessages([...messages, res.data]);
             setNewMessage("");
         } catch (err) {
@@ -119,8 +124,8 @@ export default function Messenger(state){
 
     if (value.trim()) {
       try {
-        const response = await fetch(BACK_END+"searchuser/"+currentUser.username+"/"+value.trim());
-        const matchedUsers = await response.json();
+        const response = await request.get("searchuser/" + currentUser.username + "/" + value.trim());
+        const matchedUsers = response.data;
         const matchedUserIds = matchedUsers.map(user => user.uid);
 
         const newFilteredConversations = conversations.filter(conversation =>

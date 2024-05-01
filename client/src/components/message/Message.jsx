@@ -1,6 +1,6 @@
 import "./message.css";
 import { format } from "timeago.js"
-import { timeDifference } from "../../Utils.js"
+import { timeDifference } from "../../utils/Utils.js"
 
 export default function Message({message, own}) {
   return (

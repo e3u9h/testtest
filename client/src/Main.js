@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import UserListView from './User';
-import { TweetListView } from './Tweet';
+import UserListView from './components/User';
+import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { randomSelect } from './Utils';
+import { randomSelect } from './utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import { BACK_END } from './App';
 import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
@@ -14,10 +14,13 @@ import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, Form, Input, message } from 'antd';
 import { Row, Col } from 'antd';
 import './css/custom-input.css';
+import request from './utils/request';
 
 function NewPost() {
+  const { username } = useAuth();
   const [availableTags, setAvailableTags] = useState([]);
   const [tags, setTags] = useState([]);
+  const [newTag, setNewTag] = useState('');
   const [privacy, setPrivacy] = useState('false');
   const [fileList, setFileList] = useState([]);
   const [postContent, setPostContent] = useState('');
@@ -25,17 +28,14 @@ function NewPost() {
   const [previewImage, setPreviewImage] = useState('');
 
   const fetchAvailableTags = () => {
-    fetch(BACK_END + 'tags', {
-      mothod: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(res => res.json()).then(data => {
-      const fetchedTags = data.map((item) => item['tag']);
-      setAvailableTags(fetchedTags);
-    }).catch(err => {
-      console.log(err);
-    });
+    request.get('tags')
+      .then(res => {
+        const fetchedTags = res.data.map((item) => item['tag']);
+        setAvailableTags(fetchedTags);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   // convert a file to a Base64 string
@@ -87,7 +87,7 @@ function NewPost() {
 
     // format like label:data
     let formData = new FormData();
-    formData.append('username', getLoginInfo()['username'])
+    formData.append('username', username)
     formData.append('tweet_content', postContent);
     tags.forEach(tag => {
       formData.append('tags', tag);
@@ -98,9 +98,10 @@ function NewPost() {
       formData.append('files', file.originFileObj)
     });
 
-    fetch(BACK_END + 'new-tweet', {
-      method: 'POST',
-      body: formData,
+    request.post('new-tweet', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
     }).then(res => {
       if (res.status === 201) {
         setPostContent(""); // clear post content
@@ -118,17 +119,12 @@ function NewPost() {
 
   // If the tag is not exist, use this function create a new tag
   const addNewTags = () => {
-    let newTags = document.getElementById("new-tag").value;
+    console.log(newTag);
     // check if the tag is already in the list
-    if (!availableTags.includes(newTags)) {
+    if (!availableTags.includes(newTag)) {
       // insert the new tags into the database
-      fetch(BACK_END + 'new-tag', {
-        method: 'POST',
-        body: JSON.stringify({ tag: newTags }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }).then(res => {
+      request.post('new-tag', { tag: newTag })
+        .then(res => {
         if (res.status === 201) {
           console.log("New tag inserted");
         } else if (res.status === 400) {
@@ -136,7 +132,7 @@ function NewPost() {
         } else {
           console.log("Failed to insert new tag");
         }
-        setTags([...tags, newTags]);
+          setTags([...tags, newTag]);
         // close the modal
         document.getElementById("close-modal").click();
       });
@@ -144,7 +140,7 @@ function NewPost() {
       alert("Tag already exists");
     }
     // clear the input field
-    document.getElementById("new-tag").value = '';
+    setNewTag('');
   }
 
 
@@ -208,11 +204,11 @@ function NewPost() {
                   </div>
 
                   <Dropdown as={ButtonGroup}>
-                    <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>New post</Button>
+                    <Button type="button" varient='secondary' id='privacy' className="btn btn-secondary mx-2" onClick={postNewTweet}>{privacy === 'true' ? "New Private Post" : "New Public Post"}</Button>
                     <Dropdown.Toggle split variant="secondary" id="dropdown-split-privacy" style={{ borderTopRightRadius: '6px', borderBottomRightRadius: '6px' }}/>
                     <Dropdown.Menu style={{ borderRadius: '6px'}}>
-                      <Dropdown.Item onClick={() => { setPrivacy('false'); document.getElementById('privacy').innerHTML = "New Public Post" }}>Public</Dropdown.Item>
-                      <Dropdown.Item onClick={() => { setPrivacy('true'); document.getElementById('privacy').innerHTML = "New Private Post"; }}>Private</Dropdown.Item>
+                      <Dropdown.Item onClick={() => setPrivacy('false')}>Public</Dropdown.Item>
+                      <Dropdown.Item onClick={() => setPrivacy('true')}>Private</Dropdown.Item>
                     </Dropdown.Menu>
                   </Dropdown>
                 </div>
@@ -238,7 +234,7 @@ function NewPost() {
               })}
               <div>
                 <div className="input-group m-2">
-                  <input type="text" id="new-tag" className="form-control" placeholder="Input new tags" aria-label="Input new tags" aria-describedby="button-add" />
+                  <input type="text" id="new-tag" className="form-control" placeholder="Input new tags" aria-label="Input new tags" aria-describedby="button-add" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
                   <button className="btn btn-outline-secondary" type="button" onClick={addNewTags}>Add</button>
                 </div>
               </div>
@@ -256,6 +252,7 @@ function NewPost() {
 
 
 function Main() {
+  const { username } = useAuth();
   const [viewMode, setViewMode] = useState("following");
   const [recommendUsers, setRecommendUsers] = useState([]);
   const [recommendTweets, setRecommendTweets] = useState([]);
@@ -263,10 +260,10 @@ function Main() {
   const [dataLength, setDataLength] = useState(0);
   const fetchFollowingsTweet = () => {
     console.log("hereFollowings tweets");
-    fetch(BACK_END + "followings/" + getLoginInfo()['username'], { "method": "GET" },
-    ).then((res) => {
+    request.get('followings/' + username)
+      .then((res) => {
       if (res.status === 200) {
-        return res.json();
+        return res.data;
       }
     }).then((data) => {
       console.log(data);
@@ -277,8 +274,8 @@ function Main() {
   }
 
   const fetchRecommendUsers = () => {
-    fetch(BACK_END + "users/" + getLoginInfo()['username'], { "method": "GET" })
-      .then((res) => res.json()).then((data) => {
+    request.get('users/' + username)
+      .then((res) => res.data).then((data) => {
         console.log("Recommend users");
         console.log(data);
         setRecommendUsers(randomSelect(data, 6));
@@ -289,8 +286,8 @@ function Main() {
 
   const fetchRecommendTweets = () => {
     console.log("hereRecommend tweets");
-    fetch(BACK_END + "tweets/" + getLoginInfo()['username'], { "method": "GET" })
-      .then((res) => res.json()).then((data) => {
+    request.get('tweets/' + username)
+      .then((res) => res.data).then((data) => {
         console.log("Recommend tweets");
         console.log(data);
         const newData = randomSelect(data, 12)

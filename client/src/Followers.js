@@ -1,38 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
-import UserListView from './User';
+import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 function Followers() {
     const [followers, setFollowers] = useState([]);
+    const { username: self, mode } = useAuth();
 
     async function fetchInfo() {
         // fetch followers information
-        let self = getLoginInfo()['username'];
         let target = window.location.pathname.split('/')[1];
-        let mode = getLoginInfo()['mode'];
         let followersrec;
+        console.log(self);
+        console.log(target);
         if (mode === 'user') {
-            followersrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/followers", {
-                method: 'GET',
+            followersrec = await request.get("followinfo/" + self + "/" + target + "/followers", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         } else {
-            followersrec = await fetch(BACK_END + "profile/" + target + "/followers", {
-                method: 'GET',
+            followersrec = await request.get("followinfo/" + target + "/followers", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         }
-        const followersData = await followersrec.json();
+        console.log(followersrec);
+        const followersData = followersrec.data;
         setFollowers(followersData);
     }
 

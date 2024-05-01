@@ -1,6 +1,6 @@
 import React from 'react';
-import { TweetListView } from './Tweet';
-import UserListView from './User';
+import { TweetListView } from './components/Tweet';
+import UserListView from './components/User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -8,6 +8,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState, useRef } from 'react';
 import { BACK_END } from './App';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 
 
@@ -22,16 +23,13 @@ class SearchTweetByKeyword extends React.Component {
     // get all the required tweets
     async getAllTweets() {
         console.log("keyword: " + this.state.keyword);
-        let res = await fetch(BACK_END + 'searchtweet/' + this.state.keyword, {
-            method: 'GET',
+        const res = await request.get('searchtweet/' + this.state.keyword, {
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
+                'Accept': 'application/json',
+            },
         });
-        let l = await res.json();
-        this.state.tweetList = await l;
-        this.setState((prevState) => ({ tweetList: l }));
+        const tweetList = res.data;
+        this.setState({ tweetList });
         console.log(this.state.tweetList);
     }
     componentWillMount() {

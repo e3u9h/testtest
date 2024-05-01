@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { createBrowserRouter, RouterProvider, BrowserRouter, Routes, Route, Navigate, Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import Login from './Login';
 import Main from './Main';
 import TweetDetail from './TweetDetail';
@@ -22,7 +22,6 @@ import SearchUser from './SearchUser';
 import SearchTweet from './SearchTweet';
 import SearchUserid from './Searchid';
 import SearchTweetByKeyword from './SearchTweetByKeyword';
-import cookie from 'react-cookies';
 import Messenger from './Messenger';
 
 
@@ -32,12 +31,13 @@ export const BACK_END = 'http://localhost:8000/'
 function App() {
 
   function AuthRoute({ children, requiredMode }) {
-    const userInfo = getLoginInfo();
-    if (userInfo === undefined || (requiredMode !== undefined && userInfo['mode'] !== requiredMode)) {
-      cookie.remove('userInfo');
+    const { username, mode } = useAuth();
+    if (!username || (requiredMode !== undefined && mode !== requiredMode)) {
+      console.log("111AuthRoute: ", username, children);
+      localStorage.removeItem('userInfo');
       return <Navigate to="/login" replace />;
     } else {
-      console.log("AuthRoute: ", userInfo, children);
+      console.log("222AuthRoute: ", username, children);
       return children;
     }
   }

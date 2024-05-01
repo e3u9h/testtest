@@ -1,37 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import Container from 'react-bootstrap/Container';
-import UserListView from './User';
+import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './App';
-import { getLoginInfo } from './Login';
+import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
+import request from './utils/request';
 
 function Followings() {
     const [followings, setFollowings] = useState([]);
+    const { username: self, mode } = useAuth();
 
     async function fetchInfo() {
-        let self = getLoginInfo()['username'];
         let target = window.location.pathname.split('/')[1];
-        let mode = getLoginInfo()['mode'];
         let followingsrec;
         if (mode === 'user') {
-            followingsrec = await fetch(BACK_END + "profile/" + self + "/" + target + "/followings", {
-                method: 'GET',
+            followingsrec = await request.get("followinfo/" + self + "/" + target + "/followings", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         } else {
-            followingsrec = await fetch(BACK_END + "profile/" + target + "/followings", {
-                method: 'GET',
+            followingsrec = await request.get("followinfo/" + target + "/followings", {
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 }
             });
         }
-        const followingsData = await followingsrec.json();
+        const followingsData = followingsrec.data;
         setFollowings(followingsData);
     }
 
