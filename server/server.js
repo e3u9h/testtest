@@ -577,7 +577,7 @@ app.post('/new-tag', (req, res) => {
         } else {
             console.log("error in creating tag");
             console.log(err);
-            return res.status(401).send(err);
+            return res.status(402).send(err);
         }
     });
 });

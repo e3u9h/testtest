@@ -7,7 +7,7 @@ router.post('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const _username = req.body['username'];
     Account.findOne({ username: _username }).then((acc) => {
-        if (acc) { console.log(acc); return res.status(401).send("The username has already been used. Please change a username."); }
+        if (acc) { console.log(acc); return res.status(403).send("The username has already been used. Please change a username."); }
         else {
             Account.create({
                 username: req.body['newusername'],
@@ -43,7 +43,7 @@ router.post('/', (req, res) => {
                 })
             }).catch((err) => {
                 if (err.code === 11000) {
-                    return res.status(401).send("The username has already existed. Please change a username.");
+                    return res.status(403).send("The username has already existed. Please change a username.");
                 }
                 console.log(err);
                 return res.status(400).send(err);

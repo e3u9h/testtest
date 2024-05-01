@@ -30,7 +30,7 @@ router.post('/user', (req, res) => {
                 }
             } else {
                 console.log("incorrect");
-                res.status(401).send({
+                res.status(403).send({
                     message: 'Incorrect Password!\n'
                 })
             }

@@ -32,7 +32,7 @@ function App() {
 
   function AuthRoute({ children, requiredMode }) {
     const { username, mode } = useAuth();
-    if (username === undefined || (requiredMode !== undefined && mode !== requiredMode)) {
+    if (!username || (requiredMode !== undefined && mode !== requiredMode)) {
       console.log("111AuthRoute: ", username, children);
       localStorage.removeItem('userInfo');
       return <Navigate to="/login" replace />;

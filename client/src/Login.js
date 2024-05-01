@@ -39,6 +39,8 @@ const Login = (props) => {
     };
     if (editUsername === '') {
       window.alert("Please enter a username.");
+    } else if (editUsername.length >= 20) {
+      window.alert("The length of the username should besmaller than 20.");
     } else if (!editPassword || !editPassword2) {
       window.alert("Please enter a password");
     } else if (editPassword.length <= 4 || editPassword.length >= 20) {

@@ -19,11 +19,19 @@ request.interceptors.request.use(
         }
         return config;
     },
-    (error) => {
-        localStorage.removeItem('userInfo');
+    (error) => {   
         return Promise.reject(error);
     }
 );
+
+request.interceptors.response.use(response => {
+    return response;
+}, error => {
+    if (error.response && (error.response.status === 401)) {
+        localStorage.removeItem('userInfo');
+    }
+    return Promise.reject(error);
+});
 
 
 export default request;
