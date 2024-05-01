@@ -20,7 +20,7 @@ router.put('/', (req, res) => {
             else {
                 acc.pwd = newpwd;
                 acc.save();
-                res.send("Update Successfully!").status(200);
+                res.send("Updated Successfully!").status(200);
             }
 
         }

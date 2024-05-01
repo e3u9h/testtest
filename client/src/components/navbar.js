@@ -28,9 +28,9 @@ function Navbar() {
         };
         // console.log(userinfo)
         if (userinfo['newpwd'] === '') {
-            window.alert("Please enter a valid new password.");
+            window.alert("Please enter a new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
-            window.alert("The length of the new password should be >4 and <20.");
+            window.alert("The length of the new password should be larger than 4 and smaller than 20.");
         } else if (newpwd !== newpwd2) {
             window.alert("Password mismatch!");
         } else {
@@ -116,7 +116,7 @@ function Navbar() {
                     <strong className='ms-2 text-muted'>{username}</strong>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a className="dropdown-item" onClick={handleLogout}>Sign out</a></li>
+                    <li><a className="dropdown-item" onClick={handleLogout}>Logout</a></li>
                     <li><a type="button" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changepasswordForm" data-bs-whatever="@mdo" >Change Password</a></li>
                 </ul>
             </div>}
