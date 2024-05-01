@@ -243,13 +243,6 @@ router.get('/:username/likes', (req, res) => {
             // console.log(tweetObj);
             retLikes.push(tweetObj);
         });
-        // sort according to the post time
-        retLikes.sort((a, b) => {
-            let time1 = new Date(a.time);
-            let time2 = new Date(b.time);
-            return time2 - time1;
-        });
-
         res.send(retLikes);
     }).catch((err) => {
         console.log(err);
