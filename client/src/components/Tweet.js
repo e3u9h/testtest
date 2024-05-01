@@ -68,7 +68,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/" + operation)
       .then(res => {
         if (res.status === 201) {
-          return res.json();
+          return res.data;
         } else {
           console.log("Like tweet failed");
           throw new Error("Like tweet failed");
