@@ -31,14 +31,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   console.log("here2" + tweetContent + files + tweetInfo['files'])
 
 
-  // update time interval every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeInterval(timeDifference(tweetInfo['time']));
-    }, 1000);
-    return () => clearInterval(interval);
-  });
-
   useEffect(() => {
     setLikeInfo(tweetInfo['likeInfo']);
     setDislikeInfo(tweetInfo['dislikeInfo']);

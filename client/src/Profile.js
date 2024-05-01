@@ -50,8 +50,8 @@ function Profile() {
             headers: { 'Accept': 'application/json' }
         });
         const dataTarget = responseTarget.data;
-        console.log("TARGET:");
-        console.log(dataTarget);
+        // console.log("TARGET:");
+        // console.log(dataTarget);
 
         setTarget(dataTarget);
         setTextAreaValue(dataTarget.about);
@@ -62,13 +62,13 @@ function Profile() {
             });
             const dataSelf = responseSelf.data;
             setSelf(dataSelf);
-            console.log(dataSelf);
-            console.log(dataSelf.users_blocked);
+            // console.log(dataSelf);
+            // console.log(dataSelf.users_blocked);
             // Follow, block, and report logic
             setFollow(dataSelf.followings.includes(dataTarget.uid));
             setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
-            console.log("here1111");
-            console.log(dataSelf.users_blocked);
+            // console.log("here1111");
+            // console.log(dataSelf.users_blocked);
             setBeblocked(dataTarget.users_blocked.includes(dataSelf.uid));
             setReport(dataSelf.users_reported.includes(dataTarget.uid));
         }
@@ -115,7 +115,6 @@ function Profile() {
             if (response.status === 200) {
                 setReport(true);
                 alert("You have reported this user.");
-                window.location.reload(true);
             } else {
                 alert("There seems to be some error. Please try again.");
             }
@@ -126,7 +125,7 @@ function Profile() {
 
     const handleEditClick = () => {
         setEditgender(target.gender);
-        console.log(target.gender)
+        // console.log(target.gender)
         setTextAreaValue(target.about);
     };
 
@@ -141,7 +140,7 @@ function Profile() {
             formData.append('portrait', "");
         }
         formData.append('gender', editgender);
-        console.log(editgender);
+        // console.log(editgender);
         formData.append('about', textAreaValue);
 
         try {
@@ -152,8 +151,6 @@ function Profile() {
             if (response.status === 200) {
                 alert("Update Profile Successfully!");
                 window.location.reload(true);
-            } else if (response.status === 413) {
-                alert("Please upload a portrait with size less than 10 Mb.");
             } else {
                 alert("There seems to be some error. Please try again.");
             }
@@ -293,7 +290,7 @@ function Profile() {
                                         </Form.Select>
                                     </div>
                                     <div className="mb-3">
-                                        <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait (no larger than 10 Mb): </label>
+                                        <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait: </label>
                                         <input type="file" className="form-control" id="portrait" />
                                     </div>
                                     <div className="mb-3">
@@ -407,7 +404,15 @@ function Profile() {
     );
 }
 
-
+const compare = (tweetA, tweetB) => {
+    if (tweetA.time > tweetB.time) {
+        return -1;
+    }
+    if (tweetA.time < tweetB.time) {
+        return 1;
+    }
+    return 0;
+}
 
 function MyPostsList({ username }) {
     const { username: self, mode } = useAuth();
@@ -444,17 +449,6 @@ function MyPostsList({ username }) {
     }, [target]);
 
 
-    const compare = (tweetA, tweetB) => {
-        if (tweetA.time > tweetB.time) {
-            return -1;
-        }
-        if (tweetA.time < tweetB.time) {
-            return 1;
-        }
-        return 0;
-    }
-
-
     return (
         <InfiniteScroll dataLength={tweets.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
             endMessage={<p style={{ textAlign: 'center' }}>
@@ -482,16 +476,6 @@ function LikesList() {
         likes.sort(compare);
 
         setLikes(likes);
-    }
-
-    const compare = (tweetA, tweetB) => {
-        if (tweetA.time > tweetB.time) {
-            return -1;
-        }
-        if (tweetA.time < tweetB.time) {
-            return 1;
-        }
-        return 0;
     }
 
     useEffect(() => {
