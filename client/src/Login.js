@@ -40,9 +40,9 @@ const Login = (props) => {
     if (editUsername === '') {
       window.alert("Please enter a username.");
     } else if (editUsername.length >= 20) {
-      window.alert("The length of the username should besmaller than 20.");
+      window.alert("The length of the username should be smaller than 20.");
     } else if (!editPassword || !editPassword2) {
-      window.alert("Please enter a password");
+      window.alert("Please enter a password.");
     } else if (editPassword.length <= 4 || editPassword.length >= 20) {
       window.alert("The length of the password should be larger than 4 and smaller than 20.");
     } else if (editPassword !== editPassword2) {
@@ -69,7 +69,7 @@ const Login = (props) => {
                 alert(err1.response.data.message);
               });
           }
-          alert(res.data);
+          // alert(res.data);
         })
         .catch(err => {
           console.log(err);

@@ -31,10 +31,10 @@ export const BACK_END = 'http://localhost:8000/'
 function App() {
 
   function AuthRoute({ children, requiredMode }) {
-    const { username, mode } = useAuth();
+    const { username, mode, logout } = useAuth();
     if (!username || (requiredMode !== undefined && mode !== requiredMode)) {
       console.log("111AuthRoute: ", username, children);
-      localStorage.removeItem('userInfo');
+      logout();
       return <Navigate to="/login" replace />;
     } else {
       console.log("222AuthRoute: ", username, children);
