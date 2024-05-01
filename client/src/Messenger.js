@@ -7,6 +7,7 @@ import { useAuth } from "./provider/context.js";
 import { io } from "socket.io-client";
 import { timeDifference } from "./utils/Utils.js"
 import request from "./utils/request.js";
+import { SOCKET_BACKEND } from "./config.js";
 
 // 
 export default function Messenger(state){
@@ -30,7 +31,7 @@ export default function Messenger(state){
 
     
     useEffect(() => {
-      socket.current = io("ws://localhost:8000");
+      socket.current = io(SOCKET_BACKEND);
       // socket.current = io("ws://10.13.189.122:8000");
         socket.current.on("getMessage", (data) => {
           setArrivalMessage({
