@@ -27,7 +27,7 @@ function timeDifference(time) {
     const day = postTime.getDate();
     const hours = postTime.getHours();
     const minutes = postTime.getMinutes();
-    const diffInDay = now.getDate() - day;
+    const diffInDay = now / 86400000 - postTime / 86400000;
     const diffInYear = now.getFullYear() - year;
     if (diffInYear > 0) {
         return `${year}-${month.toString()} ${day.toString()}`;

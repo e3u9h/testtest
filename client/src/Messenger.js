@@ -4,11 +4,11 @@ import Message from "./components/message/Message";
 import "./css/messenger.css"
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./provider/context.js";
-import axios from "axios";
-import { BACK_END } from "./App";
 import { io } from "socket.io-client";
 import { timeDifference } from "./utils/Utils.js"
 import request from "./utils/request.js";
+import { SOCKET_BACKEND } from "./config.js";
+import { useLocation } from 'react-router-dom';
 
 // 
 export default function Messenger(state){
@@ -23,16 +23,20 @@ export default function Messenger(state){
     const [onlineUsers, setOnlineUsers] = useState([]);
     const socket = useRef();
     const scrollRef = useRef();
+    const location = useLocation();
 
   const { username: current_username } = useAuth();
 
     //   fetch user info use this line
     //   const response = (await fetch(BACK_END + "profile/" + username));
-    //   const user = await response.json();
+    //   const user = await response.json(); 
 
+    useEffect(() => {
+      console.log("Current Chat updated:", currentChat);
+    }, [currentChat]);
     
     useEffect(() => {
-      socket.current = io("ws://localhost:8000");
+      socket.current = io(SOCKET_BACKEND);
       // socket.current = io("ws://10.13.189.122:8000");
         socket.current.on("getMessage", (data) => {
           setArrivalMessage({
@@ -47,6 +51,7 @@ export default function Messenger(state){
         arrivalMessage &&
           currentChat?.members.includes(arrivalMessage.sender) &&
           setMessages((prev) => [...prev, arrivalMessage]);
+          console.log("Gettttttt Messages:",arrivalMessage)
     }, [arrivalMessage, currentChat]);
 
     useEffect(() => {
@@ -79,8 +84,8 @@ export default function Messenger(state){
         };
         getMessages();
       }, [currentChat]);
-    console.log(currentChat);
-    console.log(messages);
+    // console.log(currentChat);
+    // console.log(messages);
 
     useEffect(() => {
         socket.current.emit("addUser", currentUser.uid);
@@ -143,7 +148,18 @@ export default function Messenger(state){
     }
   };
 
-
+  useEffect(() => {
+    const existConversation = async () => {
+      try {
+        if (location.state && location.state.current_conversation) {
+          setCurrentChat(location.state.current_conversation);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    existConversation();
+  }, [location.state]);
 
 
   useEffect(() => {
@@ -157,7 +173,8 @@ export default function Messenger(state){
                     <input placeholder="Search for friends" className="chatMenuInput" onChange={handleSearchChange}
                     value = {searchTerm} />
                         {conversations.map((c, index) => (
-                        <div key={index} onClick={() => setCurrentChat(c)}>
+                        <div key={index} onClick={() => {setCurrentChat(c); console.log("Conversation clicked:", c);}}>
+                          
                             <Conversation conversation={c} currentUsername={current_username}/>
                         </div>
                         ))}

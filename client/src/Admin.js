@@ -2,7 +2,6 @@ import { Container } from '@material-ui/core';
 import * as React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
-import { BACK_END } from './App';
 import { Link } from 'react-router-dom';
 import request from './utils/request';
 

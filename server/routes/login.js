@@ -15,7 +15,7 @@ router.post('/user', (req, res) => {
         }
         else {
             if (val && _pwd === val.pwd) {
-                const token = jsonwebtoken.sign({ username: _username, mode: val.identity }, jwtKey, { expiresIn: '1h', algorithm: 'HS256' });
+                const token = jsonwebtoken.sign({ username: _username, mode: val.identity }, jwtKey, { expiresIn: '10h', algorithm: 'HS256' });
                 if (val.identity === 'user') {
                     res.status(201).send({
                         message: 'Login As User Successfully!\n',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faHome, faSearch, faUser, faComment } from '@fortawesome/free-solid-svg-icons';
-import { BACK_END } from '../App';
+import { BACK_END } from '../config';
 import './navbar.css';
 import { useAuth } from '../provider/context';
 import request from '../utils/request';
@@ -10,6 +10,9 @@ import request from '../utils/request';
 function Navbar() {
     const { logout, username, mode } = useAuth();
     const [userPortraitSrc, setUserPortraitSrc] = useState(null);
+    const [editOldPassword, setEditOldPassword] = useState('');
+    const [editNewPassword, setEditNewPassword] = useState('');
+    const [editNewPassword2, setEditNewPassword2] = useState('');
     const navigate = useNavigate();
     const handleLogout = () => {
         logout();
@@ -17,21 +20,18 @@ function Navbar() {
     };
     const changePwd = () => {
         const changepwdusername = username;
-        const oldpwd = document.querySelector("#originalpwd").value;
-        const newpwd = document.querySelector("#changedpwd").value;
-        const newpwd2 = document.querySelector("#changedpwd2").value;
         const userinfo = {
             username: changepwdusername,
-            oldpwd: oldpwd,
-            newpwd: newpwd,
-            newpwd2: newpwd2
+            oldpwd: editOldPassword,
+            newpwd: editNewPassword,
+            newpwd2: editNewPassword2
         };
         // console.log(userinfo)
         if (userinfo['newpwd'] === '') {
-            window.alert("Please enter a valid new password.");
+            window.alert("Please enter a new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
-            window.alert("The length of the new password should be >4 and <20.");
-        } else if (newpwd !== newpwd2) {
+            window.alert("The length of the new password should be larger than 4 and smaller than 20.");
+        } else if (userinfo['newpwd'] !== userinfo['newpwd2']) {
             window.alert("Password mismatch!");
         } else {
             request.put("changepwd", userinfo)
@@ -72,9 +72,6 @@ function Navbar() {
     }, []);
     return (<>
         {<div className="col-md-2 p-3 text-bg-light">
-            {/* <div className="d-flex justify-content-center text-center">
-          <img className="w-75 d-flex justify-content-center" src={[require('./img/c3ulogo.jpg')]} alt='logo.png'></img>
-        </div> */}
             <hr />
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
@@ -116,7 +113,7 @@ function Navbar() {
                     <strong className='ms-2 text-muted'>{username}</strong>
                 </a>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow">
-                    <li><a className="dropdown-item" onClick={handleLogout}>Sign out</a></li>
+                    <li><a className="dropdown-item" onClick={handleLogout}>Logout</a></li>
                     <li><a type="button" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changepasswordForm" data-bs-whatever="@mdo" >Change Password</a></li>
                 </ul>
             </div>}
@@ -130,11 +127,11 @@ function Navbar() {
                     <div className="modal-body">
                         <div className="mb-3">
                             <label htmlFor="name" className="col-form-label"> Old Password: </label>
-                            <input type="password" className="form-control" id="originalpwd" />
+                            <input type="password" className="form-control" value={editOldPassword} onChange={(e) => setEditOldPassword(e.target.value)} />
                             <label htmlFor="name" className="col-form-label"> New Password: </label>
-                            <input type="password" className="form-control" id="changedpwd" />
+                            <input type="password" className="form-control" value={editNewPassword} onChange={(e) => setEditNewPassword(e.target.value)} />
                             <label htmlFor="name" className="col-form-label"> Recheck New Password: </label>
-                            <input type="password" className="form-control" id="changedpwd2" />
+                            <input type="password" className="form-control" value={editNewPassword2} onChange={(e) => setEditNewPassword2(e.target.value)} />
                         </div>
                     </div>
                     <div className="modal-footer">

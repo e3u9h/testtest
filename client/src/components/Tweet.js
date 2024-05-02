@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { timeDifference } from '../utils/Utils';
 import { Link } from "react-router-dom";
 import { useAuth } from '../provider/context';
-import { BACK_END } from '../App';
+import { BACK_END } from '../config';
 import { randomSelect } from '../utils/Utils';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
@@ -30,14 +30,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const files = tweetInfo['files']
   console.log("here2" + tweetContent + files + tweetInfo['files'])
 
-
-  // update time interval every second
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeInterval(timeDifference(tweetInfo['time']));
-    }, 1000);
-    return () => clearInterval(interval);
-  });
 
   useEffect(() => {
     setLikeInfo(tweetInfo['likeInfo']);
@@ -68,7 +60,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/" + operation)
       .then(res => {
         if (res.status === 201) {
-          return res.json();
+          return res.data;
         } else {
           console.log("Like tweet failed");
           throw new Error("Like tweet failed");

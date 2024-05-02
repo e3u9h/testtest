@@ -7,7 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import SearchUser from './SearchUser';
 import SearchTweet from './SearchTweet';
 import { Link } from 'react-router-dom';
-import {BACK_END} from './App';
+import { BACK_END } from './config';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import request from './utils/request';

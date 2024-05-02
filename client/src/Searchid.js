@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import UserListView from './components/User';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {BACK_END} from './App';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';

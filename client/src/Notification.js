@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import {Link} from "react-router-dom";
 // import MaterialIcon, {colorPalette} from 'material-icons-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import {BACK_END} from './App';
+import { BACK_END } from './config';
 import { useAuth } from './provider/context';
 import { timeDifference } from './utils/Utils';
 import request from './utils/request';

@@ -1,12 +1,6 @@
 import React from 'react';
 import { TweetListView } from './components/Tweet';
-import UserListView from './components/User';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useState, useRef } from 'react';
-import { BACK_END } from './App';
 import BackButton from './components/backbutton';
 import request from './utils/request';
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./conversation.css";
 import axios from "axios";
 import React from "react";
-import { BACK_END } from "../../App";
+import { BACK_END } from "../../config";
 import request from "../../utils/request";
 
 export default function Conversation({ conversation , currentUsername}) {

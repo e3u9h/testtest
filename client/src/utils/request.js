@@ -1,6 +1,5 @@
 import axios from "axios";
-
-const BACK_END = "http://localhost:8000/";
+import { BACK_END } from "../config";
 
 const request = axios.create({
     baseURL: BACK_END,
