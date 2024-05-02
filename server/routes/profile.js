@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import upload from '../middlewares/upload.js';
 router.use('/uploads', express.static('uploads'))
 
+// get the portrait of the user
 router.get('/portrait/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.params['username'];
@@ -23,43 +24,36 @@ router.get('/portrait/:username', (req, res) => {
     });
 });
 
+// get the information of the target user
 router.get('/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.params['username'];
-    User.findOne({ 'username': username }).populate('tweets').exec().then((user) => {
-        let userObj = null;
-        if (user !== null) {
-            userObj = {
-                'uid': user['_id'],
-                'username': user['username'],
-                'gender': user['gender'],
-                'follower_counter': user['follower_counter'],
-                'following_counter': user['following_counter'],
-                'users_blocked': user['users_blocked'],
-                'users_reported': user['users_reported'],
-                'about': user['about'],
-                'portrait': user['portrait']
-            }
-        }
-        res.send(userObj);
+    User.findOne({ 'username': username }).then((user) => {
+        res.send(user);
     }).catch((err) => {
         console.log(err);
         res.send(err);
     });
 });
 
-router.get('/:username/actioninfo', (req, res) => {
+// get the action information about the relationship between self and the target user
+router.get('/:username/:targetname/actioninfo', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    let username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
-        let userObj = {
-            'uid': user['_id'],
-            'username': user['username'],
-            'followings': user['followings'],
-            'users_blocked': user['users_blocked'],
-            'users_reported': user['users_reported']
-        }
-        res.send(userObj);
+    User.findOne({ 'username': req.params['username'] }).then((user) => {
+        User.findOne({ 'username': req.params['targetname'] }).then((target) => {
+            const isFollowing = user.followings.includes(target._id);
+            const isBlocking = user.users_blocked.includes(target._id);
+            const isBlocked = target.users_blocked.includes(user._id);
+            const hasReported = user.users_reported.includes(target._id);
+            const actionInfo = {
+                "_id": user._id,
+                "isFollowing": isFollowing,
+                "isBlocking": isBlocking,
+                "isBlocked": isBlocked,
+                "hasReported": hasReported
+            }
+            res.send(actionInfo);
+        });
     }).catch((err) => {
         console.log(err);
         res.send(err);
@@ -75,11 +69,11 @@ router.put('/:username', upload.single('portrait'), (req, res) => {
     const updateAbout = req.body.about;
 
     User.findOne({ 'username': username }).then((user) => {
-        if (updateGender != '')
+        if (updateGender !== '')
             user.gender = updateGender;
-        if (updatePortrait != '')
+        if (updatePortrait !== '')
             user.portrait = updatePortrait;
-        if (updateAbout != '')
+        if (updateAbout !== '')
             user.about = updateAbout;
         user.save();
         res.status(200).send(JSON.stringify(user));
@@ -98,7 +92,7 @@ router.get('/:self/:target/tweets', (req, res) => {
     let self_ = req.params['self'];
     let target = req.params['target'];
     let retTweets = [];
-    if (self_ != null && self_ != '' && self_ == target) {
+    if (self_ !== null && self_ !== '' && self_ === target) {
         User.findOne({ 'username': self_ }).populate({ path: 'tweets' }).exec().then((self) => {
             console.log('self found');
             self.tweets.forEach(tweet => {
@@ -139,7 +133,7 @@ router.get('/:self/:target/tweets', (req, res) => {
             return res.send(err);
         })
     }
-    else if (self_ != null && self_ != '' && self_ != target) {
+    else if (self_ !== null && self_ !== '' && self_ !== target) {
         User.findOne({ 'username': target }).populate({ path: 'tweets', match: { 'private': 'false' } }).exec().then((user) => {
             user.tweets.forEach(tweet => {
                 let isReported = false;
