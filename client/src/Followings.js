@@ -12,20 +12,11 @@ function Followings() {
 
     async function fetchInfo() {
         let target = window.location.pathname.split('/')[1];
-        let followingsrec;
-        if (mode === 'user') {
-            followingsrec = await request.get("followinfo/" + self + "/" + target + "/followings", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        } else {
-            followingsrec = await request.get("followinfo/" + target + "/followings", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        }
+        let followingsrec = await request.get("followinfo/" + self + "/" + target + "/followings", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         const followingsData = followingsrec.data;
         setFollowings(followingsData);
     }
