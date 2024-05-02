@@ -31,6 +31,10 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 
+// all the requests need to be authorized by the token except for login, creating user and accessing the files
+// (maybe accessing files need to be authorized as well, but now I don't know how to do it
+// because the files are directly accessed in the <img> tag,
+// which cannot use axios's request interceptor to add token to the header, so I just let it not be authorized for now)
 app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/, /^\/img/] }));
 
 app.use('/uploads', express.static('uploads'))

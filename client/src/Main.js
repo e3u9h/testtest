@@ -143,7 +143,9 @@ function NewPost() {
         document.getElementById("close-modal").click();
       });
     } else {
-      alert("Tag already exists");
+      // alert("Tag already exists");
+      setTags([...tags, newTag]);
+      document.getElementById("close-modal").click();
     }
     // clear the input field
     setNewTag('');
