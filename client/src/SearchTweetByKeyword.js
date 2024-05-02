@@ -5,7 +5,7 @@ import BackButton from './components/backbutton';
 import request from './utils/request';
 
 
-
+// seacrh tweets by its keywords
 class SearchTweetByKeyword extends React.Component {
     constructor(props) {
         super(props);
