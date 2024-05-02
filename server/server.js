@@ -22,6 +22,7 @@ import interactionRoute from "./routes/userinteraction.js";
 import { mongoUrl } from './config.js';
 import { expressjwt } from 'express-jwt';
 import { jwtKey } from './config.js';
+import bcryptjs from 'bcryptjs';
 
 const app = express();
 
@@ -1018,7 +1019,7 @@ app.put('/adminchangepwd', async (req, res) => {
         return res.status(404).send("No such user.");
       }
       console.log(`Changing password for user: ${username}`);
-      acc.pwd = newpwd;
+        acc.pwd = bcryptjs.hashSync(newpwd, 10);
       await acc.save();
       return res.status(200).send("Update Successfully!");
     } catch (err) {

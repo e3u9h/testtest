@@ -1,6 +1,7 @@
 import express from 'express';
 const router = express.Router();
 import Account from "../models/Account.js";
+import bcryptjs from 'bcryptjs';
 
 router.put('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -14,11 +15,20 @@ router.put('/', (req, res) => {
             res.sendStatus(404);
         }
         else if (newpwd !== '') {
-            if (oldpwd !== acc.pwd) {
+            let correct = false;
+            if (acc && bcryptjs.compareSync(oldpwd, acc.pwd)) {
+                correct = true;
+            } else if (acc && oldpwd === acc.pwd) {
+                // this part is for the transition from the not-encrypted version to the encrypted version
+                // because in our previous version, the passwords are saved in plain text
+                // after all the users' passwords are encrypted, this part can be deleted
+                correct = true;
+            }
+            if (correct === false) {
                 res.send("The old password is incorrect!").status(404);
             }
             else {
-                acc.pwd = newpwd;
+                acc.pwd = bcryptjs.hashSync(newpwd, 10);
                 acc.save();
                 res.send("Updated Successfully!").status(200);
             }

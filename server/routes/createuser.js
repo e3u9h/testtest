@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import Account from "../models/Account.js";
 import User from "../models/User.js";
+import bcryptjs from 'bcryptjs';
 
 // create a new user (used for both user registration and admin creation)
 router.post('/', (req, res) => {
@@ -14,7 +15,8 @@ router.post('/', (req, res) => {
             // if the username has not existed, first, create an Account record in the database
             Account.create({
                 username: req.body['newusername'],
-                pwd: req.body['newpwd'],
+                // bcryptjs is for encrypting the password
+                pwd: bcryptjs.hashSync(req.body['newpwd'], 10),
                 identity: 'user'
             }).then(() => {
                 // then, create a User record in the database
