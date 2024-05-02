@@ -3,7 +3,7 @@ import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-
+// search tweets/posts according to its tag
 class SearchTweet extends React.Component {
   constructor(props) {
     super(props);
@@ -31,7 +31,7 @@ class SearchTweet extends React.Component {
       console.error('Error:', error);
     }
   }
-
+// display related information
   render() {
     return (
       <>

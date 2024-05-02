@@ -4,12 +4,11 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-
+//get the target user by id
 const SearchUserid = () => {
   const { username: selfname } = useAuth();
   const username = window.location.pathname.split('/')[2];
   const [userList, setUserList] = useState([]);
-
   const getAllUser = async () => {
     const res = await request.get("searchuserbyid/" + selfname + "/" + username, {
       headers: {

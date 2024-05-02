@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-
+//search user by its keywords
 const SearchUser = () => {
   const { username: selfname } = useAuth();
   console.log(selfname);
