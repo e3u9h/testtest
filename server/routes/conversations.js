@@ -4,17 +4,29 @@ import Conversation from "../models/Conversation.js";
 
 //Create new conversation
 
-router.post("/", async (req,res)=>{
-    const newConversation = new Conversation({
-        members: [req.body.senderId, req.body.receiverId],
-    }); 
+router.post("/", async (req, res) => {
+  const { senderId, receiverId } = req.body;
 
-    try{
-        const savedConversation = await newConversation.save();
-        res.status(200).json(savedConversation);
-    }catch(err){
-        res.status(500).json(err);
-    }
+  try {
+      // Check if a conversation already exists between the two users
+      const existingConversation = await Conversation.findOne({
+          members: { $all: [senderId, receiverId] }
+      });
+      if (existingConversation) {
+          // If a conversation exists, return it
+          res.status(200).json(existingConversation);
+      } else {
+          // No existing conversation, create a new one
+          const newConversation = new Conversation({
+              members: [senderId, receiverId],
+          });
+
+          const savedConversation = await newConversation.save();
+          res.status(200).json(savedConversation);
+      }
+  } catch (err) {
+      res.status(500).json(err);
+  }
 });
 
 // get conv of a user
