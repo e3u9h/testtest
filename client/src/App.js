@@ -28,19 +28,24 @@ import Messenger from './Messenger';
 function App() {
 
   function AuthRoute({ children, requiredMode }) {
+    // this is a route for authentication which checks whether the user is logged in and has the required mode
     const { username, mode, logout } = useAuth();
     if (!username || (requiredMode !== undefined && mode !== requiredMode)) {
       console.log("111AuthRoute: ", username, children);
+      // if the user is not logged in or does not have the required mode, logout and redirect to the login page
       logout();
       return <Navigate to="/login" replace />;
     } else {
       console.log("222AuthRoute: ", username, children);
+      // if the user is logged in and has the required mode, return the children
       return children;
     }
   }
 
 
   const Layout = () => {
+    // this is the layout of the all the pages except the login page,
+    // which consists of a header, a navbar, and the main content
     return (<>
       <Header />
       <div className="row" style={{ height: "100vh" }}>
@@ -53,20 +58,7 @@ function App() {
     );
   }
 
-  const LayoutAdmin = () => {
-    return (
-      <>
-        <Header />
-        <div className="row" style={{ height: "100vh" }}>
-          <Navbar />
-          <div className="col-md-10 p-3 bg-light overflow-auto">
-            <Outlet />
-          </div>
-        </div>
-      </>
-    );
-  }
-
+  // there are three kinds of routes: normal routes, login route, and admin route
   const router = createBrowserRouter([
     {
       path: '/',
@@ -92,7 +84,7 @@ function App() {
     },
     {
       path: '/admin',
-      element: <AuthRoute requiredMode='admin'><LayoutAdmin /></AuthRoute>,
+      element: <AuthRoute requiredMode='admin'><Layout /></AuthRoute>,
       children: [
         { index: true, element: <Admin /> }
       ]
