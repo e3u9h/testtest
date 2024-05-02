@@ -2,6 +2,7 @@ import express from 'express';
 const router = express.Router();
 import User from "../models/User.js";
 import upload from '../middlewares/upload.js';
+import Account from '../models/Account.js';
 router.use('/uploads', express.static('uploads'))
 
 // get the portrait of the user
@@ -86,124 +87,60 @@ router.put('/:username', upload.single('portrait'), (req, res) => {
 /****Tweets****/
 /**************/
 
-// get tweets posted (user mode)
+// get tweets posted
 router.get('/:self/:target/tweets', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    let self_ = req.params['self'];
+    let self = req.params['self'];
     let target = req.params['target'];
     let retTweets = [];
-    if (self_ !== null && self_ !== '' && self_ === target) {
-        User.findOne({ 'username': self_ }).populate({ path: 'tweets' }).exec().then((self) => {
-            console.log('self found');
-            self.tweets.forEach(tweet => {
-                let isReported = false;
+    // if the self and target are the same, return all tweets; otherwise, return only public tweets
+    let matchCondition = (self === target) ? {} : { 'private': 'false' };
+    if (self !== target) {
+        // if the self is different from the target but self is an admin, return all tweets as well
+        Account.findOne({ username: self }).then((acc) => {
+            if(acc.identity === 'admin') matchCondition = {};
+        });
+    }
+    User.findOne({ 'username': target }).populate({ path: 'tweets', match: matchCondition }).exec().then((target) => {
+        User.findOne({ 'username': self }).then((user) => {
+            target.tweets.forEach(tweet => {
+                console.log(user)
+                // if the user is not found in User Database, it indicates that the user is an admin,
+                // so isLiked and isDisliked are set false; 
+                // otherwise, check if the user has liked or disliked this tweet
                 let isLiked = false;
                 let isDisliked = false;
-                if (self.tweets_liked.includes(tweet._id)) {
-                    isLiked = true;
-                }
-                if (self.tweets_disliked.includes(tweet._id)) {
-                    isDisliked = true;
-                }
-                if (self.tweets_reported.includes(tweet._id)) {
-                    isReported = true;
+                if (user !== null) {
+                    isLiked = user.tweets_liked.includes(tweet._id);
+                    isDisliked = user.tweets_disliked.includes(tweet._id)
                 }
                 let tweetObj = {
                     "tid": tweet['_id'],
                     "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": isLiked },
                     "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": isDisliked },
-                    "user": { "uid": self['_id'], 'username': self['username'] },
+                    "user": { "uid": target['_id'], 'username': target['username'] },
                     "content": tweet['tweet_content'],
                     "files": tweet['files'],
                     "commentCount": tweet['comments'].length,
                     "retweetCount": tweet['retweets'].length,
-                    "isReported": isReported,
                     "time": tweet['post_time'],
-                    "portraitUrl": self['portrait'],
+                    "portraitUrl": target['portrait'],
                     "tags": tweet['tags'],
                     'private': tweet['private']
                 }
+                console.log("here", tweetObj)
                 retTweets.push(tweetObj);
-                // console.log(tweetObj)
             });
-
-            console.log('get self tweets success')
+            console.log('hereget posted tweets success')
+            console.log(retTweets)
             return res.status(200).send(retTweets);
-        }).catch((err) => {
-            return res.send(err);
-        })
-    }
-    else if (self_ !== null && self_ !== '' && self_ !== target) {
-        User.findOne({ 'username': target }).populate({ path: 'tweets', match: { 'private': 'false' } }).exec().then((user) => {
-            user.tweets.forEach(tweet => {
-                let isReported = false;
-                let isLiked = false;
-                let isDisliked = false;
-                if (user.tweets_liked.includes(tweet._id)) {
-                    isLiked = true;
-                }
-                if (user.tweets_disliked.includes(tweet._id)) {
-                    isDisliked = true;
-                }
-                if (user.tweets_reported.includes(tweet._id)) {
-                    isReported = true;
-                }
-                let tweetObj = {
-                    "tid": tweet['_id'],
-                    "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": isLiked },
-                    "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": isDisliked },
-                    "user": { "uid": user['_id'], 'username': user['username'] },
-                    "content": tweet['tweet_content'],
-                    "files": tweet['files'],
-                    "commentCount": tweet['comments'].length,
-                    "retweetCount": tweet['retweets'].length,
-                    "isReported": isReported,
-                    "time": tweet['post_time'],
-                    "portraitUrl": user['portrait'],
-                    "tags": tweet['tags'],
-                    'private': tweet['private']
-                }
-                retTweets.push(tweetObj);
-            });
-            console.log('get other tweets success')
-            return res.status(200).send(retTweets);
-        }).catch((err) => {
-            return res.send(err);
-        })
-    }
-});
-
-// get tweets posted (admin mode)
-router.get('/:target/tweets', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let target = req.params['target'];
-    User.findOne({ 'username': target }).populate('tweets').exec().then((user) => {
-        let retTweets = [];
-        if (user != null && user != '') {
-            user.tweets.forEach(tweet => {
-                let tweetObj = {
-                    "tid": tweet['_id'],
-                    "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
-                    "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": false },
-                    "user": { "uid": user['_id'], 'username': user['username'] },
-                    "content": tweet['tweet_content'],
-                    "files": tweet['files'],
-                    "commentCount": tweet['comments'].length,
-                    "retweetCount": tweet['retweets'].length,
-                    "isReported": false,
-                    "time": tweet['post_time'],
-                    "portraitUrl": user['portrait'],
-                    "tags": tweet['tags']
-                }
-                retTweets.push(tweetObj);
-            });
-            res.send(retTweets);
-        }
+        });
     }).catch((err) => {
         console.log(err);
-        res.send(err);
-    });
+        return res.send(err);
+    })
 });
+
 
 // get tweets liked
 router.get('/:username/likes', (req, res) => {
@@ -212,7 +149,7 @@ router.get('/:username/likes', (req, res) => {
     User.findOne({ 'username': username }).populate({ path: 'tweets_liked', populate: { path: 'poster' } }).exec().then((user) => {
         let retLikes = []
         user.tweets_liked.forEach(tweet => {
-            if (tweet['poster'] == null) {
+            if (tweet['poster'] === null) {
                 console.log("Warning: tweet with id " + tweet['_id'] + " has no poster");
                 return;
             }

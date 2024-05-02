@@ -411,21 +411,12 @@ function MyPostsList({ username }) {
     const [target, setTarget] = useState(username);
 
     const fetchInfo = async () => {
-        let tweetrec;
 
-        if (mode === 'user') {
-            tweetrec = await request.get("profile/" + self + "/" + target + "/tweets", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        } else {
-            tweetrec = await request.get("profile/" + target + "/tweets", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        }
+        let tweetrec = await request.get("profile/" + self + "/" + target + "/tweets", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
 
         let fetchedTweets = tweetrec.data;
         console.log(tweetrec);

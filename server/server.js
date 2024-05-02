@@ -646,12 +646,20 @@ app.get('/fetchtweet/:tid/:username', (req, res) => {
         if (!tweet) { return res.send('Tweet does not exist').status(404); }
         console.log('tweet found');
         User.findOne({ 'username': req.params['username'] }).then((user) => {
-            if (!user) { return res.send('User does not exist').status(404); }
-            else { console.log('User found') }
+            // if the user is not found in User Database, it indicates that the user is an admin,
+            // so isLiked and isDisliked are set false; 
+            // otherwise, check if the user has liked or disliked this tweet
+            let isLiked = false;
+            let isDisliked = false;
+            if (user) {
+                console.log('User found')
+                isLiked = user.tweets_liked.includes(tweet._id);
+                isDisliked = user.tweets_disliked.includes(tweet._id);
+            }
             let tweet_info = {
                 tid: tweet._id,
-                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: user.tweets_liked.includes(tweet._id) },
-                dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: user.tweets_disliked.includes(tweet._id) },
+                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: isLiked },
+                dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: isDisliked },
                 user: { uid: tweet.poster._id, username: tweet.poster.username },
                 content: tweet.tweet_content,
                 files: tweet.files,

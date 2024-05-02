@@ -5,6 +5,7 @@ import { TweetCard } from './components/Tweet';
 import { useAuth } from './provider/context';
 import { timeDifference } from './utils/Utils';
 import request from './utils/request';
+import BackButton from './components/backbutton';
 
 const TweetDetail = () => {
     const [tweetInfo, setTweetInfo] = useState({
@@ -99,6 +100,7 @@ const TweetDetail = () => {
 
     return (
         <div>
+            <BackButton />
             <div id="scrollableComment" style={{ height: "80vh", overflow: "auto" }}>
                 <InfiniteScroll dataLength={commentInfo.length} next={null} hasMore={false} scrollableTarget="scrollableComment"
                     endMessage={<p style={{ textAlign: 'center' }}><b>No more comments</b></p>}>
