@@ -59,8 +59,9 @@ export default function Messenger(state){
           try {
             const response = await (request.get("profile/" + current_username));
             const user = response.data;
-            const res = await request.get("server/conversations/" + user.uid);
+            const res = await request.get("server/conversations/" + user._id);
             setCurrentUser(user);
+            console.log("hereaaaa", res.data)
             setConversations(res.data);
           } catch (err) {
             console.log(err);
@@ -88,7 +89,7 @@ export default function Messenger(state){
     // console.log(messages);
 
     useEffect(() => {
-        socket.current.emit("addUser", currentUser.uid);
+      socket.current.emit("addUser", currentUser._id);
         socket.current.on("getUsers", (users) => {
           setOnlineUsers(
             currentUser.followings?.filter((f) => users.some((u) => u.userId === f))
@@ -99,17 +100,17 @@ export default function Messenger(state){
     const handleSubmit = async (e) => {
         e.preventDefault();
         const message = {
-          sender: currentUser.uid,
+          sender: currentUser._id,
           text: newMessage,
           conversationId: currentChat._id,
         };
 
         const receiverId = currentChat.members.find(
-            (member) => member !== currentUser.uid
+          (member) => member !== currentUser._id
         );
       
         socket.current.emit("sendMessage", {
-        senderId: currentUser.uid,
+          senderId: currentUser._id,
         receiverId,
         text: newMessage,
         });
@@ -135,7 +136,7 @@ export default function Messenger(state){
 
         const newFilteredConversations = conversations.filter(conversation =>
           conversation.members.some(member => 
-            matchedUserIds.includes(member) && member !== currentUser.uid
+            matchedUserIds.includes(member) && member !== currentUser._id
           )
         );
         setFilteredConversations(newFilteredConversations);
@@ -188,7 +189,7 @@ export default function Messenger(state){
                                 {messages.map((m, index) => (
                                     <div key ={index} >
                                     <div ref={scrollRef}>
-                                    <Message message={m} own={m.sender === currentUser.uid} />
+                                      <Message message={m} own={m.sender === currentUser._id} />
                                     </div>
                                     </div>
                                 ))}
