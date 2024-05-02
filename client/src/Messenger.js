@@ -5,7 +5,7 @@ import "./css/messenger.css"
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./provider/context.js";
 import { io } from "socket.io-client";
-import { timeDifference } from "./utils/Utils.js"
+import { timeDisplay } from "./utils/Utils.js"
 import request from "./utils/request.js";
 import { SOCKET_BACKEND } from "./config.js";
 import { useLocation } from 'react-router-dom';

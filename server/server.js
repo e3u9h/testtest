@@ -1038,7 +1038,22 @@ app.delete('/user/:username', async (req, res) => {
     const { username } = req.params;
 
     try {
-        //delete user
+        // update the followings and followers info of all the followings and followers of the target user
+        const targetUser = await User.findOne({ username: username }).populate('followings').populate('followers');
+        if (!targetUser) {
+            return res.status(404).send('User does not exist.');
+        }
+        targetUser.followings.forEach(async (following) => {
+            following.followers.remove(targetUser._id);
+            following.follower_counter--;
+            await following.save();
+        });
+        targetUser.followers.forEach(async (follower) => {
+            follower.followings.remove(targetUser._id);
+            follower.following_counter--;
+            await follower.save();
+        });
+        //delete the user
         const accResult = await Account.deleteOne({ username: username });
         if (accResult.deletedCount === 0) {
             return res.status(404).send('User does not exist in Account db.');

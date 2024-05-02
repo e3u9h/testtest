@@ -1,6 +1,6 @@
 import "./message.css";
 import { format } from "timeago.js"
-import { timeDifference } from "../../utils/Utils.js"
+import { timeDisplay } from "../../utils/Utils.js"
 
 export default function Message({message, own}) {
   return (
@@ -13,7 +13,7 @@ export default function Message({message, own}) {
         />
         <p className="messageText">{message.text} </p>
         </div>
-        <div className="messageBottom">{timeDifference(message.createdAt)} </div>
+      <div className="messageBottom">{timeDisplay(message.createdAt)} </div>
     </div>
   );
 }

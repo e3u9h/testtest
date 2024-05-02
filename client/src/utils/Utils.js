@@ -16,7 +16,7 @@ function randomSelect(arr, n) {
     return result;
 }
 
-function timeDifference(time) {
+function timeDisplay(time) {
     // This is a functionthat display the time of the post according to the
     // time difference between the post time and the current time
     const monthAbbreviations = [
@@ -45,4 +45,4 @@ function timeDifference(time) {
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
-export { randomSelect, timeDifference };
+export { randomSelect, timeDisplay };

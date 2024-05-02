@@ -5,13 +5,15 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
+import { useParams } from 'react-router-dom';
 
 function Followings() {
+    const props = useParams();
     const [followings, setFollowings] = useState([]);
     const { username: self, mode } = useAuth();
 
     async function fetchInfo() {
-        let target = window.location.pathname.split('/')[1];
+        const target = props.username;
         let followingsrec = await request.get("followinfo/" + self + "/" + target + "/followings", {
             headers: {
                 'Accept': 'application/json'

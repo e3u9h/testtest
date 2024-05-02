@@ -1,7 +1,7 @@
 import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState, useRef } from 'react';
-import { timeDifference } from '../utils/Utils';
+import { timeDisplay } from '../utils/Utils';
 import { Link } from "react-router-dom";
 import { useAuth } from '../provider/context';
 import { BACK_END } from '../config';
@@ -17,7 +17,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   console.log("here1" + JSON.stringify(tweetInfo))
   const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
   const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
-  const [timeInterval, setTimeInterval] = useState(timeDifference(tweetInfo['time']));
+  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo['time']));
   const [isReported, setIsReported] = useState(tweetInfo['isReported']);
   const [commentCount, setCommentCount] = useState(tweetInfo['commentCount']);
   const [retweetCount, setRetweetCount] = useState(tweetInfo['retweetCount']);

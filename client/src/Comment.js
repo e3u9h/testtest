@@ -4,7 +4,7 @@ import {faStairs} from '@fortawesome/free-solid-svg-icons';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BACK_END } from './config';
-import { timeDifference } from './utils/Utils';
+import { timeDisplay } from './utils/Utils';
 
 class Comment extends React.Component{
     constructor(props){
@@ -34,7 +34,7 @@ class Comment extends React.Component{
 
                 {/* show time and recomment button */}
                 <div className="d-flex flex-column flex-column align-items-end">
-                    <small className="opacity-50 text-nowrap">{timeDifference(this.props.time)}</small>
+                    <small className="opacity-50 text-nowrap">{timeDisplay(this.props.time)}</small>
                     <CommentForm floor={this.props.floor} tid={this.props.tid} addReply={this.props.addReply}/>
                     <div data-bs-toggle="modal" data-bs-target={"#commentForm"+this.props.floor} data-bs-whatever="@mdo" data-target="#GSCCModal" onClick={() => console.log(this.props.floor)}>
                         <FontAwesomeIcon icon={faComment} className="text-secondary" />
