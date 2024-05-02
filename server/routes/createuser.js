@@ -3,22 +3,23 @@ const router = express.Router();
 import Account from "../models/Account.js";
 import User from "../models/User.js";
 
+// create a new user (used for both user registration and admin creation)
 router.post('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const _username = req.body['username'];
+    // check whether the username has already existed
     Account.findOne({ username: _username }).then((acc) => {
         if (acc) { console.log(acc); return res.status(403).send("The username has already been used. Please change a username."); }
         else {
+            // if the username has not existed, first, create an Account record in the database
             Account.create({
                 username: req.body['newusername'],
                 pwd: req.body['newpwd'],
                 identity: 'user'
             }).then(() => {
+                // then, create a User record in the database
                 const default_portrait = "./img/defaultPortrait.jpg"
-                let gender = ''
-                if (req.body['gender'] !== 'NottoSpecify') {
-                    gender = req.body['gender']
-                }
+                const gender = req.body['gender']
                 let user = {
                     username: req.body['newusername'],
                     gender: gender,

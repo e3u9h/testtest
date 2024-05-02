@@ -25,7 +25,7 @@ export default function Messenger(state){
     const scrollRef = useRef();
     const location = useLocation();
 
-  const { username: current_username } = useAuth();
+    const { username: current_username } = useAuth();
 
     //   fetch user info use this line
     //   const response = (await fetch(BACK_END + "profile/" + username));

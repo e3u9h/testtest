@@ -1,5 +1,6 @@
 import multer from 'multer'
 
+// this is the middleware for saving files to the /uploads folder in the server
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, './uploads/');
