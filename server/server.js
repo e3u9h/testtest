@@ -1015,11 +1015,7 @@ app.put('/adminchangepwd', async (req, res) => {
       return res.status(200).send("Update Successfully!");
     } catch (err) {
       console.error(err);
-      if (error.response && error.response.status === 404) {
-        alert("The username doesn't exist.");
-      } else {
-        alert("An error occurred while updating the password.");
-      }
+      return res.status(500).send('An error occurred while updating the password.');
     }
   });
 

@@ -156,7 +156,11 @@ class Admin extends React.Component {
         window.location.reload(true); 
       } catch (error) {
         console.log(error); 
-        alert(error.response.data)
+        if (error.response && error.response.status === 404) {
+          alert("The username doesn't exist.");
+        } else {
+          alert("An error occurred while updating the password.");
+        }
       }
     };
   
