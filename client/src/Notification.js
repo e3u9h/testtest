@@ -9,10 +9,10 @@ import { timeDifference } from './utils/Utils';
 import request from './utils/request';
 
 const actionMap = {
-    "like": "liked your tweet",
+    "like": "liked your post",
     'follow': "started following you",
-    "comment": "commented on your tweet",
-    "retweet": "reposted your tweet" 
+    "comment": "commented on your post",
+    "retweet": "reposted your post" 
 }
     
 
