@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+// The User schema is used for storing the user information and user relationship
+// (only for normal users; admins do not have User records)
 const UserSchema = mongoose.Schema({
     username: { type: String, required: true, unique: true, minlength: 4, maxlength: 20 },
     gender: { type: String },

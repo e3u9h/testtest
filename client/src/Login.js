@@ -1,4 +1,3 @@
-import cookie from 'react-cookies';
 import React, { useEffect, useState } from 'react';
 import {
   MDBContainer,
@@ -9,7 +8,7 @@ import {
   MDBTabsPane
 }
   from 'mdb-react-ui-kit';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Header from './components/header';
 import Form from 'react-bootstrap/Form';
 import { useAuth } from './provider/context';
@@ -36,6 +35,7 @@ const Login = (props) => {
       newpwd: editPassword,
       gender: editgender
     };
+    // check the format of the username and password and whether the 2 input passwords are the same
     if (editUsername === '') {
       window.alert("Please enter a username.");
     } else if (editUsername.length >= 20) {
@@ -47,10 +47,12 @@ const Login = (props) => {
     } else if (editPassword !== editPassword2) {
       window.alert("Password mismatch!");
     } else {
+      // if the format is correct, send the request to the backend
       request.post("createuser", userInfo)
         .then(res => {
           if (res.status === 201) {
             console.log("here");
+            // if the registration is successful, automatically login
             request.post("login/user", {
               username: editUsername,
               pwd: editPassword
@@ -71,6 +73,7 @@ const Login = (props) => {
           // alert(res.data);
         })
         .catch(err => {
+          // if the registration failed, alert the error message
           console.log(err);
           alert(err.response.data);
         });
@@ -78,6 +81,8 @@ const Login = (props) => {
   }
 
   const handleJustifyClick = (value) => {
+    // justifyActive is to determin which tab (Register or Login) is active
+    // this function is to set justifyActive to the clicked tab
     if (value === justifyActive) {
       return;
     }
@@ -85,48 +90,57 @@ const Login = (props) => {
   };
 
   const handleUserSubmit = async (event) => {
+    // this function is to handle the login request
     event.preventDefault();
     console.log(editUsername, editPassword);
     const userInfo = {
       username: editUsername,
       pwd: editPassword
     };
+    // send the login request to the backend
     request.post("login/user", userInfo)
       .then(res => {
         console.log('here login');
         console.log(res);
         if (res.status === 201) {
+          // response status 201, means that the user mode is "user" (setted by the backend function)
+          // set loggedin to be true, which will be used for navigation after login
           setLoggedin(true);
+          // call the login function from the context to save the user information
           login(editUsername, 'user', res.data.token);
           console.log("loginin " + editUsername);
-          // navigate('/');
         } else if (res.status === 200) {
+          // response status 200 means that the user mode is "admin"
           console.log("Admin login");
           setLoggedin(true);
           login(editUsername, 'admin', res.data.token);
-          // navigate('/admin');
         } 
         alert(res.data.message);
       })
       .catch(err => {
+        // if the login failed, alert the error message
         console.error("Login failed:", err);
         alert(err.response.data.message);
       });
   };
   useEffect(() => {
+    // when first loading the page, set loggedin according to the information of the context
     setLoggedin(username !== undefined);
   }
     , []);
   useEffect(() => {
+    // when the loggedin state or mode changes, navigate to the corresponding page
+    // (main page or admin page) if the user is logged in
+    console.log(loggedin, mode);
     if (loggedin) {
       navigate(mode === 'user' ? '/' : '/admin');
     }
   }, [loggedin, mode]);
-  return (loggedin === false ?
+  return (
     (<>
       <Header />
       <MDBContainer className="p-3 my-5 d-flex flex-column w-50">
-
+        {/* tabs */}
         <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
           <MDBTabsItem>
             <MDBTabsLink
@@ -151,17 +165,19 @@ const Login = (props) => {
         </MDBTabs>
 
         <MDBTabsContent>
-
+          {/* the login pane */}
           <MDBTabsPane show={justifyActive === 'login'}>
-
+            {/* input for username */}
             <div className="form-group mb-4">
               <label htmlFor="newusername">Username</label>
               <input type="text" className="form-control" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
             </div>
+            {/* input for password */}
             <div className="form-group mb-4">
               <label htmlFor="newpwd">Password</label>
               <input type="password" className="form-control" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
             </div>
+            {/* Login button */}
             <button
               className="mb-4 w-100"
               style={{
@@ -177,20 +193,24 @@ const Login = (props) => {
               Login
             </button>
           </MDBTabsPane>
+          {/* the register pane */}
           <MDBTabsPane show={justifyActive === 'register'}>
-
+            {/* input for username */}
             <div className="form-group mb-4">
               <label htmlFor="newusername">Username</label>
               <input type="text" className="form-control" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} />
             </div>
+            {/* input for password */}
             <div className="form-group mb-4">
               <label htmlFor="newpwd">Password</label>
               <input type="password" className="form-control" value={editPassword} onChange={(e) => setEditPassword(e.target.value)} />
             </div>
+            {/* input for password recheck */}
             <div className="form-group mb-4">
               <label htmlFor="newpwd2">Recheck Password</label>
               <input type="password" className="form-control" value={editPassword2} onChange={(e) => setEditPassword2(e.target.value)} />
             </div>
+            {/* dropdown menu for gender selection */}
             <div className="form-group mb-4">
               <label htmlFor="gender" > Gender: </label>
               <Form.Select
@@ -205,6 +225,7 @@ const Login = (props) => {
                 <option value="">Not to Specify</option>
               </Form.Select>
             </div>
+            {/* the register button */}
             <button
               className="mb-4 w-100"
               style={{
@@ -225,7 +246,7 @@ const Login = (props) => {
 
         </MDBTabsContent>
 
-      </MDBContainer></>) : (mode === 'user' ? <Navigate to='/' /> : <Navigate to='/admin' />)
+      </MDBContainer></>) 
   );
 }
 export default Login;

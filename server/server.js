@@ -124,15 +124,7 @@ io.on("connection", (socket) => {
 
 // 在这里添加后端各种function
 
-
-
-/***********/
 /***Main****/
-/***********/
-
-
-
-
 //get a user
 app.get("/auser/:userId", async (req, res) => {
     const userId = req.params.userId; 
@@ -198,6 +190,7 @@ app.get('/users/:username', (req, res) => {
 });
 
 // get recommended tweets for the user
+// display all the public posts for other users (not in the cuurrent user's list)
 app.get('/tweets/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
     let username = req.params['username'];
@@ -581,10 +574,7 @@ app.post('/new-tag', (req, res) => {
         }
     });
 });
-
-/********************************/
-/*** Comment and tweet detail ***/
-/********************************/
+//Comment and tweet detail
 //add a new comment
 app.post('/tweet/comment', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -981,7 +971,7 @@ app.get('/searchtweet/:keyword', (req, res) => {
         });
 });
 
-// recommendation part: get the most used tag (limitation 10)
+// hottest topic recommendation part: get the most used tag (limitation 10)
 app.get('/search/trend', (req, res) => {
     res.set('Content-Type', 'text/plain');
     Tag.aggregate([

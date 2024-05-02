@@ -1,6 +1,7 @@
 import axios from "axios";
 import { BACK_END } from "../config";
 
+// This is an axios instance which will be used to make network requests to the backend
 const request = axios.create({
     baseURL: BACK_END,
     timeout: 10000,
@@ -9,7 +10,7 @@ const request = axios.create({
     },
 });
 
-
+// This is an axios interceptor which can add the Json Web Token to all the request headers if the token exists
 request.interceptors.request.use(
     (config) => {
         const token = JSON.parse(localStorage.getItem('userInfo'))?.token;
@@ -23,6 +24,7 @@ request.interceptors.request.use(
     }
 );
 
+// This is an axios interceptor which can remove the user information from localStorage if the token is invalid (has expired)
 request.interceptors.response.use(response => {
     return response;
 }, error => {

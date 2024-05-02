@@ -80,6 +80,12 @@ function NewPost() {
 
   // Post
   const postNewTweet = () => {
+    // Not allowed to post blank post.
+    if (postContent.trim() == '') {
+      alert('Can not publish an empty post! Say someting please!');
+      return;
+    }
+
     // print fileList
     console.log(fileList)
 
