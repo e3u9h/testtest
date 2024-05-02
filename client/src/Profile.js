@@ -169,7 +169,7 @@ function Profile() {
                 receiverId: target.uid
             })).then(res => {
                 if (res.status === 200) {
-                    navigate(`/messenger`);
+                    navigate(`/messenger`, { state: { current_conversation: res.data } });
                 }
                 else {
                     alert("There seems to be some error. Please try again.");
