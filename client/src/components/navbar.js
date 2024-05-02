@@ -7,6 +7,7 @@ import './navbar.css';
 import { useAuth } from '../provider/context';
 import request from '../utils/request';
 
+// This is the navigating bar on the left side of the page
 function Navbar() {
     const { logout, username, mode } = useAuth();
     const [userPortraitSrc, setUserPortraitSrc] = useState(null);
@@ -15,11 +16,13 @@ function Navbar() {
     const [editNewPassword2, setEditNewPassword2] = useState('');
     const navigate = useNavigate();
     const handleLogout = () => {
+        // call the logout function from the context and redirect to the login page
         logout();
         navigate('/login');
     };
     const changePwd = () => {
         const changepwdusername = username;
+        // create a userinfo object from the input
         const userinfo = {
             username: changepwdusername,
             oldpwd: editOldPassword,
@@ -27,6 +30,7 @@ function Navbar() {
             newpwd2: editNewPassword2
         };
         // console.log(userinfo)
+        // check the format of the new password and whether the 2 new passwords are the same
         if (userinfo['newpwd'] === '') {
             window.alert("Please enter a new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
@@ -34,6 +38,7 @@ function Navbar() {
         } else if (userinfo['newpwd'] !== userinfo['newpwd2']) {
             window.alert("Password mismatch!");
         } else {
+            // if the format is correct, send the request to the backend
             request.put("changepwd", userinfo)
                 .then(res => {
                     if (res.status === 200) {
@@ -49,6 +54,7 @@ function Navbar() {
 
     useEffect(() => {
         console.log(BACK_END + "profile/portrait/" + username);
+        // fetch the user portrait from the backend when first rendering
         request.get("profile/portrait/" + username)
             .then(res => {
                 console.log(res);
@@ -73,6 +79,7 @@ function Navbar() {
     return (<>
         {<div className="col-md-2 p-3 text-bg-light">
             <hr />
+            {/* the links to different pages */}
             <ul className="nav nav-pills flex-column mb-auto">
                 <li className="nav-item">
                     {mode === 'user' && <NavLink to="/" className="nav-link text-muted" activeclassname="active">
@@ -99,12 +106,14 @@ function Navbar() {
                         <span><FontAwesomeIcon icon={faUser} className='me-2' />Profile</span>
                     </NavLink>}
                 </li>
+                {/* the only link shown if the mode is admin */}
                 <li>
                     {mode === 'admin' && <NavLink to={"/admin"} className="nav-link text-muted" activeclassname="active">
                         <span><FontAwesomeIcon icon={faUser} className='me-2' />Admin Actions</span>
                     </NavLink>}
                 </li>
             </ul>
+            {/* the user information and the dropdown menu for logout and change password */}
             {<div className="dropdown">
                 <hr />
                 <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
@@ -118,6 +127,7 @@ function Navbar() {
                 </ul>
             </div>}
         </div>}
+        {/* the modal for password changing */}
         <div className="modal fade" id="changepasswordForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div className="modal-dialog">
                 <div className="modal-content">

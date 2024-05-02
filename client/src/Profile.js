@@ -50,8 +50,6 @@ function Profile() {
             headers: { 'Accept': 'application/json' }
         });
         const dataTarget = responseTarget.data;
-        // console.log("TARGET:");
-        // console.log(dataTarget);
 
         setTarget(dataTarget);
         setTextAreaValue(dataTarget.about);
@@ -62,9 +60,7 @@ function Profile() {
             });
             const dataSelf = responseSelf.data;
             setSelf(dataSelf);
-            // console.log(dataSelf);
-            // console.log(dataSelf.users_blocked);
-            // Follow, block, and report logic
+            // get the user relationship information and set the states
             setFollow(dataSelf.followings.includes(dataTarget.uid));
             setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
             // console.log("here1111");
@@ -124,8 +120,9 @@ function Profile() {
     };
 
     const handleEditClick = () => {
+        // when clicking the "Edit Profile" button,
+        // set the default values in the form to current user information
         setEditgender(target.gender);
-        // console.log(target.gender)
         setTextAreaValue(target.about);
     };
 

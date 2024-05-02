@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-
+// This is the context provider which is used to manage the user's login status
+// It provides the user information (username, mode and token)
+// and login/logout functions to all the components that need these information or functions
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -7,7 +9,9 @@ export const AuthProvider = ({ children }) => {
     const [mode, setMode] = useState(JSON.parse(localStorage.getItem('userInfo'))?.mode);
     const [token, setToken] = useState(JSON.parse(localStorage.getItem('userInfo'))?.token);
     const login = (username, mode, token) => {
+        // save the user information to localStorage
         localStorage.setItem('userInfo', JSON.stringify({ username, mode, token }));
+        // update the context states
         setUsername(username);
         setMode(mode);
         setToken(token);
@@ -15,7 +19,9 @@ export const AuthProvider = ({ children }) => {
         console.log(localStorage.getItem('userInfo'));  
     };
     const logout = () => {
+        // remove the user information from localStorage
         localStorage.removeItem('userInfo');
+        // update the context states
         setUsername(undefined);
         setMode(undefined);
         setToken(undefined);
