@@ -1005,7 +1005,7 @@ app.get('/search/trend', (req, res) => {
 
 //-------Admin User-------
 //update: change password by admin
-app.put('/adminupdate', async (req, res) => {
+app.put('/adminchangepwd', async (req, res) => {
     res.set('Content-Type', 'text/plain');
     const { username, newpwd } = req.body;
   

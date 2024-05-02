@@ -1,7 +1,5 @@
 import { Container } from '@material-ui/core';
 import * as React from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import request from './utils/request';
 
@@ -12,11 +10,10 @@ class Admin extends React.Component {
         currentPage: 'addUpdatePage',
       };
     }
-  
+    //   button: select the desired function  
     handleButtonClick = (page) => {
       this.setState({ currentPage: page });
     };
-  
     render() {
       const { currentPage } = this.state;
   
@@ -65,304 +62,310 @@ class Admin extends React.Component {
     }
   }
 
-class AddUser extends React.Component {
+  class AddUser extends React.Component {
 
-    handleSubmit = (event) => {
-        const username = document.getElementById("addUsername").value;
-        const newpwd = document.getElementById("addPassword").value;
-        const userInfo = {
-            newusername: username,
-            newpwd: newpwd
-        };
-        request.post("/createuser", userInfo)
-            .then(response => {
-                return response.data;
-            })
-            .then(data => {
-                alert(data);
-                window.location.reload(true);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-        event.preventDefault();
-
-    }
-    renderFormGroup = (label, id, type) => (
-        <div className="row mb-3">
-            <label htmlFor={id} className="col-sm-2 col-form-label">{label}</label>
-            <div className="col-sm-10">
-                <input type={type} className="form-control" id={id} />
-            </div>
-        </div>
-    );
-
-    render() {
-        return (
-            <div className='border' style={{ padding: '20px' }}>
-                <form onSubmit={this.handleSubmit}>
-                    <div className="row mb-3">
-                        <h3 id="addTtitle">Add User</h3>
-                    </div>
-                    {this.renderFormGroup("Username:", "addUsername", "text")}
-                    {this.renderFormGroup("Password:", "addPassword", "password")}
-                    <button type="submit" className="btn btn-success">Create</button>
-                </form>
-            </div>
-        );
-    }
-}
-
-class UpdatePassword extends React.Component {
-
-    handleUpdate = (event) => {
-        event.preventDefault();
-        const username = document.querySelector("#updateOldUsername").value;
-        const newpwd = document.getElementById('updatePassword').value;
-
-        const newObj = {
-            username: username,
-            newpwd: newpwd
-        };
-
-        if (!username) {
-            window.alert("Invalid input.\nPlease enter the original username.");
-        } else if (!newpwd) {
-            window.alert("Invalid input.\nPlease enter the updating password.");
-        } else if (newpwd.length <= 4 || newpwd.length >= 20) {
-            window.alert("Invalid input.\n The length of the password should be >4 and <20.");
-        } else {
-            request.put('/adminchangepwd', newObj)
-                .then(response => {
-                    return response.data;
-                })
-                .then(data => {
-                    alert(data);
-                    window.location.reload(true);
-                })
-                .catch(error => {
-                    console.log(error);
-                });
-        }
-    }
-
-    renderFormGroup = (label, id, type) => (
-        <div className="row mb-3">
-            <label htmlFor={id} className="col-sm-2 col-form-label">{label}</label>
-            <div className="col-sm-10">
-                <input type={type} className="form-control" id={id} />
-            </div>
-        </div>
-    );
-
-    render() {
-        return (
-            <div className='border' style={{ padding: '20px' }}>
-                <form onSubmit={this.handleUpdate}>
-                    <div className="row mb-3">
-                        <h3 id="updateTtitle">Update Password</h3>
-                    </div>
-                    {this.renderFormGroup("Username:", "updateOldUsername", "text")}
-                    {this.renderFormGroup("Updated Password:", "updatePassword", "password")}
-                    <button type="submit" className="btn btn-secondary">Update</button>
-                </form>
-            </div>
-        );
-    }
-}
-
-class ListUser extends React.Component {
     constructor(props) {
-        super(props);
-        this.state = { userList: [] };
+      super(props);
+      this.usernameRef = React.createRef();
+      this.passwordRef = React.createRef();
     }
+  
+    handleSubmit = async (event) => {
+      event.preventDefault();
+      const username = this.usernameRef.current.value;
+      const newPassword = this.passwordRef.current.value;
 
-    componentDidMount() {
-        this.getAllUser();
+    // handle submission, sends AddUser request to create a new user
+    if (!username.trim() || !newPassword.trim()) {
+        alert("Username and password cannot be empty.");
+        return;
+      }
+    
+      if (newPassword.length <= 4 || newPassword.length >= 20) {
+        alert("Password must be between 4 and 20 characters long.");
+        return;
+      }
+    
+      try {
+        const response = await request.post("/createuser", {
+          newusername: username,
+          newpwd: newPassword
+        });
+        const data = response.data; 
+        alert(data);
+        window.location.reload(true);
+      } catch (error) {
+        console.log(error); 
+      }
     }
-
-    getAllUser = async () => {
-        try {
-            const res = await request.get('reportusers', {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            const userList = res.data;
-            this.setState({ userList });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        }
-    }
-
+  
+    renderFormGroup = (label, id, type, inputRef) => (
+      <div className="mb-3 row">
+        <label htmlFor={id} className="col-form-label col-sm-2">{label}</label>
+        <div className="col-sm-10">
+          <input ref={inputRef} type={type} className="form-control" id={id} />
+        </div>
+      </div>
+    );
+  
     render() {
-        return (
-            <InfiniteScroll
-                dataLength={this.state.userList.length}
-                next={null}
-                hasMore={false}
-                scrollableTarget="scrollableDiv"
-                endMessage={
-                    <p style={{ textAlign: 'center' }}>
-                        <ViewUserList userInfos={this.state.userList} />
-                        <h6>That's all user :)</h6>
-                    </p>
-                }>
-            </InfiniteScroll>
-        );
+      return (
+        <div className='border p-4'>
+          <form onSubmit={this.handleSubmit}>
+            <div className="mb-3 row">
+              <h3 id="addTtitle">Add User</h3>
+            </div>
+            {this.renderFormGroup("Username:", "addUsername", "text", this.usernameRef)}
+            {this.renderFormGroup("Password:", "addPassword", "password", this.passwordRef)}
+            <button type="submit" className="btn btn-secondary">Create</button>
+          </form>
+        </div>
+      );
     }
-}
+  }
 
-const UserView = (props) => {
-    return (
-        <form className="row g-3 border-bottom" style={{ padding: '20px' }}>
+  class UpdatePassword extends React.Component {
+    constructor(props) {
+      super(props);
+      this.usernameRef = React.createRef();
+      this.passwordRef = React.createRef();
+    }
+    // handle submission, sends UpdatePassword request to update a new password 
+    handleUpdate = async (event) => {
+      event.preventDefault();
+      const username = this.usernameRef.current.value;
+      const newPassword = this.passwordRef.current.value;
+  
+      if (!newPassword.trim()) {
+        alert("Updated password cannot be empty.");
+        return; 
+      }
+  
+      if (newPassword.length <= 4 || newPassword.length >= 20) {
+        alert("Password must be between 4 and 20 characters long.");
+        return; 
+      }
+  
+      try {
+        const response = await request.put("/adminchangepwd", {
+          username: username,
+          newpwd: newPassword,
+        });
+        const data = response.data; 
+        alert(data); 
+        window.location.reload(true); 
+      } catch (error) {
+        console.log(error); 
+      }
+    };
+  
+    renderFormGroup = (label, id, type, inputRef) => (
+      <div className="mb-3 row">
+        <label htmlFor={id} className="col-form-label col-sm-2">
+          {label}
+        </label>
+        <div className="col-sm-10">
+          <input ref={inputRef} type={type} className="form-control" id={id} />
+        </div>
+      </div>
+    );
+  
+    render() {
+      return (
+        <div className="border p-4">
+          <form onSubmit={this.handleUpdate}>
+            <div className="mb-3 row">
+              <h3 id="updateTtitle">Update Password</h3>
+            </div>
+            {this.renderFormGroup(
+              "Username:",
+              "updateOldUsername",
+              "text",
+              this.usernameRef
+            )}
+            {this.renderFormGroup(
+              "Updated Password:",
+              "updatePassword",
+              "password",
+              this.passwordRef
+            )}
+            <button type="submit" className="btn btn-secondary">
+              Update
+            </button>
+          </form>
+        </div>
+      );
+    }
+  }
+
+  class ListUser extends React.Component {
+    constructor(props) {
+      super(props);
+      this.state = { userList: [] };
+    }
+  
+    componentDidMount() {
+      this.getAllUser();
+    }
+    // Fetch all users from the server
+    getAllUser = async () => {
+      try {
+        const res = await request.get('listusers', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        const userList = res.data;
+        this.setState({ userList });
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
+    }
+  
+    render() {
+      return (
+        <div className="container-fluid border p-4">
+          <div className="mb-3 row">
+            <h3 id="listTitle">List User</h3>
+          </div>
+          <div className="row g-3 border-bottom p-3">
             <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
-                <label htmlFor="interest" className="col-form-label" style={{ fontWeight: 'bold' }}>
-                    {props.name}
-                </label>
+              <h5>Username</h5>
             </div>
             <div className="col-auto" style={{ width: '25%' }}></div>
             <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                <Link to={`/${props.name}`}>
-                    <button type="button" className="btn btn-secondary">
-                        View Details
-                    </button>
-                </Link>
+              <h5>Operation</h5>
             </div>
-        </form>
-    );
-};
-
-function ViewUserList({ userInfos }) {
-
-    return (
-        <div className="container-fluid border" style={{ padding: '20px' }}>
-            <div className="row mb-3">
-                <h3 id="updateTitle"> List User </h3>
-            </div>
-            <div className='row g-3 border-bottom' style={{ padding: '20px' }}>
-                <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
-                    <h5> Username </h5>
-                </div>
-                <div className="col-auto" style={{ width: '25%' }}></div>
-                <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                    <h5> Operation </h5>
-                </div>
-            </div>
-            {userInfos.map((userInfo, index) =>
-                <UserView name={userInfo.username} id={userInfo.id} key={index} />
-            )}
+          </div>
+          <ViewUserList userInfos={this.state.userList} />
         </div>
+      );
+    }
+  }
+  
+  const UserView = (props) => {
+    return (
+      <div className="row g-3 border-bottom p-3">
+        <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
+          <label className="col-form-label fw-bold">{props.name}</label>
+        </div>
+        <div className="col-auto" style={{ width: '25%' }}></div>
+        <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
+          <Link to={`/${props.name}`}>
+            <button type="button" className="btn btn-secondary">
+              View Details
+            </button>
+          </Link>
+        </div>
+      </div>
     );
-}
+  };
+  // Render the list of users
+  function ViewUserList({ userInfos }) {
+    return (
+      <>
+        {userInfos.map((userInfo, index) =>
+          <UserView name={userInfo.username} id={userInfo.id} key={index} />
+        )}
+      </>
+    );
+  }
 
 class DeleteUser extends React.Component {
-
     constructor(props) {
-        super(props);
-        this.state = { userList: [] };
+      super(props);
+      this.state = { userList: [] };
     }
-
+  
     componentDidMount() {
-        this.getAllUser();
+      this.getAllUser();
     }
-
+    // Fetch all users from the server 
     getAllUser = async () => {
-        try {
-            const res = await request.get('reportusers', {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            const userList = res.data;
-            this.setState({ userList });
-        } catch (error) {
-            console.error("Failed to fetch users:", error);
-        }
+      try {
+        const res = await request.get('reportusers', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        const userList = res.data;
+        this.setState({ userList });
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      }
     }
-
+  
     render() {
-        return (
-            <InfiniteScroll
-                dataLength={this.state.userList.length}
-                next={null}
-                hasMore={false}
-                scrollableTarget="scrollableDiv"
-                endMessage={
-                    <p style={{ textAlign: 'center' }}>
-                        <DeleteUserList userInfos={this.state.userList} />
-                        <h6>That's all user :)</h6>
-                    </p>
-                }>
-            </InfiniteScroll>
-        );
+      return (
+        <div className="container-fluid border p-4">
+          <div className="mb-3 row">
+            <h3 id="deleteTtitle">Delete User</h3>
+          </div>
+          <div className="row g-3 border-bottom p-3">
+            <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
+              <h5>Username</h5>
+            </div>
+            <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
+              <h5>Report</h5>
+            </div>
+            <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
+              <h5>Operation</h5>
+            </div>
+          </div>
+          <DeleteUserList userInfos={this.state.userList} />
+        </div>
+      );
     }
-}
+  }
 
-function DeleteUserList({ userInfos }) {
-
+  // Render the list of users to be deleted
+  function DeleteUserList({ userInfos }) {
     return (
-        <>
-            <div className="container-fluid border" style={{ padding: '20px' }}>
-                <div class="row mb-3">
-                    <h3 id="updateTtitle"> Delete User </h3>
-                </div>
-                <div className='row g-3 border-bottom' style={{ padding: '20px' }}>
-                    <div class="col-auto" style={{ width: '50%', textAlign: 'center', }}>
-                        <h5> Username </h5>
-                    </div>
-                    <div class="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                        <h5> Report </h5>
-                    </div>
-                    <div class="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                        <h5> Operation </h5>
-                    </div>
-                </div>
-                {userInfos.map((userInfo, index) =>
-                    <DeleteUserCase name={userInfo.username} report={userInfo.report_counter} key={index} />
-                )}
-            </div >
-        </>
+      <>
+        {userInfos.map((userInfo, index) =>
+          <DeleteUserCase name={userInfo.username} report={userInfo.report_counter} key={index} />
+        )}
+      </>
     );
-}
-
-class DeleteUserCase extends React.Component {
-
+  }
+  
+  class DeleteUserCase extends React.Component {
+    // Handle the deletion of a user
     handleDelete = async () => {
-        try {
-            const response = await request.delete(`user/${this.props.name}`, {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (response.status === 204) {
-                alert('User successfully deleted.');
-                window.location.reload();
-            } else {
-                alert(response.data);
-            }
-        } catch (error) {
-            console.error(error);
-            alert('An error occurred while deleting the user.');
+      try {
+        const response = await request.delete(`user/${this.props.name}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+  
+        if (response.status === 204) {
+          alert('Delete successfully.');
+          window.location.reload();
+        } else {
+          alert(response.data);
         }
+      } catch (error) {
+        console.error(error);
+        alert('An error occurred while deleting the user.');
+      }
     };
-
+  
     render() {
-        return (
-            <form className='row g-3 border-bottom' style={{ padding: '20px' }}>
-                <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
-                    <label htmlFor="interest" className="col-form-label" style={{ fontWeight: 'bold' }}> {this.props.name} </label>
-                </div>
-                <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                    <label htmlFor="interest" className="col-form-label" style={{ fontWeight: 'bold' }}> {this.props.report} </label>
-                </div>
-                <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
-                    <button type="button" className="btn btn-secondary" onClick={this.handleDelete}> Delete </button>
-                </div>
-            </form>
-        );
+      return (
+        <div className="row g-3 border-bottom p-3">
+          <div className="col-auto" style={{ width: '50%', textAlign: 'center' }}>
+            <label className="col-form-label fw-bold">{this.props.name}</label>
+          </div>
+          <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
+            <label className="col-form-label fw-bold">{this.props.report}</label>
+          </div>
+          <div className="col-auto" style={{ width: '25%', textAlign: 'center' }}>
+            <button type="button" className="btn btn-secondary" onClick={this.handleDelete}>Delete</button>
+          </div>
+        </div>
+      );
     }
-}
+  }
 
 export { Admin };
