@@ -504,34 +504,6 @@ app.put('/tweet/:tid/:username/cancel-dislike', (req, res) => {
     });
 });
 
-// report a tweet
-app.put('/tweet/:tid/:username/report', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            if (user.tweets_reported == null) { user.tweets_reported = []; }
-            // check if the user has reported the tweet
-            let reportedTweets = user.tweets_reported;
-            if (reportedTweets.includes(tid)) {
-                return res.status(400).send('User have already reported this tweet');
-            }
-            user.tweets_reported.push(tweet._id);
-            tweet.report_counter++;
-            user.save();
-            tweet.save();
-            console.log(username + " report " + tid + " successfully");
-            return res.status(201).send('Report successfully');
-        });
-    }).catch((err) => {
-        console.log("-----Report Error--------");
-        console.log(err);
-        return res.status(500).send(err);
-    });
-});
 
 // get all the tags
 app.get('/tags', (req, res) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Comment from './Comment';
+import Comment from './components/Comment';
 import { TweetCard } from './components/Tweet';
 import { useAuth } from './provider/context';
 import { timeDisplay } from './utils/Utils';

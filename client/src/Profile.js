@@ -9,10 +9,25 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { PlusOutlined } from '@ant-design/icons';
+import { message, Upload } from 'antd';
 import { BACK_END } from './config';
 import "./css/profile.css"
 import BackButton from './components/backbutton';
 import request from './utils/request';
+
+const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+};
+const beforeUpload = (file) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+        message.error('You can only upload JPG/PNG file!');
+    }
+    return isJpgOrPng;
+};
 
 function Profile() {
     const { username, mode } = useAuth();
@@ -36,6 +51,32 @@ function Profile() {
     const [textAreaValue, setTextAreaValue] = useState("");
     const [editgender, setEditgender] = useState(target.gender);
     const navigate = useNavigate();
+    const [imageUrl, setImageUrl] = useState();
+    const [file, setFile] = useState(null);
+    const handleChange = (info) => {
+        setFile(info.file.originFileObj);
+        getBase64(info.file.originFileObj, (url) => {
+            setImageUrl(url);
+        });
+    };
+    const uploadButton = (
+        <button
+            style={{
+                border: 0,
+                background: 'none',
+            }}
+            type="button"
+        >
+            <PlusOutlined />
+            <div
+                style={{
+                    marginTop: 8,
+                }}
+            >
+                Upload
+            </div>
+        </button>
+    );
 
     const fetchInfo = async () => {
 
@@ -122,7 +163,7 @@ function Profile() {
 
     const handleEditSubmit = async (event) => {
         event.preventDefault();
-        const portrait = document.getElementById("portrait").files[0];
+        const portrait = file;
         let formData = new FormData();
         if (portrait !== undefined) {
             formData.append('portrait', portrait);
@@ -181,7 +222,7 @@ function Profile() {
                 {target['username'] !== username && <Row>
                     <BackButton />
                 </Row>}
-
+                {/* basic information part */}
                 <div class='row'>
                     <div class='col-sm-3'>
                         <img src={BACK_END + target.portrait} width={180} height={180} alt='avatar' class='profile-portrait' style={{ objectFit: 'cover' }}></img>
@@ -223,6 +264,7 @@ function Profile() {
                             </Link>
                         </div>
                     </div>
+                    {/* buttons: Edit Profile for self; Follow/Unfollow, Block/Unblock, Report/Reported and Chat for others */}
                     <div class='col'>
                         <div className="btn-group-vertical" >
                             {
@@ -258,6 +300,7 @@ function Profile() {
                         </div>
                     </div>
                 </div>
+                {/* modal for Edit Profile */}
                 <div className="modal fade" id="editProfileForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -282,7 +325,26 @@ function Profile() {
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait: </label>
-                                        <input type="file" className="form-control" id="portrait" />
+                                        <Upload
+                                            name="avatar"
+                                            listType="picture-card"
+                                            className="avatar-uploader"
+                                            showUploadList={false}
+                                            beforeUpload={beforeUpload}
+                                            onChange={handleChange}
+                                        >
+                                            {imageUrl ? (
+                                                <img
+                                                    src={imageUrl}
+                                                    alt="avatar"
+                                                    style={{
+                                                        width: '100%',
+                                                    }}
+                                                />
+                                            ) : (
+                                                uploadButton
+                                            )}
+                                        </Upload>
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="about-text" className="col-form-label"> About: </label>

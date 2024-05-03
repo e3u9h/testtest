@@ -6,7 +6,6 @@ import { randomSelect } from './utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from './provider/context';
-import { BACK_END } from './config';
 import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
