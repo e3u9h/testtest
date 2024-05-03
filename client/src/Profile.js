@@ -200,6 +200,7 @@ function Profile() {
 
 
     return (<>
+        {/* if self has not blocked target and is not blocked by target or self is an admin, show the profile */}
         {(mode === 'admin' || (!block && !beblocked)) && <Container fluid>
             <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
                 {target['username'] !== username && <Row>
@@ -335,6 +336,7 @@ function Profile() {
                         </div>
                     </div>
                 </div>
+                {/* Posts part: for self, show posted posts or liked posts; for others, show only posed posts */}
                 {
                     (target['username'] === username &&
                         <Row>
@@ -375,7 +377,7 @@ function Profile() {
                             <div className="row">
                                 {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
                             </div>
-
+                                {/* modal for confirming the report action */}
                             <div className="modal fade" id="report-user" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                 <div className="modal-dialog modal-dialog-centered">
                                     <div className="modal-content">
@@ -398,6 +400,7 @@ function Profile() {
                 }
             </div>
         </Container>}
+        {/* if self has blocked target, show an empty profile and an Unblock button */}
         {block && <Container fluid>
             <Row>
                 <BackButton />
@@ -415,6 +418,7 @@ function Profile() {
                 <div className="col-md-3"></div>
             </div>
         </Container>}
+        {/* if self has been blocked by target, show an empty profile */}
         {beblocked && <Container fluid>
             <Row>
                 <BackButton />

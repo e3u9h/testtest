@@ -38,7 +38,7 @@ function timeDisplay(time) {
         return `${year} ${month.toString()} ${day.toString()}`;
     }
     // If the post day is different from the current day, display "month day hour:minute"
-    if (diffInDay > 0) {
+    if (diffInDay >= 1) {
         return `${month.toString()} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     // If the post day is the same as the current day, display "hour:minute"
