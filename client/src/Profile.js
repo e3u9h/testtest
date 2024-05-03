@@ -52,7 +52,7 @@ function Profile() {
     const [editgender, setEditgender] = useState(target.gender);
     const navigate = useNavigate();
     const [imageUrl, setImageUrl] = useState();
-    const [file, setFile] = useState(null);
+    const [file, setFile] = useState(undefined);
     const handleChange = (info) => {
         setFile(info.file.originFileObj);
         getBase64(info.file.originFileObj, (url) => {
@@ -159,6 +159,8 @@ function Profile() {
         // set the default values in the form to current user information
         setEditgender(target.gender);
         setTextAreaValue(target.about);
+        setImageUrl(BACK_END + target.portrait);
+        setFile(undefined);
     };
 
     const handleEditSubmit = async (event) => {
