@@ -1,51 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-
+import { useParams } from 'react-router-dom';
+import { useAuth } from './provider/context';
 
 // seacrh tweets by its keywords
-class SearchTweetByKeyword extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            keyword: window.location.pathname.split('/')[2],
-            tweetList: []
-        };
-    }
-    // get all the required tweets
-    async getAllTweets() {
-        console.log("keyword: " + this.state.keyword);
-        const res = await request.get('searchtweet/' + this.state.keyword, {
-            headers: {
-                'Accept': 'application/json',
-            },
-        });
-        const tweetList = res.data;
-        this.setState({ tweetList });
-        console.log(this.state.tweetList);
-    }
-    componentWillMount() {
-        this.getAllTweets()
-    }
+function SearchTweetByKeyword() {
+    const props = useParams();
+    const [keyword, setKeyword] = useState(props.keyword);
+    const [tweetList, setTweetList] = useState([]);
+    const { username: selfname } = useAuth();
+    const getAllTweets = async () => {
+        try {
+            const res = await request.get('searchtweet/' + keyword + "/" + selfname, {
+                headers: {
+                    'Accept': 'application/json',
+                },
+            });
+            setTweetList(res.data);
+            console.log(res.data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
+    useEffect(() => {
+        getAllTweets();
+    }, []);
 
-    render() {
-        return (
-            <>
-                <div className='row'>
-                    <BackButton />
-                </div>
-                <div id='scrollabletweets' style={{ height: "80vh", overflow: "auto" }}>
-                    <InfiniteScroll dataLength={this.state.tweetList.length} next={null} hasMore={false} scrollableTarget="scrollabletweets"
-                        endMessage={<p style={{ textAlign: 'center' }}><b>No more Tweets</b></p>}>
-
-                        <TweetListView tweetInfos={this.state.tweetList} />
-                    </InfiniteScroll>
-                </div>
-            </>
-        )
-    }
+    return (
+        <>
+            <div className='row'>
+                <BackButton />
+            </div>
+            <div id='scrollabletweets' style={{ height: "80vh", overflowY: "scroll" }}>
+                <InfiniteScroll
+                    dataLength={tweetList.length}
+                    next={null}
+                    hasMore={false}
+                    scrollableTarget='scrollabletweets'
+                    endMessage={<p style={{ textAlign: 'center' }}><b>No more Posts</b></p>}
+                >
+                    <TweetListView tweetInfos={tweetList} />
+                </InfiniteScroll>
+            </div>
+        </>
+    );
 }
 
 export default SearchTweetByKeyword;

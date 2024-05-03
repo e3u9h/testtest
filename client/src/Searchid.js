@@ -29,7 +29,7 @@ const SearchUserid = () => {
       <div className='row'>
         <BackButton />
       </div>
-      <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
+      <div id='scrollabletweets' style={{ height: "80vh", overflowY: "scroll" }}>
         <InfiniteScroll
           dataLength={userList.length}
             next={null}

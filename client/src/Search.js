@@ -1,71 +1,82 @@
 import React from 'react';
-import TweetListView from './components/Tweet';
-import UserListView from './components/User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
-import SearchUser from './SearchUser';
-import SearchTweet from './SearchTweet';
-import { Link } from 'react-router-dom';
-import { BACK_END } from './config';
+import { Link, useNavigate } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useState } from 'react';
 import request from './utils/request';
 
-class Search extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {viewMode:"search"}; // two viewmode, notification or message
-        this.clickSearch = this.clickSearch.bind(this)
-        this.onkeydown = this.onkeydown.bind(this)
-    }
+function Search() {
+    const [viewMode, setViewMode] = useState("search");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [buttonText, setButtonText] = useState("Search");
+    const navigate = useNavigate();
+
     // Direct to the specific page after clicking the search button to search for something.
-    async clickSearch(){
-        var search=document.getElementById('search_input').value;
-        if(this.state.viewMode == 'searchuser'){
-            window.location = '/searchuser/'+search;
+    const clickSearch = () => {
+        let path = '';
+        switch (viewMode) {
+            case 'searchuser':
+                path = "/searchuser/" + searchTerm;
+                break;
+            case 'searchtweet':
+                path = "/searchtag/" + searchTerm;
+                break;
+            case 'searchuserid':
+                path = "/searchuserbyid/" + searchTerm;
+                break;
+            case 'searchtweetbykeyword':
+                path = "/searchtweet/" + searchTerm;
+                break;
+            default:
+                path = "/searchtweet/" + searchTerm;
+                break;
         }
-        else if(this.state.viewMode  == 'searchtweet'){
-            window.location = '/searchtag/'+search;
-        }
-        else if(this.state.viewMode == 'searchuserid'){
-            window.location = '/searchuserbyid/'+search;
-        }
-        else{
-            window.location = '/searchtweet/' + search;
-        }
+        navigate(path);
+    };
 
-    }
-    async onkeydown(e){
-  if (e.keyCode === 13) {
-   this.clickSearch()
-  }
- }
+    const onkeydown = (e) => {
+        if (e.keyCode === 13) {
+            clickSearch();
+        }
+    };
 
-    render(){
-        return(
-            <>
-            <div class="input-group">
-                <input id='search_input' type="search" class="form-control rounded" onKeyDown={(e)=>this.onkeydown(e)} placeholder={(this.state.viewMode == 'search' ? "Please select what you want to search" : "Please input the keyword")} aria-label="Search" aria-describedby="search-addon" />
+    const updateViewMode = (mode, text) => {
+        setViewMode(mode);
+        setButtonText(text);
+    };
+
+    return (
+        <>
+            <div className="input-group">
+                <input
+                    type="search"
+                    className="form-control rounded"
+                    onKeyDown={onkeydown}
+                    placeholder={viewMode === 'search' ? "Please select what you want to search" : "Please input the keyword"}
+                    aria-label="Search"
+                    aria-describedby="search-addon"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
                 <Dropdown as={ButtonGroup}>
-                <Button variant="secondary" id="searchclick" onClick={this.clickSearch} >Search</Button>
-                <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
-                <Dropdown.Menu>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search User by Username"; }}>Search User by Username</Dropdown.Item>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search Post by Tag";}}>Search Post by Tag</Dropdown.Item>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search Users by ID";}}>Search Users by ID</Dropdown.Item>
-                <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchtweetbykeyword" }); document.getElementById('searchclick').innerHTML = "Search Post by Keyword"; }}>Search Posts by Keyword</Dropdown.Item>
-                </Dropdown.Menu>
+                    <Button variant="secondary" onClick={clickSearch}>{buttonText}</Button>
+                    <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => updateViewMode("searchuser", "Search User by Username")}>Search User by Username</Dropdown.Item>
+                        <Dropdown.Item onClick={() => updateViewMode("searchtweet", "Search Post by Tag")}>Search Post by Tag</Dropdown.Item>
+                        <Dropdown.Item onClick={() => updateViewMode("searchuserid", "Search Users by ID")}>Search Users by ID</Dropdown.Item>
+                        <Dropdown.Item onClick={() => updateViewMode("searchtweetbykeyword", "Search Post by Keyword")}>Search Post by Keyword</Dropdown.Item>
+                    </Dropdown.Menu>
                 </Dropdown>
-                </div>
-                <div className="row">
-                <Trend/>
             </div>
-            
-            </>
-        )   
-    }
-}       
+            <div className="row">
+                <Trend />
+            </div>
+        </>
+    );
+}
 class Trend extends React.Component{
     constructor(props) {
         super(props);

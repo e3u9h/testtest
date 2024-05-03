@@ -909,76 +909,86 @@ app.get('/searchuserbyid/:selfname/:targetname', (req, res) => {
 });
 
 //search for posts with specified tag    
-app.get('/searchtag/:tag', (req, res) => {
+app.get('/searchtag/:tag/:selfname', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
-        tweet = tweet.filter((tweet) => {
-            return tweet.poster != null;
-        });
-        let obj = [];
-        if (!tweet) {
-            console.log("no such tweet");
-            res.sendStatus(404);
-        }
-        else {
-            tweet.forEach(tweet => {
-                let tweetObj = {
-                    "tid": tweet['_id'],
-                    "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
-                    "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
-                    "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
-                    "content": tweet.tweet_content,
-                    "files": tweet.files,
-                    "commentCount": tweet['comments'].length,
-                    "retweetCount": tweet['retweets'].length,
-                    "time": tweet['post_time'],
-                    "portraitUrl": tweet.poster['portrait'],
-                    "tags": tweet['tags'],
-                    'private': tweet['private']
-                }
-                obj.push(tweetObj);
+    User.findOne({ 'username': req.params['selfname'] }).then((self) => {
+        Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
+            tweet = tweet.filter((tweet) => {
+                return tweet.poster != null;
             });
-            console.log(obj);
-            res.send(obj);
-        }
+            let obj = [];
+            if (!tweet) {
+                console.log("no such tweet");
+                res.sendStatus(404);
+            }
+            else {
+                tweet.forEach(tweet => {
+                    const beLiked = self["tweets_liked"].includes(tweet['_id']);
+                    const beDisliked = self["tweets_disliked"].includes(tweet['_id']);
+                    let tweetObj = {
+                        "tid": tweet['_id'],
+                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": beLiked },
+                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": beDisliked },
+                        "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
+                        "content": tweet.tweet_content,
+                        "files": tweet.files,
+                        "commentCount": tweet['comments'].length,
+                        "retweetCount": tweet['retweets'].length,
+                        "time": tweet['post_time'],
+                        "portraitUrl": tweet.poster['portrait'],
+                        "tags": tweet['tags'],
+                        'private': tweet['private']
+                    }
+                    obj.push(tweetObj);
+                });
+                console.log(obj);
+                res.send(obj);
+            }
+        }).catch((err) => {
+            res.send(err);
+        });
     }).catch((err) => {
         res.send(err);
     });
 })
 
 // search for posts by keyword
-app.get('/searchtweet/:keyword', (req, res) => {
+app.get('/searchtweet/:keyword/:self', (req, res) => {
     res.set('Content-Type', 'application/json');
     const keyword = req.params.keyword;
-
-    Tweet.find({
-        tweet_content: { $regex: new RegExp(keyword, 'i') },
-        private: false
-    })
-        .populate('poster', 'username portrait')
-        .exec()
-        .then(tweets => {
-            tweets = tweets.filter(tweet => tweet.poster);
-
-            let searchResults = tweets.map(tweet => ({
-                tid: tweet._id,
-                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: false },
-                dislikeInfo: { dislikeCount: tweet.dislike_counter },
-                user: { uid: tweet.poster._id, username: tweet.poster.username },
-                content: tweet.tweet_content,
-                files: tweet.files,
-                commentCount: tweet.comments.length,
-                retweetCount: tweet.retweets.length,
-                time: tweet.post_time,
-                portraitUrl: tweet.poster.portrait,
-                tags: tweet.tags,
-                private: tweet.private
-            }));
-
-            console.log(searchResults);
-            res.json(searchResults);
+    User.findOne({ 'username': req.params.self }).then((self) => {
+        Tweet.find({
+            tweet_content: { $regex: new RegExp(keyword, 'i') },
+            private: false
         })
-        .catch(err => {
+            .populate('poster', 'username portrait')
+            .exec()
+            .then(
+                tweets => {
+                    tweets = tweets.filter(tweet => tweet.poster);
+                    let searchResults = tweets.map(tweet => {
+                        const beLiked = self["tweets_liked"].includes(tweet["_id"]);
+                        const beDisliked = self["tweets_disliked"].includes(tweet["_id"]);
+                        return {
+                            tid: tweet._id,
+                            likeInfo: { likeCount: tweet.likes.length, bLikeByUser: beLiked },
+                            dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: beDisliked },
+                            user: { uid: tweet.poster._id, username: tweet.poster.username },
+                            content: tweet.tweet_content,
+                            files: tweet.files,
+                            commentCount: tweet.comments.length,
+                            retweetCount: tweet.retweets.length,
+                            time: tweet.post_time,
+                            portraitUrl: tweet.poster.portrait,
+                            tags: tweet.tags,
+                            private: tweet.private
+                        };
+                    });
+
+                    console.log(searchResults);
+                    res.json(searchResults);
+                })
+    }).catch(err => {
             console.error(err);
             res.status(500).send(err);
         });
