@@ -25,20 +25,20 @@ function timeDisplay(time) {
     ];
     const now = new Date();
     const postTime = new Date(time);
-    // console.log(time + postTime);
+    console.log(time + postTime);
     const year = postTime.getFullYear();
     const month = monthAbbreviations[postTime.getMonth()];
     const day = postTime.getDate();
     const hours = postTime.getHours();
     const minutes = postTime.getMinutes();
-    const diffInDay = now / 86400000 - postTime / 86400000;
+    const isSameDay = (now.getDate() === day && now.getMonth() === postTime.getMonth() && now.getFullYear() === year);
     const diffInYear = now.getFullYear() - year;
     // If the post year is different from the current year, display "year month day"
     if (diffInYear > 0) {
         return `${year} ${month.toString()} ${day.toString()}`;
     }
     // If the post day is different from the current day, display "month day hour:minute"
-    if (diffInDay >= 1) {
+    if (!isSameDay) {
         return `${month.toString()} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     // If the post day is the same as the current day, display "hour:minute"
