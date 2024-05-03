@@ -9,7 +9,6 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PlusOutlined } from '@ant-design/icons';
 import { message, Upload } from 'antd';
 import { BACK_END } from './config';
 import "./css/profile.css"
@@ -59,24 +58,6 @@ function Profile() {
             setImageUrl(url);
         });
     };
-    const uploadButton = (
-        <button
-            style={{
-                border: 0,
-                background: 'none',
-            }}
-            type="button"
-        >
-            <PlusOutlined />
-            <div
-                style={{
-                    marginTop: 8,
-                }}
-            >
-                Upload
-            </div>
-        </button>
-    );
 
     const fetchInfo = async () => {
 
@@ -329,23 +310,16 @@ function Profile() {
                                         <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait: </label>
                                         <Upload
                                             name="avatar"
-                                            listType="picture-card"
+                                            listType="picture-circle"
                                             className="avatar-uploader"
                                             showUploadList={false}
                                             beforeUpload={beforeUpload}
                                             onChange={handleChange}
                                         >
-                                            {imageUrl ? (
-                                                <img
-                                                    src={imageUrl}
-                                                    alt="avatar"
-                                                    style={{
-                                                        width: '100%',
-                                                    }}
-                                                />
-                                            ) : (
-                                                uploadButton
-                                            )}
+                                            <img
+                                                src={imageUrl}
+                                                style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
+                                            />
                                         </Upload>
                                     </div>
                                     <div className="mb-3">
