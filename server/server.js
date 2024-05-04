@@ -194,46 +194,53 @@ app.get('/users/:username', (req, res) => {
     });
 });
 
-// get recommended tweets for the user
-// display all the public posts for other users (not in the cuurrent user's list)
-app.get('/tweets/:username', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let username = req.params['username'];
-    // find all the tweets except for the user's tweets
-    // sort tweets by post time (newest first)
-    Tweet.find({ 'private': 'false' }).sort({ post_time: 'desc' }).populate(
-        { path: "poster", model: "User", select: "username portrait" }).then((tweets) => {
-            tweets = tweets.filter((tweet) => {
-                return tweet.poster != null && tweet.poster.username !== username;
-            });
-            User.findOne({ "username": username }).then((user) => {
-                let retTweets = tweets.map(tweet => {
-                    return {
-                        "tid": tweet['_id'],
-                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": user['tweets_liked'].includes(tweet['_id']) },
-                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": user['tweets_disliked'].includes(tweet['_id']) },
-                        "isReported": user['tweets_reported'].includes(tweet['_id']),
-                        "user": { "uid": tweet['poster']['_id'], 'username': tweet['poster']['username'] },
-                        "content": tweet['tweet_content'],
-                        "files": tweet['files'],
-                        "commentCount": tweet['comments'].length,
-                        "retweetCount": tweet['retweets'].length,
-                        "time": tweet['post_time'],
-                        "portraitUrl": tweet['poster']['portrait'],
-                        "tags": tweet['tags'],
-                        "private": tweet['private']
-                    }
-                });
-                console.log("---Get recommended tweets---");
-                res.status(200).send(retTweets);
-            });
-        }).catch((err) => {
-            console.log("---Recommended tweets error---");
-            console.log(err);
-            return res.status(404).send(err);
-        });
-});
-
+app.get('/tweets/:username', async (req, res) => {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({ username });
+  
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+  
+      const tweets = await Tweet.find({ private: false })
+        .sort({ post_time: 'desc' })
+        .populate({ path: 'poster', model: 'User', select: 'username portrait' });
+  
+      const filteredTweets = tweets.filter(tweet => tweet.poster && tweet.poster.username !== username);
+  
+      const recommendedTweets = filteredTweets.map(tweet => ({
+        tid: tweet._id,
+        likeInfo: {
+          likeCount: tweet.likes.length,
+          bLikeByUser: user.tweets_liked.includes(tweet._id),
+        },
+        dislikeInfo: {
+          dislikeCount: tweet.dislike_counter,
+          bDislikeByUser: user.tweets_disliked.includes(tweet._id),
+        },
+        isReported: user.tweets_reported.includes(tweet._id),
+        user: {
+          uid: tweet.poster._id,
+          username: tweet.poster.username,
+        },
+        content: tweet.tweet_content,
+        files: tweet.files,
+        commentCount: tweet.comments.length,
+        retweetCount: tweet.retweets.length,
+        time: tweet.post_time,
+        portraitUrl: tweet.poster.portrait,
+        tags: tweet.tags,
+        private: tweet.private,
+      }));
+  
+      res.status(200).json(recommendedTweets);
+    } catch (error) {
+      console.error('Failed to get recommended tweets:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
 // get all the followings' tweets of the user (including the own posts)
 app.get('/followings/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
