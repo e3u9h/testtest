@@ -6,6 +6,8 @@ import { BACK_END } from '../config';
 import { timeDisplay } from '../utils/Utils';
 import { useState } from 'react';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 class Comment extends React.Component {
     constructor(props) {
         super(props);

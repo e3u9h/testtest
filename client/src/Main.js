@@ -15,6 +15,8 @@ import { Row, Col } from 'antd';
 import './css/custom-input.css';
 import request from './utils/request';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 // use of existing code: for image uploading and preview in NewPost, we referred to the sample code in the documentation of antd: https://ant.design/components/upload-cn
 function NewPost() {
   const { username } = useAuth();

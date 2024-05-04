@@ -7,6 +7,8 @@ import { timeDisplay } from './utils/Utils';
 import request from './utils/request';
 import BackButton from './components/backbutton';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 const TweetDetail = () => {
     const [tweetInfo, setTweetInfo] = useState({
         "tid": 0,

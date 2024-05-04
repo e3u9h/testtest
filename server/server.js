@@ -24,6 +24,8 @@ import { expressjwt } from 'express-jwt';
 import { jwtKey } from './config.js';
 import bcryptjs from 'bcryptjs';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 const app = express();
 
 app.use(cors());
