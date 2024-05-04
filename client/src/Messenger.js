@@ -210,4 +210,4 @@ export default function Messenger(state){
 }
 
 
-//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev
+//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev

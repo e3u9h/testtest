@@ -13,4 +13,4 @@ const Conversation = mongoose.model("Conversation", ConversationSchema);
 export default Conversation;
   
 
-//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev
+//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev

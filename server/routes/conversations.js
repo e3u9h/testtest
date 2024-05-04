@@ -58,4 +58,4 @@ router.get("/:userId", async (req, res) => {
   });
 export default router;
 
-//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev
+//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev
