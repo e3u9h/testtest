@@ -14,6 +14,8 @@ import { BACK_END } from './config';
 import "./css/profile.css"
 import BackButton from './components/backbutton';
 import request from './utils/request';
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 const getBase64 = (img, callback) => {
     const reader = new FileReader();
@@ -47,17 +49,12 @@ function Profile() {
     const [block, setBlock] = useState(false);
     const [beblocked, setBeblocked] = useState(false);
     const [report, setReport] = useState(false);
-    const [textAreaValue, setTextAreaValue] = useState("");
-    const [editgender, setEditgender] = useState(target.gender);
-    const navigate = useNavigate();
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [textAreaValue, setTextAreaValue] = useState();
+    const [editgender, setEditgender] = useState();
     const [imageUrl, setImageUrl] = useState();
     const [file, setFile] = useState(undefined);
-    const handleChange = (info) => {
-        setFile(info.file.originFileObj);
-        getBase64(info.file.originFileObj, (url) => {
-            setImageUrl(url);
-        });
-    };
+    const navigate = useNavigate();
 
     const fetchInfo = async () => {
 
@@ -68,7 +65,6 @@ function Profile() {
         const dataTarget = responseTarget.data;
 
         setTarget(dataTarget);
-        setTextAreaValue(dataTarget.about);
         // Fetch self information
         if (mode === 'user') {
             const responseSelf = await request.get("profile/" + username + "/" + target.username + "/actioninfo", {
@@ -136,12 +132,28 @@ function Profile() {
     };
 
     const handleEditClick = () => {
-        // when clicking the "Edit Profile" button,
-        // set the default values in the form to current user information
-        setEditgender(target.gender);
         setTextAreaValue(target.about);
+        setEditgender(target.gender);
         setImageUrl(BACK_END + target.portrait);
-        setFile(undefined);
+        setShowEditModal(true);
+    };
+
+    const handleClose = () => {
+        setShowEditModal(false);
+    }
+
+    const handleChange = (info) => {
+        setFile(info.file.originFileObj);
+        getBase64(info.file.originFileObj, (url) => {
+            setImageUrl(url);
+        });
+    };
+
+    const handleAboutChange = (event) => {
+        setTextAreaValue(event.target.value);
+    }
+    const handleGenderChange = (event) => {
+        setEditgender(event.target.value);
     };
 
     const handleEditSubmit = async (event) => {
@@ -164,7 +176,7 @@ function Profile() {
             });
 
             if (response.status === 200) {
-                alert("Update Profile Successfully!");
+                alert("Profile updated successfully.");
                 window.location.reload(true);
             } else {
                 alert("There seems to be some error. Please try again.");
@@ -172,13 +184,6 @@ function Profile() {
         } catch (err) {
             console.log(err);
         }
-    };
-
-    const handleAboutChange = (event) => {
-        setTextAreaValue(event.target.value);
-    }
-    const handleGenderChange = (event) => {
-        setEditgender(event.target.value);
     };
     const handleChatClick = async () => {
         try {
@@ -253,7 +258,7 @@ function Profile() {
                         <div className="btn-group-vertical" >
                             {
                                 mode === 'user' && target['username'] === username &&
-                                <button type="button" onClick={handleEditClick} className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editProfileForm" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
+                                <button type="button" onClick={handleEditClick} className="btn btn-secondary" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
                                     Edit Profile
                                 </button>
                             }
@@ -285,57 +290,61 @@ function Profile() {
                     </div>
                 </div>
                 {/* modal for Edit Profile */}
-                <div className="modal fade" id="editProfileForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel"> Edit Profile </h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <form>
-                                    <div className="mb-3">
-                                        <label htmlFor="gender" className="col-form-label"> Gender: </label>
-                                        <Form.Select
-                                            aria-label="Default select example"
-                                            value={editgender}
-                                            onChange={handleGenderChange}
-                                        >
-                                            <option value="Male">Male</option>
-                                            <option value="Female">Female</option>
-                                            <option value="Others">Others</option>
-                                            <option value="">Not to Specify</option>
-                                        </Form.Select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait: </label>
-                                        <Upload
-                                            name="avatar"
-                                            listType="picture-circle"
-                                            className="avatar-uploader"
-                                            showUploadList={false}
-                                            beforeUpload={beforeUpload}
-                                            onChange={handleChange}
-                                        >
-                                            <img
-                                                src={imageUrl}
-                                                style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
-                                            />
-                                        </Upload>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="about-text" className="col-form-label"> About: </label>
-                                        <textarea onChange={handleAboutChange} className="form-control" id="about" rows="4" defaultValue={textAreaValue} />
-                                    </div>
-                                </form>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
-                                <button type="button" className="btn btn-secondary" onClick={handleEditSubmit} data-bs-dismiss="modal"> Submit </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <Modal show={showEditModal} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Edit Profile</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                                <Form.Label>Gender</Form.Label>
+                                <Form.Select
+                                    aria-label="Default select example"
+                                    value={editgender}
+                                    onChange={handleGenderChange}
+                                >
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Others">Others</option>
+                                    <option value="">Not to Specify</option>
+                                </Form.Select>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                                <Form.Label>Portrait</Form.Label>
+                                <Upload
+                                    name="avatar"
+                                    listType="picture-circle"
+                                    className="avatar-uploader"
+                                    showUploadList={false}
+                                    beforeUpload={beforeUpload}
+                                    onChange={handleChange}
+                                >
+                                    <img
+                                        src={imageUrl}
+                                        style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
+                                    />
+                                </Upload>
+                            </Form.Group>
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                                <Form.Label>About</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    rows={3}
+                                    value={textAreaValue}
+                                    onChange={handleAboutChange}
+                                />
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Cancel
+                        </Button>
+                        <Button variant="primary" onClick={handleEditSubmit}>
+                            Submit
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 {/* Posts part: for self, show posted posts or liked posts; for others, show only posed posts */}
                 {
                     (target['username'] === username &&

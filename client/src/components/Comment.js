@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Link } from "react-router-dom";
-import { faStairs } from '@fortawesome/free-solid-svg-icons';
 import { faComment } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { BACK_END } from '../config';
 import { timeDisplay } from '../utils/Utils';
+import { useState } from 'react';
 
 class Comment extends React.Component {
     constructor(props) {
@@ -47,33 +47,37 @@ class Comment extends React.Component {
 }
 
 {/** this is used to comment comment */ }
-class CommentForm extends React.Component {
-    constructor(props) {
-        super(props);
-        console.log("Here is this.props.floor",this.props.floor)
-    }
-
-    render() {
-        return (
-            <div class="modal fade" id={"commentForm" + this.props.floor} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5"> Re floor {this.props.floor}</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <textarea className="form-control" id={'new-comment' + this.props.floor} rows='5'></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"> Cancel </button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onClick={() => this.props.addReply(this.props.floor)}> Send </button>
-                        </div>
-                    </div>
-                </div>
+function CommentForm({ floor, addReply }) {
+    const [comment, setComment] = useState('');
+  
+    const handleCommentChange = (e) => {
+      setComment(e.target.value);
+    };
+  
+    const handleSendClick = () => {
+      addReply(floor, comment);
+      setComment('');
+    };
+  
+    return (
+      <div className="modal fade" id={`commentForm${floor}`} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5">Re floor {floor}</h1>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-        )
-    }
+            <div className="modal-body">
+              <textarea className="form-control" id={`new-comment${floor}`} rows="5" value={comment} onChange={handleCommentChange}></textarea>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={handleSendClick}>Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
 }
 
 

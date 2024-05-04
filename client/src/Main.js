@@ -131,7 +131,7 @@ function NewPost() {
         if (res.status === 201) {
           console.log("New tag is inserted");
         } else if (res.status === 400) {
-          alert("Tag has already exists");
+          console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }

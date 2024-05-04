@@ -31,3 +31,6 @@ export default function Conversation({ conversation , currentUsername}) {
     </div>
   );
 }
+
+
+//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev

@@ -1268,3 +1268,7 @@ app.get('/notification/:username', (req, res) => {
 server.listen(8000, ()=>{
     console.log("Server is running on Port 8000");
 });
+
+
+
+// Socket server code referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev

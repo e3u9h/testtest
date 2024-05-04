@@ -12,3 +12,5 @@ const ConversationSchema = new mongoose.Schema(
 const Conversation = mongoose.model("Conversation", ConversationSchema);
 export default Conversation;
   
+
+//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev

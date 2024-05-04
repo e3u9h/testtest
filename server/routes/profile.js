@@ -70,8 +70,7 @@ router.put('/:username', upload.single('portrait'), (req, res) => {
     const updateAbout = req.body.about;
 
     User.findOne({ 'username': username }).then((user) => {
-        if (updateGender !== '')
-            user.gender = updateGender;
+        user.gender = updateGender;
         if (updatePortrait !== '')
             user.portrait = updatePortrait;
         if (updateAbout !== '')
