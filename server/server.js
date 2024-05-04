@@ -1082,24 +1082,28 @@ app.delete('/user/:username', async (req, res) => {
 });
 
 //get all users sorted by report_counter
-app.get('/reportusers', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    User.find().sort({ "report_counter": -1 }).then((users) => {
-        res.send(users);
-    }).catch((err) => {
-        res.send(err);
-    });
-});
+app.get('/reportusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().sort({ report_counter: -1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by report count:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 //get all users sorted by name
-app.get('/listusers', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 }).then((users) => {
-        res.send(users);
-    }).catch((err) => {
-        res.send(err);
-    });
-});
+app.get('/listusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by name:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 // get notificaqtions
 app.get('/notification/:username', (req, res) => {
