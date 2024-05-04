@@ -1,4 +1,4 @@
-import ChatOnline from "./components/chatOnline/ChatOnline";
+// import ChatOnline from "./components/chatOnline/ChatOnline";
 import Conversation from "./components/conversations/Conversations";
 import Message from "./components/message/Message";
 import "./css/messenger.css"
@@ -204,16 +204,10 @@ export default function Messenger(state){
                         </> 
                         ) : (<span className="noCoversationText">Open a conversation here</span>)}
                 </div>
-            </div>
-            <div className="chatOnline">
-                <div className="chatOnlineWrapper">
-                    <ChatOnline/>
-                    <ChatOnline/>
-                    <ChatOnline/>
-                    <ChatOnline/>
-                </div>
-            </div>
-            
+            </div>       
         </div>
     )
 }
+
+
+//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev

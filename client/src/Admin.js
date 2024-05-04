@@ -22,26 +22,17 @@ class Admin extends React.Component {
           <Container fluid>
           <div style={{ display: 'flex', width: '100%' }}>
               <button
-                type="submit"
-                className="btn btn-secondary"
-                style={{ width: '25%' }}
-                onClick={() => this.handleButtonClick('addUpdatePage')}
+                type="submit" className="btn btn-secondary" style={{ width: '25%' }} onClick={() => this.handleButtonClick('addUpdatePage')}
               >
                 Add User and Update Password
               </button>
               <button
-                type="submit"
-                className="btn btn-secondary"
-                style={{ width: '25%' }}
-                onClick={() => this.handleButtonClick('deleteUserPage')}
+                type="submit" className="btn btn-secondary" style={{ width: '25%' }} onClick={() => this.handleButtonClick('deleteUserPage')}
               >
                 Delete User
               </button>
               <button
-                type="submit"
-                className="btn btn-secondary"
-                style={{ width: '25%' }}
-                onClick={() => this.handleButtonClick('listUserPage')}
+                type="submit" className="btn btn-secondary" style={{ width: '25%' }} onClick={() => this.handleButtonClick('listUserPage')}
               >
                 List User
               </button>
@@ -374,3 +365,4 @@ class DeleteUser extends React.Component {
   }
 
 export { Admin };
+// employ claude3 to offer some idea

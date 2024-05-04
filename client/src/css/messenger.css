@@ -54,14 +54,8 @@
 }
 
 
-.chatOnline{
-    flex: 2.3;
-}
-
-
 .chatMenuWrapper,
-.chatBoxWrapper,
-.chatOnlineWrapper {
+.chatBoxWrapper{
   padding: 10px;
   height: 100%;
 }
@@ -80,3 +74,6 @@
     color: rgba(170, 168, 168, 0.661);
     cursor: default;
   }
+
+
+  /* Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev */

@@ -1213,55 +1213,41 @@ app.get('/listusers', async (req, res) => {
     }
   });
 
-// get notificaqtions
-app.get('/notification/:username', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    console.log('before')
-    console.log(req.params)
-    Notification.find({ 'username': req.params['username'] }).sort({ 'time': -1 }).populate('actor_id').populate('tid').exec().then((notes) => {
-        console.log('notifications found');
-        console.log(req.params['username'])
-        console.log(notes)
-        let notification_list = [];
-        notes.forEach(note => {
-            console.log("for each note")
-            console.log(note);
-            if (note.action !== 'follow') {
-                const content_len = note.tid.tweet_content.length > 30 ? 30 : note.tid.tweet_content.length;
-                const notification = {
-                    "icon": note.action,
-                    "tid": note.tid._id,
-                    "action": note.action,
-                    "name": note.actor_id.username,
-                    "portrait": note.actor_id.portrait,
-                    "time": note.time,
-                    "content": note.tid.tweet_content.slice(0, content_len),
-                }
-                console.log(notification);
-                notification_list.push(notification);
-            }
-            else {
-                const notification = {
-                    "icon": note.action,
-                    "tid": null,
-                    "action": note.action,
-                    "name": note.actor_id.username,
-                    "portrait": note.actor_id.portrait,
-                    "time": note.time,
-                    "content": null
-                }
-                notification_list.push(notification);
-            }
-            console.log(notification_list);
-        });
-        console.log(notification_list);
-        res.status(201).send(JSON.stringify(notification_list));
-    }).catch((err) => {
-        console.log("-----Get Notification Error--------");
-        console.log(err);
-        return res.status(500).send(err);
-    })
-});
+ // get notificaqtions
+app.get('/notification/:username', async (req, res) => {
+    try {
+      res.set('Content-Type', 'application/json');
+      const { username } = req.params; 
+      const notifications = await Notification.find({ username }).sort({ time: -1 }).populate('actor_id').populate('tid').exec();
+      const formattedNotifications = notifications.map(note => {
+        if (note.action !== 'follow') {
+          const contentLength = Math.min(note.tid.tweet_content.length, 30);
+          return {
+            tid: note.tid._id,
+            action: note.action,
+            name: note.actor_id.username,
+            portrait: note.actor_id.portrait,
+            time: note.time,
+            content: note.tid.tweet_content.slice(0, contentLength),
+          };
+        } else {
+          return {
+            tid: null,
+            action: note.action,
+            name: note.actor_id.username,
+            portrait: note.actor_id.portrait,
+            time: note.time,
+            content: null,
+          };
+        }
+      });
+      
+      res.status(200).json(formattedNotifications);
+    } catch (error) {
+      console.error('fail to fetch noti:', error);
+      res.status(500).json({ error: 'server error' });
+    }
+  });
 
 
 // ------启动server------

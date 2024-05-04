@@ -17,3 +17,5 @@ export default function Message({message, own}) {
     </div>
   );
 }
+
+//Referrence: https://github.com/safak/youtube/tree/chat-app by Lama Dev

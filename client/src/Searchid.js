@@ -4,7 +4,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-
+// use OpenAI to gernerate some idea and debbuging the code.
 const fetchUsers = async (currentUser, searchUserId, setUsers) => {
   try {
     const response = await request.get(`searchuserbyid/${currentUser}/${searchUserId}`, {
