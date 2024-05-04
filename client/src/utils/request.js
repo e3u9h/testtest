@@ -1,5 +1,8 @@
 import axios from "axios";
 import { BACK_END } from "../config";
+// I admit that I referred to some existing code in
+// 【黑马程序员前端React18入门到实战视频教程，从react+hooks核心基础到企业级项目开发实战（B站评论、极客园项目等）及大厂面试全通关-哔哩哔哩】 https://b23.tv/hqVNyZA
+// for defining the axios instace and the request interceptor
 
 // This is an axios instance which will be used to make network requests to the backend
 const request = axios.create({

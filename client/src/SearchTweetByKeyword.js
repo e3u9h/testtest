@@ -5,7 +5,7 @@ import BackButton from './components/backbutton';
 import request from './utils/request';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './provider/context';
-
+// use OpenAI to gernerate some idea and debbuging the code.
 const searchTweets = async (searchKeyword, currentUser, setTweets) => {
   try {
     const response = await request.get(`searchtweet/${searchKeyword}/${currentUser}`, {

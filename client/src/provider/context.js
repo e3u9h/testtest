@@ -1,4 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
+// I admit that I used GPT-4 in poe (https://poe.com/) to draft the fisrt version of this part,
+// and modified it manually to make it useable in our project.
+
 // This is the context provider which is used to manage the user's login status
 // It provides the user information (username, mode and token)
 // and login/logout functions to all the components that need these information or functions
