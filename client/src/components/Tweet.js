@@ -12,6 +12,8 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Image, Form, Input } from 'antd';
 import request from '../utils/request';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const { username: selfname, mode } = useAuth();
   console.log("1:" + JSON.stringify(tweetInfo));

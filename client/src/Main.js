@@ -15,6 +15,8 @@ import { Row, Col } from 'antd';
 import './css/custom-input.css';
 import request from './utils/request';
 
+// Declaration: we use poe.com to generate some code and fix some bugs in this file
+
 function NewPost() {
   const { username } = useAuth();
   const [availableTags, setAvailableTags] = useState([]);
