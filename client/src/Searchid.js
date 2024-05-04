@@ -38,7 +38,7 @@ const SearchUserid = () => {
             endMessage={
               <p style={{ textAlign: 'center' }}>
                 <b>No more Users</b>
-              </p>
+              </p >
             }
           >
             <UserListView userInfos={userList} />
@@ -49,4 +49,3 @@ const SearchUserid = () => {
 }
 
 export default SearchUserid;
-    

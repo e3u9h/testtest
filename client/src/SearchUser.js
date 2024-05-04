@@ -4,38 +4,35 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-//search user by its keywords
+import { useParams } from 'react-router-dom';
+
 const SearchUser = () => {
   const { username: selfname } = useAuth();
-  console.log(selfname);
-    const username = window.location.pathname.split('/')[2];
+  const { username } = useParams();
   const [userList, setUserList] = useState([]);
 
-  const getAllUser = async () => {
-    try {
-      const res = await request.get("searchuser/" + selfname + "/" + username, {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      const userList = res.data;
-      setUserList(userList);
-      console.log(userList);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-
   useEffect(() => {
-    getAllUser();
-  }, []);
+    const fetchUsers = async () => {
+      try {
+        const response = await request.get(`searchuser/${selfname}/${username}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        setUserList(response.data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-    return (
-      <>
-        <div className='row'>
-          <BackButton />
-        </div>
-        <div id='scrollabletweets' style={{ height: "80vh", overflowY: "scroll" }}>
+    fetchUsers();
+  }, [selfname, username]);
+
+  return (
+    <div>
+      <BackButton />
+      <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
+        {userList.length > 0 ? (
           <InfiniteScroll
             dataLength={userList.length}
             next={null}
@@ -49,9 +46,12 @@ const SearchUser = () => {
           >
             <UserListView userInfos={userList} />
           </InfiniteScroll>
-        </div>
-      </>
-    );
+        ) : (
+          <p style={{ textAlign: 'center' }}>No users found.</p>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default SearchUser;

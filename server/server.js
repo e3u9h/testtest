@@ -194,6 +194,7 @@ app.get('/users/:username', (req, res) => {
     });
 });
 
+<<<<<<< HEAD
 // get recommended posts for the user
 // display all the public posts for other users (not in the cuurrent user's list)
 app.get('/tweets/:username', (req, res) => {
@@ -234,6 +235,55 @@ app.get('/tweets/:username', (req, res) => {
         });
 });
 
+=======
+app.get('/tweets/:username', async (req, res) => {
+    try {
+      const { username } = req.params;
+      const user = await User.findOne({ username });
+  
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+  
+      const tweets = await Tweet.find({ private: false })
+        .sort({ post_time: 'desc' })
+        .populate({ path: 'poster', model: 'User', select: 'username portrait' });
+  
+      const filteredTweets = tweets.filter(tweet => tweet.poster && tweet.poster.username !== username);
+  
+      const recommendedTweets = filteredTweets.map(tweet => ({
+        tid: tweet._id,
+        likeInfo: {
+          likeCount: tweet.likes.length,
+          bLikeByUser: user.tweets_liked.includes(tweet._id),
+        },
+        dislikeInfo: {
+          dislikeCount: tweet.dislike_counter,
+          bDislikeByUser: user.tweets_disliked.includes(tweet._id),
+        },
+        isReported: user.tweets_reported.includes(tweet._id),
+        user: {
+          uid: tweet.poster._id,
+          username: tweet.poster.username,
+        },
+        content: tweet.tweet_content,
+        files: tweet.files,
+        commentCount: tweet.comments.length,
+        retweetCount: tweet.retweets.length,
+        time: tweet.post_time,
+        portraitUrl: tweet.poster.portrait,
+        tags: tweet.tags,
+        private: tweet.private,
+      }));
+  
+      res.status(200).json(recommendedTweets);
+    } catch (error) {
+      console.error('Failed to get recommended tweets:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
+>>>>>>> a3c260a760544a7eeec55fb1cd89636492ad5d27
 // get all the followings' tweets of the user (including the own posts)
 app.get('/followings/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -1144,24 +1194,28 @@ app.delete('/user/:username', async (req, res) => {
 });
 
 //get all users sorted by report_counter
-app.get('/reportusers', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    User.find().sort({ "report_counter": -1 }).then((users) => {
-        res.send(users);
-    }).catch((err) => {
-        res.send(err);
-    });
-});
+app.get('/reportusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().sort({ report_counter: -1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by report count:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 //get all users sorted by name
-app.get('/listusers', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 }).then((users) => {
-        res.send(users);
-    }).catch((err) => {
-        res.send(err);
-    });
-});
+app.get('/listusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by name:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
 
 // get notificaqtions
 app.get('/notification/:username', (req, res) => {
