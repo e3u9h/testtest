@@ -25,12 +25,12 @@ router.put('/', (req, res) => {
                 correct = true;
             }
             if (correct === false) {
-                res.send("The old password is incorrect!").status(404);
+                res.status(404).send("The old password is incorrect!");
             }
             else {
                 acc.pwd = bcryptjs.hashSync(newpwd, 10);
                 acc.save();
-                res.send("Updated Successfully!").status(200);
+                res.status(200).send("Updated Successfully!");
             }
 
         }
