@@ -1,7 +1,3 @@
-Perfect! I'll revise the setup instructions in your README file to include these additional steps, ensuring that users understand the need to navigate to the appropriate directories for setting up and starting the server and client environments separately.
-
-Here's the updated README content formatted using Markdown:
-
 ### Application Introduction
 
 **CubeCU** stands for "Conveniently Connect and Communicate with U". This is a content-oriented web application that integrates social networking and content creation, offering features such as user authentication, user profiles, user interaction, posts, admin functionalities, search, chat, and recommendations.
