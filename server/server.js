@@ -1190,6 +1190,30 @@ app.delete('/user/:username', async (req, res) => {
 });
 
 //get all users sorted by report_counter
+app.get('/reportusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().sort({ report_counter: -1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by report count:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
+
+//get all users sorted by name
+app.get('/listusers', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const users = await User.find().collation({ locale: 'en', strength: 2 }).sort({ username: 1 });
+      res.send(users);
+    } catch (err) {
+      console.error('Error fetching users by name:', err);
+      res.status(500).send('Internal server error');
+    }
+  });
+
+ // get notificaqtions
 app.get('/notification/:username', async (req, res) => {
     try {
       res.set('Content-Type', 'application/json');
@@ -1230,7 +1254,3 @@ app.get('/notification/:username', async (req, res) => {
 server.listen(8000, ()=>{
     console.log("Server is running on Port 8000");
 });
-
-
-
-// Socket server code reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev
