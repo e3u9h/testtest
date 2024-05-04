@@ -157,7 +157,7 @@ function NewPost() {
                 rows={10}
                 value={postContent}
                 onChange={e => setPostContent(e.target.value)}
-                placeholder="What's on your mind?"
+                placeholder="What do you want to share?"
               />
             </Form.Item>
 
