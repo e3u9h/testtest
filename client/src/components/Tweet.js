@@ -227,7 +227,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
           <Button variant="secondary" onClick={handlePostCommentModalClose}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={isDetailPage ? addComment : addCommentMain}>
+          <Button variant="primary" onClick={isDetailPage ? () => { addComment(postCommetValue); setShowPostCommentModal(false); } : () => { addCommentMain() }}>
             Send
           </Button>
         </Modal.Footer>

@@ -6,10 +6,12 @@ import { useAuth } from './provider/context';
 import { timeDisplay } from './utils/Utils';
 import request from './utils/request';
 import BackButton from './components/backbutton';
+import { useParams } from 'react-router-dom';
 
 // Declaration: we use poe.com to generate some code and fix some bugs in this file
 
 const TweetDetail = () => {
+    const { tweetid } = useParams();
     const [tweetInfo, setTweetInfo] = useState({
         "tid": 0,
         "likeInfo": { likeCount: 0, bLikeByUser: false },
@@ -42,12 +44,12 @@ const TweetDetail = () => {
         fetchTweetDetail();
     }, []);
 
-    const addReply = async (clicked_floor) => {
+    const addReply = async (clicked_floor, content) => {
         let newcommentId = "new-comment" + clicked_floor;
         let newCom = {
-            content: document.getElementById(newcommentId).value,
+            content: content,
             username: username,
-            tid: window.location.pathname.split('/')[2],
+            tid: tweetid,
             floor_reply: clicked_floor
         };
         console.log(newCom);
@@ -70,11 +72,11 @@ const TweetDetail = () => {
         }
     }
 
-    const addComment = async () => {
+    const addComment = async (content) => {
         let newCom = {
-            content: document.getElementById('new-comment' + tweetInfo.tid).value,
+            content: content,
             username: username,
-            tid: window.location.pathname.split('/')[2],
+            tid: tweetid,
         };
         console.log(newCom);
         try {
@@ -87,7 +89,6 @@ const TweetDetail = () => {
             let com_count = tweetInfo.commentCount + 1
             setTweetInfo({ ...tweetInfo, commentCount: com_count });
             console.log(commentInfo);
-            document.getElementById('new-comment' + tweetInfo.tid).value = '';
         }
         catch (err) {
             if (err.response.status === 403) {
