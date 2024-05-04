@@ -33,6 +33,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setDislikeInfo(tweetInfo['dislikeInfo']);
     setCommentCount(tweetInfo['commentCount']);
     setRetweetCount(tweetInfo['retweetCount']);
+    setTimeInterval(timeDisplay(tweetInfo['time']));
   }, [tweetInfo]);
 
   const clickLikeTweet = () => {

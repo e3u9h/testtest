@@ -25,6 +25,9 @@ function timeDisplay(time) {
     ];
     const now = new Date();
     const postTime = new Date(time);
+    if (isNaN(postTime)) {
+        return 'Invalid Date';
+    }
     console.log(time + postTime);
     const year = postTime.getFullYear();
     const month = monthAbbreviations[postTime.getMonth()];
