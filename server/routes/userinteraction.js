@@ -3,6 +3,7 @@ const router = express.Router();
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 
+// use of existing code: I referred to the code in https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js when implemeniting the user interaction functions
 // follow
 router.put('/:username/:target/follow', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -10,6 +11,7 @@ router.put('/:username/:target/follow', (req, res) => {
     let target = req.params['target'];
     User.findOne({ 'username': username }).then((user) => {
         User.findOne({ 'username': target }).then((target) => {
+            // cannot follow the users blocking you or being blocked by you
             if (target.users_blocked.includes(user._id)) {
                 return res.status(403).send('You have been blocked by this user.');
             }
@@ -22,15 +24,12 @@ router.put('/:username/:target/follow', (req, res) => {
             target.follower_counter += 1;
             user.save();
             target.save();
+            // create a notification
             Notification.create({
                 username: target.username,
                 actor_id: user._id,
                 action: "follow",
                 time: new Date()
-            }).then((noteobj) => {
-                Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } }).then(c => {
-                    console.log(c);
-                });
             });
             return res.sendStatus(200);
 
@@ -101,12 +100,12 @@ router.put('/:username/:target/report', async (req, res) => {
     const { username, target } = req.params;
 
     try {
-        //report
+        // the reporter
         let user = await User.findOne({ 'username': username });
         if (!user) {
             return res.status(404).send(`User ${username} not found.`);
         }
-        // be reported
+        // the user being reported
         let targetUser = await User.findOne({ 'username': target });
         if (!targetUser) {
             return res.status(404).send(`Target user ${target} not found.`);

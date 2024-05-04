@@ -7,6 +7,9 @@ import BackButton from './components/backbutton';
 import request from './utils/request';
 import { useParams } from 'react-router-dom';
 
+// use of existing code: I referred to the open-source code on GitHub: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Followings.js
+
+// page for the followings of a user
 function Followings() {
     const props = useParams();
     const [followings, setFollowings] = useState([]);

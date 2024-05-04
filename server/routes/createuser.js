@@ -4,7 +4,9 @@ import Account from "../models/Account.js";
 import User from "../models/User.js";
 import bcryptjs from 'bcryptjs';
 
-// create a new user (used for both user registration and admin creation)
+// reference: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
+
+// create a new user (used for both user registration and admin "add user" function)
 router.post('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const _username = req.body['username'];

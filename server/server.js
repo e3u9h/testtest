@@ -48,6 +48,7 @@ app.use('/profile', profileRoute);
 app.use('/followinfo', followinfoRote);
 app.use('/interaction', interactionRoute);
 
+// if the token is invalid, send an error message with status 401
 app.use((err, req, res, next) => {
     if (err.name === 'UnauthorizedError') {
         res.status(401).send('invalid token');
@@ -57,7 +58,6 @@ app.use((err, req, res, next) => {
 
 
 //Connect to MongoDB
-// const uri = "mongodb+srv://dufz2003:4321qwer@cluster0.tkqscce.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const url = mongoUrl;
 console.log("Connecting to MongoDB...");
 mongoose.connect(url)
@@ -127,7 +127,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// 在这里添加后端各种function
+// backend functions
 
 /***Main****/
 //get a user
@@ -1250,7 +1250,7 @@ app.get('/notification/:username', async (req, res) => {
   });
 
 
-// ------启动server------
+// ------start the server------
 server.listen(8000, ()=>{
     console.log("Server is running on Port 8000");
 });

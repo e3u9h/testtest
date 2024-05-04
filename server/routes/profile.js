@@ -61,7 +61,8 @@ router.get('/:username/:targetname/actioninfo', (req, res) => {
     });
 });
 
-// edit profile
+// edit profile; use the "upload" middleware to upload the portrait first, which returns the path of the saved portrait;
+// save the path to the database
 router.put('/:username', upload.single('portrait'), (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.params['username'];
@@ -142,6 +143,7 @@ router.get('/:self/:target/tweets', (req, res) => {
 
 
 // get tweets liked
+// reference of this function: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
 router.get('/:username/likes', (req, res) => {
     res.set('Content-Type', 'text/plain');
     let username = req.params['username'];

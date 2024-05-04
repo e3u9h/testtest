@@ -3,6 +3,7 @@ const router = express.Router();
 import User from "../models/User.js";
 
 // get followings or followers of the target user
+// option: followings or followers
 router.get('/:self/:target/:option', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const self = req.params['self'];

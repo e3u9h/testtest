@@ -19,7 +19,7 @@ import Button from 'react-bootstrap/Button';
 
 // use of existing code: for portrait uploading and preview, I referred to the sample code in the documentation of antd: https://ant.design/components/upload-cn
 // for the profile editing modal, I referred to the sample code in the documentation of react-bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/ and https://react-bootstrap.netlify.app/docs/forms/select
-// for the infinite scroll, I referred to the sample code in the documentation of react-infinite-scroll-component: https://www.npmjs.com/package/react-infinite-scroll-component
+// for how to implement the infinite scroll, I referred to the code in StackOverflow https://stackoverflow.com/questions/59689791/react-infinitescroll-in-a-scrollable-component-on-the-page and the open-source code in https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client
 
 // use of AI: I admit that I used GPT-4 in poe (https://poe.com/) for generating some of the code in this file, and modified them to make them useable in our project
 
@@ -213,144 +213,143 @@ function Profile() {
     return (<>
         {/* if self has not blocked target and is not blocked by target or self is an admin, show the profile */}
         {(mode === 'admin' || (!block && !beblocked)) && <Container fluid>
-            <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
-                {target['username'] !== username && <Row>
-                    <BackButton />
-                </Row>}
-                {/* basic information part */}
-                <div class='row'>
-                    <div class='col-sm-3'>
-                        <img src={BACK_END + target.portrait} width={180} height={180} alt='avatar' class='profile-portrait' style={{ objectFit: 'cover' }}></img>
+            {target['username'] !== username && <Row>
+                <BackButton />
+            </Row>}
+            {/* basic information part */}
+            <div class='row'>
+                <div class='col-sm-3'>
+                    <img src={BACK_END + target.portrait} width={180} height={180} alt='avatar' class='profile-portrait' style={{ objectFit: 'cover' }}></img>
+                </div>
+                <div class='col-sm-7'>
+                    <div class='row' id='name-id'>
+                        <div className='ms-2 text-black' id='profile-username'>{target['username']}</div>
+                        <div className='ms-2 text-muted'> @{target['_id']} </div>
                     </div>
-                    <div class='col-sm-7'>
-                        <div class='row' id='name-id'>
-                            <div className='ms-2 text-black' id='profile-username'>{target['username']}</div>
-                            <div className='ms-2 text-muted'> @{target['_id']} </div>
-                        </div>
-                        <div class='row'>
-                            <span className='ms-2 text-black'> {target['about']} </span>
-                        </div>
-                        <div class='row'>
-                            <span className='ms-2 text-muted'> {target['gender']} </span>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
-                            <Link
-                                to={"/" + target['username'] + "/followers"}
-                                id='followers'
-                                className='ms-2 text-muted'
-                                style={{
-                                    // textDecoration: 'none',
-                                    color: 'inherit',
-                                    marginRight: '10px'
-                                }}
-                            >
-                                Followers: {target['follower_counter']}
-                            </Link>
-                            <Link
-                                to={"/" + target['username'] + "/followings"}
-                                id='followings'
-                                className='ms-2 text-muted'
-                                style={{
-                                    // textDecoration: 'none',
-                                    color: 'inherit',
-                                }}
-                            >
-                                Following: {target['following_counter']}
-                            </Link>
-                        </div>
+                    <div class='row'>
+                        <span className='ms-2 text-black'> {target['about']} </span>
                     </div>
-                    {/* buttons: Edit Profile for self; Follow/Unfollow, Block/Unblock, Report/Reported and Chat for others */}
-                    <div class='col'>
-                        <div className="btn-group-vertical" >
-                            {
-                                mode === 'user' && target['username'] === username &&
-                                <button type="button" onClick={handleEditClick} className="btn btn-secondary" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
-                                    Edit Profile
-                                </button>
-                            }
-                            {
-                                mode === 'user' && target['username'] !== username && (
-                                    <button type="button" onClick={handleFollowClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="follow" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
-                                        {follow ? 'Unfollow' : 'Follow'}
-                                    </button>)
-                            }
-                            {
-                                mode === 'user' && target['username'] !== username && (
-                                    <button type="button" onClick={handleBlockClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
-                                        {block ? 'Unblock' : 'Block'}
-                                    </button>)
-                            }
-                            {
-                                mode === 'user' && target['username'] !== username && (
-                                    <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
-                                        {report ? 'Reported' : 'Report'}
-                                    </button>)
-                            }
-                            {
-                                mode === 'user' && target['username'] !== username &&
-                                <button type="button" onClick={handleChatClick} className="btn btn-secondary" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
-                                    Chat
-                                </button>
-                            }
-                        </div>
+                    <div class='row'>
+                        <span className='ms-2 text-muted'> {target['gender']} </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px', marginBottom: '10px' }}>
+                        <Link
+                            to={"/" + target['username'] + "/followers"}
+                            id='followers'
+                            className='ms-2 text-muted'
+                            style={{
+                                // textDecoration: 'none',
+                                color: 'inherit',
+                                marginRight: '10px'
+                            }}
+                        >
+                            Followers: {target['follower_counter']}
+                        </Link>
+                        <Link
+                            to={"/" + target['username'] + "/followings"}
+                            id='followings'
+                            className='ms-2 text-muted'
+                            style={{
+                                // textDecoration: 'none',
+                                color: 'inherit',
+                            }}
+                        >
+                            Following: {target['following_counter']}
+                        </Link>
                     </div>
                 </div>
-                {/* modal for Edit Profile */}
-                <Modal show={showEditModal} onHide={handleClose}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Edit Profile</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                                <Form.Label>Gender</Form.Label>
-                                <Form.Select
-                                    aria-label="Default select example"
-                                    value={editgender}
-                                    onChange={handleGenderChange}
-                                >
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Others">Others</option>
-                                    <option value="">Not to Specify</option>
-                                </Form.Select>
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
-                                <Form.Label>Portrait</Form.Label>
-                                <Upload
-                                    name="avatar"
-                                    listType="picture-circle"
-                                    className="avatar-uploader"
-                                    showUploadList={false}
-                                    beforeUpload={beforeUpload}
-                                    onChange={handleChange}
-                                >
-                                    <img
-                                        src={imageUrl}
-                                        style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
-                                    />
-                                </Upload>
-                            </Form.Group>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
-                                <Form.Label>About</Form.Label>
-                                <Form.Control
-                                    as="textarea"
-                                    rows={3}
-                                    value={textAreaValue}
-                                    onChange={handleAboutChange}
+                {/* buttons: Edit Profile for self; Follow/Unfollow, Block/Unblock, Report/Reported and Chat for others */}
+                <div class='col'>
+                    <div className="btn-group-vertical" >
+                        {
+                            mode === 'user' && target['username'] === username &&
+                            <button type="button" onClick={handleEditClick} className="btn btn-secondary" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
+                                Edit Profile
+                            </button>
+                        }
+                        {
+                            mode === 'user' && target['username'] !== username && (
+                                <button type="button" onClick={handleFollowClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="follow" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                    {follow ? 'Unfollow' : 'Follow'}
+                                </button>)
+                        }
+                        {
+                            mode === 'user' && target['username'] !== username && (
+                                <button type="button" onClick={handleBlockClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                    {block ? 'Unblock' : 'Block'}
+                                </button>)
+                        }
+                        {
+                            mode === 'user' && target['username'] !== username && (
+                                <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
+                                    {report ? 'Reported' : 'Report'}
+                                </button>)
+                        }
+                        {
+                            mode === 'user' && target['username'] !== username &&
+                            <button type="button" onClick={handleChatClick} className="btn btn-secondary" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
+                                Chat
+                            </button>
+                        }
+                    </div>
+                </div>
+            </div>
+            {/* modal for Edit Profile */}
+            <Modal show={showEditModal} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Edit Profile</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>Gender</Form.Label>
+                            <Form.Select
+                                aria-label="Default select example"
+                                value={editgender}
+                                onChange={handleGenderChange}
+                            >
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Others">Others</option>
+                                <option value="">Not to Specify</option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                            <Form.Label>Portrait</Form.Label>
+                            <Upload
+                                name="avatar"
+                                listType="picture-circle"
+                                className="avatar-uploader"
+                                showUploadList={false}
+                                beforeUpload={beforeUpload}
+                                onChange={handleChange}
+                            >
+                                <img
+                                    src={imageUrl}
+                                    style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
                                 />
-                            </Form.Group>
-                        </Form>
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
-                            Cancel
-                        </Button>
-                        <Button variant="primary" onClick={handleEditSubmit}>
-                            Submit
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
+                            </Upload>
+                        </Form.Group>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                            <Form.Label>About</Form.Label>
+                            <Form.Control
+                                as="textarea"
+                                rows={3}
+                                value={textAreaValue}
+                                onChange={handleAboutChange}
+                            />
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleEditSubmit}>
+                        Submit
+                    </Button>
+                </Modal.Footer>
+            </Modal>
                 {/* Posts part: for self, show posted posts or liked posts; for others, show only posed posts */}
                 {
                     (target['username'] === username &&
@@ -372,11 +371,12 @@ function Profile() {
                                         Likes
                                     </button>
                                 </div>
-
+                            <div id="scrollableDiv" className='border' style={{ height: "60vh", overflowX: "hidden", overflowY: "scroll" }}>
                                 <div className="row">
                                     {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
                                     {viewMode === "Likes" && <LikesList />}
                                 </div>
+                            </div>
                             </Col>
                         </Row>) ||
                     <Row>
@@ -389,8 +389,10 @@ function Profile() {
                                         Posts
                                     </button>
                             </div>
+                            <div id="scrollableDiv" className='border' style={{ height: "60vh", overflowX: "hidden", overflowY: "scroll" }}>
                             <div className="row">
                                 {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
+                            </div>
                             </div>
                                 {/* modal for confirming the report action */}
                             <div className="modal fade" id="report-user" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -412,8 +414,7 @@ function Profile() {
                             </div>
                         </Col>
                     </Row>
-                }
-            </div>
+            }
         </Container>}
         {/* if self has blocked target, show an empty profile and an Unblock button */}
         {block && <Container fluid>
