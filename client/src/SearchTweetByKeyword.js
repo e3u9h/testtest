@@ -6,26 +6,26 @@ import request from './utils/request';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './provider/context';
 
+const searchTweets = async (searchKeyword, currentUser, setTweets) => {
+  try {
+    const response = await request.get(`searchtweet/${searchKeyword}/${currentUser}`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+    setTweets(response.data);
+  } catch (error) {
+    console.error('Failed to search tweets:', error);
+  }
+};
+
 const SearchTweetByKeyword = () => {
   const { keyword: searchKeyword } = useParams();
   const [tweets, setTweets] = useState([]);
   const { username: currentUser } = useAuth();
 
   useEffect(() => {
-    const searchTweets = async () => {
-      try {
-        const response = await request.get(`searchtweet/${searchKeyword}/${currentUser}`, {
-          headers: {
-            Accept: 'application/json',
-          },
-        });
-        setTweets(response.data);
-      } catch (error) {
-        console.error('Failed to search tweets:', error);
-      }
-    };
-
-    searchTweets();
+    searchTweets(searchKeyword, currentUser, setTweets);
   }, [searchKeyword, currentUser]);
 
   return (
