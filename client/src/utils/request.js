@@ -10,7 +10,7 @@ const request = axios.create({
     },
 });
 
-// This is an axios interceptor which can add the Json Web Token to all the request headers if the token exists
+// axios request interceptor which can add the Json Web Token to all the request headers if the token exists
 request.interceptors.request.use(
     (config) => {
         const token = JSON.parse(localStorage.getItem('userInfo'))?.token;
@@ -24,7 +24,8 @@ request.interceptors.request.use(
     }
 );
 
-// This is an axios interceptor which can remove the user information from localStorage if the token is invalid (has expired)
+// axios response interceptor which can remove the user information from localStorage
+// if the response indicates that the token is invalid (has expired)
 request.interceptors.response.use(response => {
     return response;
 }, error => {

@@ -3,6 +3,7 @@ import jsonwebtoken from 'jsonwebtoken'
 const router = express.Router();
 import Account from "../models/Account.js";
 import { jwtKey } from '../config.js';
+import bcryptjs from 'bcryptjs';
 
 // the login function
 router.post('/user', (req, res) => {
@@ -17,7 +18,20 @@ router.post('/user', (req, res) => {
         }
         else {
             // verify the password
-            if (val && _pwd === val.pwd) {
+            let correct = false;
+            // bcrypyjs.compareSync is for comparing the input password (in plain text) with the encrypted correct password
+            if (val && bcryptjs.compareSync(_pwd, val.pwd)) {
+                correct = true;
+            } else if (val && _pwd === val.pwd) {
+                // this part is for the transition from the not-encrypted version to the encrypted version
+                // because in our previous version, the passwords are saved in plain text
+                // if the plain text password is correct, update the password to the encrypted version
+                // after all the users' passwords are encrypted, this part can be deleted
+                correct = true;
+                val.pwd = bcryptjs.hashSync(_pwd, 10);
+                val.save();
+            }
+            if (correct) {
                 // generate the Json Web Token
                 const token = jsonwebtoken.sign({ username: _username, mode: val.identity }, jwtKey, { expiresIn: '10h', algorithm: 'HS256' });
                 // use the identity in the Account schema to determine the user's mode,

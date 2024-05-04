@@ -22,6 +22,7 @@ import interactionRoute from "./routes/userinteraction.js";
 import { mongoUrl } from './config.js';
 import { expressjwt } from 'express-jwt';
 import { jwtKey } from './config.js';
+import bcryptjs from 'bcryptjs';
 
 const app = express();
 
@@ -30,6 +31,10 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 
+// all the requests need to be authorized by the token except for login, creating user and accessing the files
+// (maybe accessing files need to be authorized as well, but now I don't know how to do it
+// because the files are directly accessed in the <img> tag,
+// which cannot use axios's request interceptor to add token to the header, so I just let it not be authorized for now)
 app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/, /^\/img/] }));
 
 app.use('/uploads', express.static('uploads'))
@@ -347,87 +352,109 @@ app.post('/new-tweet', upload.array('files'), (req, res) => {
     });
 });
 
-// like a tweet
-app.put('/tweet/:tid/:username/like', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    // find the user
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).populate('poster').exec().then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            let time = new Date();
-            if (user.tweets_liked == null) { user.tweets_liked = []; }
-            if (tweet.likes == null) { tweet.likes = []; }
-            // check if the user has liked the tweet
-            let likedTweets = user.tweets_liked;
-            if (likedTweets.includes(tid)) {
-                return res.status(400).send('User have already liked this tweet');
-            }
-            user.tweets_liked.push(tweet._id);
-            tweet.likes.push({ username: username, time: time });
-            // remove from the dislike list
-            if (user.tweets_disliked && user.tweets_disliked.includes(tweet._id)) {
-                console.log("Remove tweet {" + tweet._id + "} from " + username + " dislike list");
-                user.tweets_disliked.remove(tweet._id);
-                tweet.dislike_counter--;
-            }
-            let ret = {
-                "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
-                "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
-            }
-            user.save();
-            tweet.save();
-            Notification.create({
-                username: tweet.poster.username,
-                actor_id: user._id,
-                action: "like",
-                tid: tweet._id,
-                time: new Date()
-            }).then((noteobj) => {
-                Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } }).then(c => {
-                    console.log(c);
-                });
-            });
-            console.log("Like successfully");
-            return res.status(201).send(ret);
+// like a post
+app.put('/tweet/:tid/:username/like', async (req, res) => {
+    try {
+        res.set('Content-Type', 'text/plain');
+        const tid = req.params['tid'];
+        const username = req.params['username'];
+
+        // Find the user
+        const user = await User.findOne({ 'username': username });
+        if (!user) {
+            return res.status(404).send('User does not exist');
+        }
+
+        // Find the post
+        const tweet = await Tweet.findById(tid).populate('poster').exec();
+        if (!tweet) {
+            return res.status(404).send('Post does not exist');
+        }
+
+        const time = new Date();
+
+        // Check if the user has already liked the post
+        const likedTweets = user.tweets_liked || [];
+        if (likedTweets.includes(tid)) {
+            return res.status(400).send('User has already liked this tweet');
+        }
+
+        user.tweets_liked.push(tweet._id);
+        tweet.likes.push({ username: username, time: time });
+
+        // Remove from the dislike list
+        if (user.tweets_disliked && user.tweets_disliked.includes(tweet._id)) {
+            console.log(`Remove tweet ${tweet._id} from ${username} dislike list`);
+            user.tweets_disliked.remove(tweet._id);
+            tweet.dislike_counter--;
+        }
+
+        const ret = {
+            "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
+            "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
+        };
+
+        await user.save();
+        await tweet.save();
+
+        const noteobj = await Notification.create({
+            username: tweet.poster.username,
+            actor_id: user._id,
+            action: "like",
+            tid: tweet._id,
+            time: new Date()
         });
-    }).catch((err) => {
+
+        await Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } });
+
+        console.log("Like successful");
+        return res.status(201).send(ret);
+    } catch (err) {
         console.log("-----Like Error--------");
         console.log(err);
         return res.status(500).send(err);
-    });
+    }
 });
 
-// cancel like a tweet
-app.put('/tweet/:tid/:username/cancel-like', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            if (user.tweets_liked == null || !user.tweets_liked.includes(tid) || tweet.likes == null || tweet.likes.includes(username)) {
-                return res.status(400).send('User have not liked this tweet');
-            }
-            user.tweets_liked.remove(tweet._id);
-            tweet.likes = tweet.likes.filter(item => item.username !== username);
-            let ret = {
-                "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
-                "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
-            }
-            user.save();
-            tweet.save();
-            console.log("Cancel like successfully");
-            return res.status(201).send(ret);
-        });
-    }).catch((err) => {
+// cancel like a post
+app.put('/tweet/:tid/:username/cancel-like', async (req, res) => {
+    try {
+        res.set('Content-Type', 'text/plain');
+        const tid = req.params['tid'];
+        const username = req.params['username'];
+
+        const user = await User.findOne({ 'username': username });
+        if (!user) {
+            return res.status(404).send('User does not exist');
+        }
+
+        const tweet = await Tweet.findById(tid);
+        if (!tweet) {
+            return res.status(404).send('Tweet does not exist');
+        }
+
+        if (!user.tweets_liked?.includes(tid) || !tweet.likes?.some(like => like.username === username)) {
+            return res.status(400).send('User has not liked this tweet');
+        }
+
+        user.tweets_liked.remove(tweet._id);
+        tweet.likes = tweet.likes.filter(like => like.username !== username);
+
+        const ret = {
+            "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
+            "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
+        };
+
+        await user.save();
+        await tweet.save();
+
+        console.log("Cancel like successfully");
+        return res.status(201).send(ret);
+    } catch (err) {
         console.log("-----Cancel Like Error--------");
         console.log(err);
         return res.status(500).send(err);
-    });
+    }
 });
 
 // dislike a tweet
@@ -499,34 +526,6 @@ app.put('/tweet/:tid/:username/cancel-dislike', (req, res) => {
     });
 });
 
-// report a tweet
-app.put('/tweet/:tid/:username/report', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            if (user.tweets_reported == null) { user.tweets_reported = []; }
-            // check if the user has reported the tweet
-            let reportedTweets = user.tweets_reported;
-            if (reportedTweets.includes(tid)) {
-                return res.status(400).send('User have already reported this tweet');
-            }
-            user.tweets_reported.push(tweet._id);
-            tweet.report_counter++;
-            user.save();
-            tweet.save();
-            console.log(username + " report " + tid + " successfully");
-            return res.status(201).send('Report successfully');
-        });
-    }).catch((err) => {
-        console.log("-----Report Error--------");
-        console.log(err);
-        return res.status(500).send(err);
-    });
-});
 
 // get all the tags
 app.get('/tags', (req, res) => {
@@ -646,12 +645,20 @@ app.get('/fetchtweet/:tid/:username', (req, res) => {
         if (!tweet) { return res.send('Tweet does not exist').status(404); }
         console.log('tweet found');
         User.findOne({ 'username': req.params['username'] }).then((user) => {
-            if (!user) { return res.send('User does not exist').status(404); }
-            else { console.log('User found') }
+            // if the user is not found in User Database, it indicates that the user is an admin,
+            // so isLiked and isDisliked are set false; 
+            // otherwise, check if the user has liked or disliked this tweet
+            let isLiked = false;
+            let isDisliked = false;
+            if (user) {
+                console.log('User found')
+                isLiked = user.tweets_liked.includes(tweet._id);
+                isDisliked = user.tweets_disliked.includes(tweet._id);
+            }
             let tweet_info = {
                 tid: tweet._id,
-                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: user.tweets_liked.includes(tweet._id) },
-                dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: user.tweets_disliked.includes(tweet._id) },
+                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: isLiked },
+                dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: isDisliked },
                 user: { uid: tweet.poster._id, username: tweet.poster.username },
                 content: tweet.tweet_content,
                 files: tweet.files,
@@ -896,76 +903,86 @@ app.get('/searchuserbyid/:selfname/:targetname', (req, res) => {
 });
 
 //search for posts with specified tag    
-app.get('/searchtag/:tag', (req, res) => {
+app.get('/searchtag/:tag/:selfname', (req, res) => {
     res.set('Content-Type', 'text/plain');
-    Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
-        tweet = tweet.filter((tweet) => {
-            return tweet.poster != null;
-        });
-        let obj = [];
-        if (!tweet) {
-            console.log("no such tweet");
-            res.sendStatus(404);
-        }
-        else {
-            tweet.forEach(tweet => {
-                let tweetObj = {
-                    "tid": tweet['_id'],
-                    "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": false },
-                    "dislikeInfo": { "dislikeCount": tweet['dislike_counter'] },
-                    "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
-                    "content": tweet.tweet_content,
-                    "files": tweet.files,
-                    "commentCount": tweet['comments'].length,
-                    "retweetCount": tweet['retweets'].length,
-                    "time": tweet['post_time'],
-                    "portraitUrl": tweet.poster['portrait'],
-                    "tags": tweet['tags'],
-                    'private': tweet['private']
-                }
-                obj.push(tweetObj);
+    User.findOne({ 'username': req.params['selfname'] }).then((self) => {
+        Tweet.find({ 'tags': { $all: [req.params['tag']] }, private: 'false' }).populate('poster').exec().then((tweet) => {
+            tweet = tweet.filter((tweet) => {
+                return tweet.poster != null;
             });
-            console.log(obj);
-            res.send(obj);
-        }
+            let obj = [];
+            if (!tweet) {
+                console.log("no such tweet");
+                res.sendStatus(404);
+            }
+            else {
+                tweet.forEach(tweet => {
+                    const beLiked = self["tweets_liked"].includes(tweet['_id']);
+                    const beDisliked = self["tweets_disliked"].includes(tweet['_id']);
+                    let tweetObj = {
+                        "tid": tweet['_id'],
+                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": beLiked },
+                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": beDisliked },
+                        "user": { "uid": tweet.poster['_id'], 'username': tweet.poster['username'] },
+                        "content": tweet.tweet_content,
+                        "files": tweet.files,
+                        "commentCount": tweet['comments'].length,
+                        "retweetCount": tweet['retweets'].length,
+                        "time": tweet['post_time'],
+                        "portraitUrl": tweet.poster['portrait'],
+                        "tags": tweet['tags'],
+                        'private': tweet['private']
+                    }
+                    obj.push(tweetObj);
+                });
+                console.log(obj);
+                res.send(obj);
+            }
+        }).catch((err) => {
+            res.send(err);
+        });
     }).catch((err) => {
         res.send(err);
     });
 })
 
 // search for posts by keyword
-app.get('/searchtweet/:keyword', (req, res) => {
+app.get('/searchtweet/:keyword/:self', (req, res) => {
     res.set('Content-Type', 'application/json');
     const keyword = req.params.keyword;
-
-    Tweet.find({
-        tweet_content: { $regex: new RegExp(keyword, 'i') },
-        private: false
-    })
-        .populate('poster', 'username portrait')
-        .exec()
-        .then(tweets => {
-            tweets = tweets.filter(tweet => tweet.poster);
-
-            let searchResults = tweets.map(tweet => ({
-                tid: tweet._id,
-                likeInfo: { likeCount: tweet.likes.length, bLikeByUser: false },
-                dislikeInfo: { dislikeCount: tweet.dislike_counter },
-                user: { uid: tweet.poster._id, username: tweet.poster.username },
-                content: tweet.tweet_content,
-                files: tweet.files,
-                commentCount: tweet.comments.length,
-                retweetCount: tweet.retweets.length,
-                time: tweet.post_time,
-                portraitUrl: tweet.poster.portrait,
-                tags: tweet.tags,
-                private: tweet.private
-            }));
-
-            console.log(searchResults);
-            res.json(searchResults);
+    User.findOne({ 'username': req.params.self }).then((self) => {
+        Tweet.find({
+            tweet_content: { $regex: new RegExp(keyword, 'i') },
+            private: false
         })
-        .catch(err => {
+            .populate('poster', 'username portrait')
+            .exec()
+            .then(
+                tweets => {
+                    tweets = tweets.filter(tweet => tweet.poster);
+                    let searchResults = tweets.map(tweet => {
+                        const beLiked = self["tweets_liked"].includes(tweet["_id"]);
+                        const beDisliked = self["tweets_disliked"].includes(tweet["_id"]);
+                        return {
+                            tid: tweet._id,
+                            likeInfo: { likeCount: tweet.likes.length, bLikeByUser: beLiked },
+                            dislikeInfo: { dislikeCount: tweet.dislike_counter, bDislikeByUser: beDisliked },
+                            user: { uid: tweet.poster._id, username: tweet.poster.username },
+                            content: tweet.tweet_content,
+                            files: tweet.files,
+                            commentCount: tweet.comments.length,
+                            retweetCount: tweet.retweets.length,
+                            time: tweet.post_time,
+                            portraitUrl: tweet.poster.portrait,
+                            tags: tweet.tags,
+                            private: tweet.private
+                        };
+                    });
+
+                    console.log(searchResults);
+                    res.json(searchResults);
+                })
+    }).catch(err => {
             console.error(err);
             res.status(500).send(err);
         });
@@ -995,7 +1012,7 @@ app.get('/search/trend', (req, res) => {
 
 //-------Admin User-------
 //update: change password by admin
-app.put('/adminupdate', async (req, res) => {
+app.put('/adminchangepwd', async (req, res) => {
     res.set('Content-Type', 'text/plain');
     const { username, newpwd } = req.body;
   
@@ -1010,7 +1027,7 @@ app.put('/adminupdate', async (req, res) => {
         return res.status(404).send("No such user.");
       }
       console.log(`Changing password for user: ${username}`);
-      acc.pwd = newpwd;
+        acc.pwd = bcryptjs.hashSync(newpwd, 10);
       await acc.save();
       return res.status(200).send("Update Successfully!");
     } catch (err) {
@@ -1025,7 +1042,22 @@ app.delete('/user/:username', async (req, res) => {
     const { username } = req.params;
 
     try {
-        //delete user
+        // update the followings and followers info of all the followings and followers of the target user
+        const targetUser = await User.findOne({ username: username }).populate('followings').populate('followers');
+        if (!targetUser) {
+            return res.status(404).send('User does not exist.');
+        }
+        targetUser.followings.forEach(async (following) => {
+            following.followers.remove(targetUser._id);
+            following.follower_counter--;
+            await following.save();
+        });
+        targetUser.followers.forEach(async (follower) => {
+            follower.followings.remove(targetUser._id);
+            follower.following_counter--;
+            await follower.save();
+        });
+        //delete the user
         const accResult = await Account.deleteOne({ username: username });
         if (accResult.deletedCount === 0) {
             return res.status(404).send('User does not exist in Account db.');

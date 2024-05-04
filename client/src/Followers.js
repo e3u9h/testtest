@@ -5,30 +5,23 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
+import { useParams } from 'react-router-dom';
 
 function Followers() {
+    const props = useParams();
     const [followers, setFollowers] = useState([]);
     const { username: self, mode } = useAuth();
 
     async function fetchInfo() {
         // fetch followers information
-        let target = window.location.pathname.split('/')[1];
-        let followersrec;
+        const target = props.username;
         console.log(self);
         console.log(target);
-        if (mode === 'user') {
-            followersrec = await request.get("followinfo/" + self + "/" + target + "/followers", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        } else {
-            followersrec = await request.get("followinfo/" + target + "/followers", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        }
+        let followersrec = await request.get("followinfo/" + self + "/" + target + "/followers", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         console.log(followersrec);
         const followersData = followersrec.data;
         setFollowers(followersData);

@@ -5,7 +5,7 @@ import {Link} from "react-router-dom";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './config';
 import { useAuth } from './provider/context';
-import { timeDifference } from './utils/Utils';
+import { timeDisplay } from './utils/Utils';
 import request from './utils/request';
 
 const actionMap = {
@@ -78,7 +78,7 @@ class SingleNotification extends React.Component{
                         <p class="card-text d-inline-block m-2">{this.props.name} {actionMap[this.props.action]}</p>
                         <p style={{ display: 'inline-block', fontStyle: 'italic', fontWeight: 'bold' }}>{this.props.content}</p>
                     </div>
-                    <p class="card-text text-right"><small class="text-muted">Last updated: {timeDifference(this.props.time)} </small></p>
+                    <p class="card-text text-right"><small class="text-muted">Last updated: {timeDisplay(this.props.time)} </small></p>
                 </div>
                 
             </div>
