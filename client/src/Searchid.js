@@ -4,25 +4,37 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
-//get the target user by id
+
 const SearchUserid = () => {
   const { username: selfname } = useAuth();
   const username = window.location.pathname.split('/')[2];
   const [userList, setUserList] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+
   const getAllUser = async () => {
-    const res = await request.get("searchuserbyid/" + selfname + "/" + username, {
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    const l = res.data;
-      setUserList(l);
-      console.log(l);
+    try {
+      const res = await request.get(`searchuserbyid/${selfname}/${username}`, {
+        headers: {
+          'Accept': 'application/json'
+        },
+        params: {
+          page: page
+        }
+      });
+      
+      const newData = res.data;
+      setUserList(prevUserList => [...prevUserList, ...newData]);
+      setHasMore(newData.length > 0);
+      setPage(prevPage => prevPage + 1);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
+  };
 
   useEffect(() => {
     getAllUser();
-  }, []);
+  }, [selfname, username]);
 
   return (
     <>
@@ -32,21 +44,20 @@ const SearchUserid = () => {
       <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
         <InfiniteScroll
           dataLength={userList.length}
-            next={null}
-            hasMore={false}
-            scrollableTarget="scrollabletweets"
-            endMessage={
-              <p style={{ textAlign: 'center' }}>
-                <b>No more Users</b>
-              </p>
-            }
-          >
-            <UserListView userInfos={userList} />
-          </InfiniteScroll>
-        </div>
-        </>
-    );
-}
+          next={getAllUser}
+          hasMore={hasMore}
+          scrollableTarget="scrollabletweets"
+          endMessage={
+            <p style={{ textAlign: 'center' }}>
+              <b>No more Users</b>
+            </p>
+          }
+        >
+          <UserListView userInfos={userList} />
+        </InfiniteScroll>
+      </div>
+    </>
+  );
+};
 
 export default SearchUserid;
-    

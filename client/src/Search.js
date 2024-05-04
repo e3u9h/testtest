@@ -1,6 +1,4 @@
 import React from 'react';
-import TweetListView from './components/Tweet';
-import UserListView from './components/User';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -15,11 +13,11 @@ import request from './utils/request';
 class Search extends React.Component{
     constructor(props){
         super(props);
-        this.state = {viewMode:"search"}; // two viewmode, notification or message
+        this.state = {viewMode:"search"};
         this.clickSearch = this.clickSearch.bind(this)
         this.onkeydown = this.onkeydown.bind(this)
     }
-    // Direct to the specific page after clicking the search button to search for something.
+
     async clickSearch(){
         var search=document.getElementById('search_input').value;
         if(this.state.viewMode == 'searchuser'){
