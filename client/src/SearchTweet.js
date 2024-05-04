@@ -7,14 +7,14 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from './provider/context';
 
 const SearchTweet = () => {
-  const { tag: tagParam } = useParams();
+  const { tag: searchTag } = useParams();
   const [tweets, setTweets] = useState([]);
   const { username: currentUser } = useAuth();
 
   useEffect(() => {
     const fetchTweetsByTag = async () => {
       try {
-        const response = await request.get(`searchtag/${tagParam}/${currentUser}`, {
+        const response = await request.get(`searchtag/${searchTag}/${currentUser}`, {
           headers: {
             'Accept': 'application/json',
           },
@@ -26,19 +26,23 @@ const SearchTweet = () => {
     };
 
     fetchTweetsByTag();
-  }, [tagParam, currentUser]);
+  }, [searchTag, currentUser]);
 
   return (
     <div>
       <BackButton />
-      <div id='tweetContainer' style={{ height: "80vh", overflowY: "scroll" }}>
+      <div id="tweetScrollContainer" style={{ height: '80vh', overflowY: 'scroll' }}>
         {tweets.length > 0 ? (
           <InfiniteScroll
             dataLength={tweets.length}
             next={null}
             hasMore={false}
-            scrollableTarget='tweetContainer'
-            endMessage={<p style={{ textAlign: 'center' }}><b>No more Posts</b></p>}
+            scrollableTarget="tweetScrollContainer"
+            endMessage={
+              <p style={{ textAlign: 'center' }}>
+                <b>No more Posts</b>
+              </p>
+            }
           >
             <TweetListView tweetInfos={tweets} />
           </InfiniteScroll>
@@ -48,6 +52,6 @@ const SearchTweet = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SearchTweet;
