@@ -89,7 +89,6 @@ function NewPost() {
     console.log(fileList)
 
     // send data to server
-
     // format like label:data
     let formData = new FormData();
     formData.append('username', username)
@@ -401,3 +400,4 @@ function Main() {
 }
 
 export default Main;
+// employ claude3 to offer some idea
