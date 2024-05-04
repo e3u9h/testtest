@@ -7,44 +7,44 @@ import request from './utils/request';
 import { useParams } from 'react-router-dom';
 
 const SearchUser = () => {
-  const { username: selfname } = useAuth();
-  const { username } = useParams();
-  const [userList, setUserList] = useState([]);
+  const { username: currentUser } = useAuth();
+  const { username: searchUsername } = useParams();
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const searchUsers = async () => {
       try {
-        const response = await request.get(`searchuser/${selfname}/${username}`, {
+        const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {
           headers: {
-            'Accept': 'application/json'
-          }
+            Accept: 'application/json',
+          },
         });
-        setUserList(response.data);
+        setUsers(response.data);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error('Failed to search users:', error);
       }
     };
 
-    fetchUsers();
-  }, [selfname, username]);
+    searchUsers();
+  }, [currentUser, searchUsername]);
 
   return (
     <div>
       <BackButton />
-      <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
-        {userList.length > 0 ? (
+      <div id="userScrollContainer" style={{ height: '95vh', overflow: 'auto' }}>
+        {users.length > 0 ? (
           <InfiniteScroll
-            dataLength={userList.length}
+            dataLength={users.length}
             next={null}
             hasMore={false}
-            scrollableTarget="scrollabletweets"
+            scrollableTarget="userScrollContainer"
             endMessage={
               <p style={{ textAlign: 'center' }}>
                 <b>No more Users</b>
               </p>
             }
           >
-            <UserListView userInfos={userList} />
+            <UserListView userInfos={users} />
           </InfiniteScroll>
         ) : (
           <p style={{ textAlign: 'center' }}>No users found.</p>
@@ -52,6 +52,6 @@ const SearchUser = () => {
       </div>
     </div>
   );
-}
+};
 
 export default SearchUser;
