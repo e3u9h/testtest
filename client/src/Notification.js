@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
-import {Link} from "react-router-dom";
-// import MaterialIcon, {colorPalette} from 'material-icons-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './config';
 import { useAuth } from './provider/context';
@@ -55,9 +53,9 @@ class NotificationListView extends React.Component{
             <div className='list-group w-auto'>
                 {this.props.notifications.map((note,index)=>
                 note.icon!="follow" ?
-                <SingleNotification key={index} icon={note.icon} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>
+                <SingleNotification key={index} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>
                 :
-                <SingleNotification key={index} icon={note.icon} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>)
+                <SingleNotification key={index} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>)
                 }
                 
             </div>
