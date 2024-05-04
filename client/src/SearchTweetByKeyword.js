@@ -7,40 +7,44 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from './provider/context';
 
 const SearchTweetByKeyword = () => {
-  const { keyword } = useParams();
-  const [tweetList, setTweetList] = useState([]);
-  const { username: selfname } = useAuth();
+  const { keyword: searchKeyword } = useParams();
+  const [tweets, setTweets] = useState([]);
+  const { username: currentUser } = useAuth();
 
   useEffect(() => {
-    const fetchTweets = async () => {
+    const searchTweets = async () => {
       try {
-        const response = await request.get(`searchtweet/${keyword}/${selfname}`, {
+        const response = await request.get(`searchtweet/${searchKeyword}/${currentUser}`, {
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
           },
         });
-        setTweetList(response.data);
+        setTweets(response.data);
       } catch (error) {
-        console.error('Error fetching tweets:', error);
+        console.error('Failed to search tweets:', error);
       }
     };
 
-    fetchTweets();
-  }, [keyword, selfname]);
+    searchTweets();
+  }, [searchKeyword, currentUser]);
 
   return (
     <div>
       <BackButton />
-      <div id='scrollabletweets' style={{ height: '80vh', overflowY: 'scroll' }}>
-        {tweetList.length > 0 ? (
+      <div id="tweetScrollContainer" style={{ height: '80vh', overflowY: 'scroll' }}>
+        {tweets.length > 0 ? (
           <InfiniteScroll
-            dataLength={tweetList.length}
-            next={() => {}}
+            dataLength={tweets.length}
+            next={null}
             hasMore={false}
-            scrollableTarget='scrollabletweets'
-            endMessage={<p style={{ textAlign: 'center' }}><b>No more Posts</b></p>}
+            scrollableTarget="tweetScrollContainer"
+            endMessage={
+              <p style={{ textAlign: 'center' }}>
+                <b>No more Posts</b>
+              </p>
+            }
           >
-            <TweetListView tweetInfos={tweetList} />
+            <TweetListView tweetInfos={tweets} />
           </InfiniteScroll>
         ) : (
           <p style={{ textAlign: 'center' }}>No tweets found.</p>
