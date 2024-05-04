@@ -23,6 +23,7 @@ router.get('/:self/:target/:option', (req, res) => {
                 let userObj = {
                     "username": innerUser['username'],
                     "uid": innerUser['_id'],
+                    "about": innerUser['about'],
                     "following": innerUser['following_counter'],
                     "follower": innerUser['follower_counter'],
                     "isFollowing": isFollowing,

@@ -4,7 +4,10 @@ import { useAuth } from '../provider/context';
 import { BACK_END } from '../config';
 import request from '../utils/request';
 
+// Reference: https://mdbootstrap.com/docs/standard/extended/profiles/
+
 function UserCard({ userInfo }) {
+  console.log(userInfo);
   const { username: selfname, mode } = useAuth();
   const [isFollowing, setIsFollowing] = useState(userInfo["isFollowing"]);
   const [followingCount, setFollowingCount] = useState(userInfo["following"]);
@@ -43,11 +46,14 @@ function UserCard({ userInfo }) {
               <Link to={"/" + username}>
                 <img src={BACK_END + portraitUrl}
                   alt="Generic placeholder image" className="img-fluid"
-                  style={{ width: "150px", borderRadius: "10px" }} />
+                  style={{ width: "150px", height: "120px", borderRadius: "100%", objectFit: 'cover' }} />
               </Link>
             </div>
-            <div className="col-8 ms-3">
-              <h5 className="m-1">{username}</h5>
+            <div className="col-8 ms-3" >
+              <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <h5 className="m-1">{username}</h5>
+                <p className="text-muted m-1">{userInfo["about"]}</p>
+              </div>
               <div className="row d-flex justify-content-center rounded-3 py-1 m-1 my-2"
                 style={{ backgroundColor: "#efefef" }}>
                 <div className="col-md-6">

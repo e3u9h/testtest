@@ -9,8 +9,11 @@ import { randomSelect } from '../utils/Utils';
 import Dropdown from 'react-bootstrap/Dropdown';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Modal from 'react-bootstrap/Modal';
 import { Image, Form, Input } from 'antd';
 import request from '../utils/request';
+
+// References: for image display, we referred to the documentation of antd: https://ant.design/components/image-cn
 
 // Declaration: we use poe.com to generate some code and fix some bugs in this file
 
@@ -22,6 +25,8 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo.time));
   const [commentCount, setCommentCount] = useState(tweetInfo.commentCount);
   const [retweetCount, setRetweetCount] = useState(tweetInfo.retweetCount);
+  const [showPostCommentModal, setShowPostCommentModal] = useState(false);
+  const [postCommetValue, setPostCommentValue] = useState('');
   const tweetContent = tweetInfo.content;
   const portraitUrl = tweetInfo.portraitUrl;
   const tags = tweetInfo.tags;
@@ -72,10 +77,11 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
       });
   }
 
+  const handlePostCommentModalClose = () => setShowPostCommentModal(false);
 
   const addCommentMain = () => {
     const newCom = {
-      content: document.getElementById(`new-comment${tweetInfo.tid}`).value,
+      content: postCommetValue,
       username: selfname,
       tid: tweetInfo.tid,
     };
@@ -92,7 +98,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
           alert(err.response.data);
         }
       });
-    document.getElementById(`new-comment${tweetInfo.tid}`).value = "";
+    setShowPostCommentModal(false);
   };
 
 
@@ -185,9 +191,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
                   <button
                   type="button"
                   className="btn btn-outline-secondary rounded-pill"
-                  data-bs-toggle="modal"
-                  data-bs-target={`#tweetCommentForm${tweetInfo.tid}`}
-                  data-bs-whatever="@mdo"
+                    onClick={() => setShowPostCommentModal(true)}
                   >
                     <FontAwesomeIcon icon={faComment} /> Comment
                   </button>
@@ -212,24 +216,22 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
       </div>
 
       {/* comment form for tweet's comment*/}
-      <div className="modal fade" id={"tweetCommentForm" + tweetInfo.tid} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5"> Post your comment from here </h1>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div className="modal-body">
-              <textarea className="form-control" id={'new-comment' + tweetInfo.tid} rows='5'></textarea>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal"> Cancel </button>
-              <button type="button" onClick={isDetailPage ? addComment : addCommentMain} className="btn btn-secondary" data-bs-dismiss="modal"> Send </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Modal show={showPostCommentModal} onHide={handlePostCommentModalClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Post your comment from here</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <textarea className="form-control" value={postCommetValue} onChange={e => setPostCommentValue(e.target.value)} rows='5'></textarea>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handlePostCommentModalClose}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={isDetailPage ? addComment : addCommentMain}>
+            Send
+          </Button>
+        </Modal.Footer>
+      </Modal>
       {/* forward tweet */}
       <ForwardForm tid={tweetInfo.tid} retweetCount={retweetCount} setRetweetCount={setRetweetCount} />
     </div>
@@ -324,7 +326,9 @@ function ForwardForm(props) {
         console.log(err);
       }
     } else {
-      alert("Tag already exists");
+      // alert("Tag already exists");
+      setTags([...tags, newTags]);
+      document.getElementById("close-modal").click();
     }
   };
 

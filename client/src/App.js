@@ -24,7 +24,11 @@ import SearchUserid from './Searchid';
 import SearchTweetByKeyword from './SearchTweetByKeyword';
 import Messenger from './Messenger';
 
-// use of existing code: I referred to some sample code in 【使用React、Node.js和MySQL构建博客应用程序-哔哩哔哩】 https://b23.tv/T4LPkm7 to learn how to use creathBrowserRouter
+// use of existing code: I referred to some sample code in 【使用React、Node.js和MySQL构建博客应用程序-哔哩哔哩】 https://b23.tv/T4LPkm7 (P3: 03-React Router Dom 6.4 Tutorial) to learn how to use creathBrowserRouter;
+// also, I referred to some sample code in 【黑马程序员前端React18入门到实战视频教程，从react+hooks核心基础到企业级项目开发实战（B站评论、极客园项目等）及大厂面试全通关-哔哩哔哩】 https://b23.tv/hqVNyZA (P97: Day7-02.根据Token控制路由跳转 and P99: Day7-04.Layout-二级路由配置)
+// to learn how to set AuthRoute according to the login state
+// and modified them (add the requiredMode parameter) to make them fit our project
+
 // use of AI: I used GPT-4 in poe (https://poe.com/) to help me debug
 
 function App() {

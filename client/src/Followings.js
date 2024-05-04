@@ -7,7 +7,7 @@ import BackButton from './components/backbutton';
 import request from './utils/request';
 import { useParams } from 'react-router-dom';
 
-// use of existing code: I referred to the open-source code on GitHub: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Followings.js
+// use of existing code: we referred to StackOverflow https://stackoverflow.com/questions/59689791/react-infinitescroll-in-a-scrollable-component-on-the-page and the open-source code on GitHub: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Followings.js
 
 // page for the followings of a user
 function Followings() {

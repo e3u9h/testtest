@@ -4,11 +4,16 @@ import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 
 // use of existing code: I referred to the code in https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js when implemeniting the user interaction functions
+
 // follow
 router.put('/:username/:target/follow', (req, res) => {
     res.set('Content-Type', 'text/plain');
     let username = req.params['username'];
     let target = req.params['target'];
+    // cannot follow yourself
+    if (username === target) {
+        return res.status(403).send('You cannot follow yourself.');
+    }
     User.findOne({ 'username': username }).then((user) => {
         User.findOne({ 'username': target }).then((target) => {
             // cannot follow the users blocking you or being blocked by you

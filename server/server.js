@@ -130,6 +130,7 @@ io.on("connection", (socket) => {
 });
 
 // backend functions
+// use of existing code: some of the functions below reffered to the open-source code on GitHub: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
 
 /***Main****/
 //get a user
@@ -179,6 +180,7 @@ app.get('/users/:username', (req, res) => {
                 return {
                     "username": user['username'],
                     "uid": user['_id'],
+                    "about": user['about'],
                     "following": user['followings'].length,
                     "follower": user['followers'].length,
                     "isFollowing": currUser['followings'].includes(user['_id']),
@@ -408,8 +410,6 @@ app.put('/tweet/:tid/:username/like', async (req, res) => {
             tid: tweet._id,
             time: new Date()
         });
-
-        await Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } });
 
         console.log("Like successful");
         return res.status(201).send(ret);
@@ -673,8 +673,6 @@ app.post('/tweet/comment', async (req, res) => {
         });
         console.log(noteobj._id);
 
-        // Update the notification list for the poster
-        await Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } });
         console.log("Comment successfully");
         return res.status(201).send(JSON.stringify(new_comment_res));
     } catch (err) {
@@ -703,7 +701,7 @@ app.get('/fetchtweet/:tid/:username', async (req, res) => {
         // Find the user
         const user = await User.findOne({ 'username': username });
 
-        // set admin to all false
+        // set admin to all false (because admin does not have a user object in the database)
         let isLiked = false;
         let isDisliked = false;
         if (user) {
@@ -861,6 +859,7 @@ app.post('/retweet', async (req, res) => {
       console.log('user found');
 
       const tweet = await Tweet.findById(parent_tid).populate('poster').exec();
+        // cannot repost if the poster has blocked the user or the user has blocked the poster
       if (tweet.poster.users_blocked.includes(user._id)) {
         return res.status(403).send('You have been blocked by the poster');
       }
@@ -896,12 +895,7 @@ app.post('/retweet', async (req, res) => {
         tid: parent_tid,
         time: new Date(),
       });
-      console.log(noteobj._id);
-
-      await Notification.updateOne(
-        { nid: noteobj.nid },
-        { $push: { notification: noteobj._id } }
-      );
+        console.log(noteobj._id);
       res.sendStatus(201);
     } catch (err) {
       console.log('-----Retweet Error--------');
@@ -928,6 +922,7 @@ app.get('/searchuser/:currentUser/:searchUsername', (req, res) => {
                     const userList = matchedUsers.map((user) => ({
                         username: user.username,
                         uid: user._id,
+                        about: user.about,
                         following: user.followings.length,
                         follower: user.followers.length,
                         isFollowing: user.followers.includes(currentUserDoc._id),
@@ -967,6 +962,7 @@ app.get('/searchuserbyid/:currentUser/:targetUserId', (req, res) => {
                     const userInfo = {
                         username: targetUserDoc.username,
                         uid: targetUserDoc._id,
+                        about: targetUserDoc.about,
                         following: targetUserDoc.followings.length,
                         follower: targetUserDoc.followers.length,
                         isFollowing: targetUserDoc.followers.includes(currentUserDoc._id),
