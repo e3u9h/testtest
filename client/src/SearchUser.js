@@ -5,7 +5,7 @@ import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
 import { useParams } from 'react-router-dom';
-
+// use OpenAI to gernerate some idea and debbuging the code.
 const searchUsers = async (currentUser, searchUsername, setUsers) => {
   try {
     const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import request from './utils/request';
 import { useNavigate } from 'react-router-dom';
-
+// use OpenAI to gernerate some idea and debbuging the code.
 const Search = () => {
   const [viewMode, setViewMode] = useState('search');
     const [buttonText, setButtonText] = useState("Search");
