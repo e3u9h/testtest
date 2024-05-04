@@ -194,48 +194,6 @@ app.get('/users/:username', (req, res) => {
     });
 });
 
-<<<<<<< HEAD
-// get recommended posts for the user
-// display all the public posts for other users (not in the cuurrent user's list)
-app.get('/tweets/:username', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let username = req.params['username'];
-    // find all the tweets except for the user's tweets
-    // sort tweets by post time (newest first)
-    Tweet.find({ 'private': 'false' }).sort({ post_time: 'desc' }).populate(
-        { path: "poster", model: "User", select: "username portrait" }).then((tweets) => {
-            tweets = tweets.filter((tweet) => {
-                return tweet.poster != null && tweet.poster.username !== username;
-            });
-            User.findOne({ "username": username }).then((user) => {
-                let retTweets = tweets.map(tweet => {
-                    return {
-                        "tid": tweet['_id'],
-                        "likeInfo": { "likeCount": tweet['likes'].length, "bLikeByUser": user['tweets_liked'].includes(tweet['_id']) },
-                        "dislikeInfo": { "dislikeCount": tweet['dislike_counter'], "bDislikeByUser": user['tweets_disliked'].includes(tweet['_id']) },
-                        "isReported": user['tweets_reported'].includes(tweet['_id']),
-                        "user": { "uid": tweet['poster']['_id'], 'username': tweet['poster']['username'] },
-                        "content": tweet['tweet_content'],
-                        "files": tweet['files'],
-                        "commentCount": tweet['comments'].length,
-                        "retweetCount": tweet['retweets'].length,
-                        "time": tweet['post_time'],
-                        "portraitUrl": tweet['poster']['portrait'],
-                        "tags": tweet['tags'],
-                        "private": tweet['private']
-                    }
-                });
-                console.log("---Get recommended tweets---");
-                res.status(200).send(retTweets);
-            });
-        }).catch((err) => {
-            console.log("---Recommended tweets error---");
-            console.log(err);
-            return res.status(404).send(err);
-        });
-});
-
-=======
 app.get('/tweets/:username', async (req, res) => {
     try {
       const { username } = req.params;
@@ -283,7 +241,6 @@ app.get('/tweets/:username', async (req, res) => {
     }
   });
   
->>>>>>> a3c260a760544a7eeec55fb1cd89636492ad5d27
 // get all the followings' tweets of the user (including the own posts)
 app.get('/followings/:username', (req, res) => {
     res.set('Content-Type', 'text/plain');
@@ -352,55 +309,50 @@ app.get('/followings/:username', (req, res) => {
         });
 });
 
-// create a new tweet
-app.post('/new-tweet', upload.array('files'), (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    // find the user
-    User.findOne({ 'username': req.body['username'] }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        console.log(req.body);
-        let uid = user._id;
-        // create a new tweet
-        let time = new Date();
-        const filesPaths = req.files.map(file => file.path);
-        let tweet = {
-            poster: uid,
-            tweet_content: req.body.tweet_content,
-            files: filesPaths,
-            tags: req.body.tags,
-            dislike_counter: 0,
-            report_counter: 0,
-            post_time: time,
-            likes: [],
-            comments: [],
-            retweets: [],
-            private: req.body.private
-        }
-        console.log("here" + req.files.map(file => file.filename));
-
-        // find all the tags in the tweet
-        let tags = req.body.tags;
-        Tag.find({ 'tag': { $in: tags } }).then((tagList) => {
-            Tweet.create(tweet).then((tweet) => {
-                // add the tweet to the user's tweets
-                // for each tag, add the tweet to the tag's tweets
-                user.tweets.push(tweet._id);
-                tagList.forEach((tag) => {
-                    tag.tid.push(tweet._id);
-                    tag.save();
-                });
-                console.log("Save tweet to tags");
-                user.save();
-                return res.sendStatus(201);
-            }).catch((err) => {
-                return res.status().send(err);
-            });
-        }).catch((err) => {
-            console.log(err);
-            return res.status(400).send(err);
-        });
-    });
-});
+// create a new post
+app.post('/new-tweet', upload.array('files'), async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const user = await User.findOne({ username: req.body.username });
+      if (!user) {
+        return res.status(404).send('User does not exist');
+      }
+      console.log(req.body);
+      const uid = user._id;
+      const time = new Date();
+      const filesPaths = req.files.map(file => file.path);
+      const tweet = {
+        poster: uid,
+        tweet_content: req.body.tweet_content,
+        files: filesPaths,
+        tags: req.body.tags,
+        dislike_counter: 0,
+        report_counter: 0,
+        post_time: time,
+        likes: [],
+        comments: [],
+        retweets: [],
+        private: req.body.private
+      };
+      console.log("here" + req.files.map(file => file.filename));
+  
+      const tags = req.body.tags;
+      const tagList = await Tag.find({ tag: { $in: tags } });
+      const createdTweet = await Tweet.create(tweet);
+      user.tweets.push(createdTweet._id);
+      tagList.forEach(tag => {
+        tag.tid.push(createdTweet._id);
+        tag.save();
+      });
+      console.log("Save Post to tags");
+      await user.save();
+      return res.sendStatus(201);
+    } catch (err) {
+      console.log('-----New Post Error--------');
+      console.log(err);
+      return res.status(500).send(err);
+    }
+  });
 
 // like a post
 app.put('/tweet/:tid/:username/like', async (req, res) => {
@@ -881,6 +833,11 @@ app.post('/tweet/reply', async (req, res) => {
 
         console.log(new_reply);
         console.log("Reply successfully");
+
+        // Refresh ?
+        const refreshScript = '<script>setTimeout(function() { window.location.reload(); }, 1000);</script>';
+        const responseHtml = JSON.stringify(new_reply_res) + refreshScript;
+
         return res.status(201).send(JSON.stringify(new_reply_res));
     } catch (err) {
         console.log("-----Reply Error--------");
@@ -890,63 +847,66 @@ app.post('/tweet/reply', async (req, res) => {
 });
 
 // repost
-app.post('/retweet', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let parent_tid = req.body.tid;
-    // find the user
-    User.findOne({ 'username': req.body['username'] }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        console.log('user found')
-        Tweet.findById(parent_tid).populate('poster').exec().then((tweet) => {
-            if (tweet.poster.users_blocked.includes(user._id)) {
-                return res.status(403).send('You have been blocked by the poster');
-            }
-            if (user.users_blocked.includes(tweet.poster._id)) {
-                return res.status(403).send('You have blocked the poster');
-            }
-            // create a new tweet
-            let time = new Date();
-            let new_tweet = {
-                poster: user._id,
-                tweet_content: req.body.tweet_content + " RT @" + tweet.poster.username + ": " + tweet.tweet_content,
-                tags: req.body.tags,
-                dislike_counter: 0,
-                report_counter: 0,
-                post_time: time,
-                likes: [],
-                comments: [],
-                retweets: [],
-                private: req.body.private,
-            }
+app.post('/retweet', async (req, res) => {
+    try {
+      res.set('Content-Type', 'text/plain');
+      const parent_tid = req.body.tid;
+      const user = await User.findOne({ username: req.body.username });
 
-            Tweet.create(new_tweet).then((new_tweet_) => {
-                console.log(new_tweet_);
-                // update the user
-                user.tweets.push(new_tweet_._id);
-                user.save();
-                // update the parent tweet
-                tweet.retweets.push(new_tweet_._id);
-                tweet.save();
-                // create a notification
-                Notification.create({
-                    username: tweet.poster.username,
-                    actor_id: user._id,
-                    action: "retweet",
-                    tid: parent_tid,
-                    time: new Date()
-                }).then((noteobj) => {
-                    console.log(noteobj._id);
-                    Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } }).then(c => {
-                        console.log(c);
-                    });
-                });
-                res.sendStatus(201);
-            })
-        })
-    }).catch((err) => {
-        res.send(err);
-    });
-});
+      if (!user) {
+        return res.status(404).send('User does not exist');
+      }
+      console.log('user found');
+
+      const tweet = await Tweet.findById(parent_tid).populate('poster').exec();
+      if (tweet.poster.users_blocked.includes(user._id)) {
+        return res.status(403).send('You have been blocked by the poster');
+      }
+      if (user.users_blocked.includes(tweet.poster._id)) {
+        return res.status(403).send('You have blocked the poster');
+      }
+
+      const time = new Date();
+      const new_tweet = {
+        poster: user._id,
+        tweet_content: req.body.tweet_content + ' RT @' + tweet.poster.username + ':' + tweet.tweet_content,
+        tags: req.body.tags,
+        dislike_counter: 0,
+        report_counter: 0,
+        post_time: time,
+        likes: [],
+        comments: [],
+        retweets: [],
+        private: req.body.private,
+      };
+      const new_tweet_ = await Tweet.create(new_tweet);
+
+      console.log(new_tweet_);
+      user.tweets.push(new_tweet_._id);
+      await user.save();
+      tweet.retweets.push(new_tweet_._id);
+      await tweet.save();
+
+      const noteobj = await Notification.create({
+        username: tweet.poster.username,
+        actor_id: user._id,
+        action: 'retweet',
+        tid: parent_tid,
+        time: new Date(),
+      });
+      console.log(noteobj._id);
+
+      await Notification.updateOne(
+        { nid: noteobj.nid },
+        { $push: { notification: noteobj._id } }
+      );
+      res.sendStatus(201);
+    } catch (err) {
+      console.log('-----Retweet Error--------');
+      console.log(err);
+      return res.status(500).send(err);
+    }
+  });
 
 
 //search for users by user name keywords
