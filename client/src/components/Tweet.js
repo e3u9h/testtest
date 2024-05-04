@@ -14,6 +14,7 @@ import { Image, Form, Input } from 'antd';
 import request from '../utils/request';
 
 // References: for image display, we referred to the documentation of antd: https://ant.design/components/image-cn
+// for general structure of the code, we referred to the open-source code on GitHub (with the actual contents customized): https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Tweet.js
 
 // Declaration: we use poe.com to generate some code and fix some bugs in this file
 
@@ -227,7 +228,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
           <Button variant="secondary" onClick={handlePostCommentModalClose}>
             Cancel
           </Button>
-          <Button variant="primary" onClick={isDetailPage ? () => { addComment(postCommetValue); setShowPostCommentModal(false); } : () => { addCommentMain() }}>
+          <Button variant="secondary" onClick={isDetailPage ? () => { addComment(postCommetValue); setShowPostCommentModal(false); } : () => { addCommentMain() }}>
             Send
           </Button>
         </Modal.Footer>
@@ -245,6 +246,7 @@ function ForwardForm(props) {
   const [tags, setTags] = useState([]);
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
+  const [selectedTags, setSelectedTags] = useState([]);
 
   const fetchAvailableTags = async () => {
     try {
@@ -252,6 +254,7 @@ function ForwardForm(props) {
       const data = res.data;
       const fetchedTags = data.map(item => item.tag);
       setAvailableTags(fetchedTags);
+      setSelectedTags(randomSelect(fetchedTags, 5));
     } catch (err) {
       console.log(err);
     }
@@ -356,7 +359,7 @@ function ForwardForm(props) {
               <h5>Choose a tag</h5>
               <hr />
               <div className="d-flex flex-wrap">
-                {randomSelect(availableTags, 5).map((tag, index) => {
+                  {selectedTags.map((tag, index) => {
                 return (
                   <button
                     type="button"
@@ -407,6 +410,7 @@ function ForwardForm(props) {
               variant="secondary"
               id="retweet-privacy"
               className="btn btn-secondary mx-2"
+                    data-bs-dismiss="modal"
               onClick={postRetweet}
             >
             Send

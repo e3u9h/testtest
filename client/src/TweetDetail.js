@@ -45,7 +45,6 @@ const TweetDetail = () => {
     }, []);
 
     const addReply = async (clicked_floor, content) => {
-        let newcommentId = "new-comment" + clicked_floor;
         let newCom = {
             content: content,
             username: username,
@@ -56,12 +55,13 @@ const TweetDetail = () => {
         try {
             const com = await request.post("tweet/reply", newCom);
             let com_res = com.data;
+            console.log("heeeeeeeee");
             console.log(com_res);
-            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDisplay(com_res.time) }];
+            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: com_res.time }];
             setCommentInfo(new_comments);
             setTweetInfo({ ...tweetInfo, commentCount: tweetInfo.commentCount + 1 });
             console.log(commentInfo);
-            document.getElementById(newcommentId).value = '';
+            console.log(new_comments)
         }
         catch (err) {
             if (err.response.status === 403) {

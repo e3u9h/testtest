@@ -834,10 +834,6 @@ app.post('/tweet/reply', async (req, res) => {
         console.log(new_reply);
         console.log("Reply successfully");
 
-        // Refresh ?
-        const refreshScript = '<script>setTimeout(function() { window.location.reload(); }, 1000);</script>';
-        const responseHtml = JSON.stringify(new_reply_res) + refreshScript;
-
         return res.status(201).send(JSON.stringify(new_reply_res));
     } catch (err) {
         console.log("-----Reply Error--------");
