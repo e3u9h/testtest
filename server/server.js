@@ -352,87 +352,109 @@ app.post('/new-tweet', upload.array('files'), (req, res) => {
     });
 });
 
-// like a tweet
-app.put('/tweet/:tid/:username/like', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    // find the user
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).populate('poster').exec().then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            let time = new Date();
-            if (user.tweets_liked == null) { user.tweets_liked = []; }
-            if (tweet.likes == null) { tweet.likes = []; }
-            // check if the user has liked the tweet
-            let likedTweets = user.tweets_liked;
-            if (likedTweets.includes(tid)) {
-                return res.status(400).send('User have already liked this tweet');
-            }
-            user.tweets_liked.push(tweet._id);
-            tweet.likes.push({ username: username, time: time });
-            // remove from the dislike list
-            if (user.tweets_disliked && user.tweets_disliked.includes(tweet._id)) {
-                console.log("Remove tweet {" + tweet._id + "} from " + username + " dislike list");
-                user.tweets_disliked.remove(tweet._id);
-                tweet.dislike_counter--;
-            }
-            let ret = {
-                "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
-                "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
-            }
-            user.save();
-            tweet.save();
-            Notification.create({
-                username: tweet.poster.username,
-                actor_id: user._id,
-                action: "like",
-                tid: tweet._id,
-                time: new Date()
-            }).then((noteobj) => {
-                Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } }).then(c => {
-                    console.log(c);
-                });
-            });
-            console.log("Like successfully");
-            return res.status(201).send(ret);
+// like a post
+app.put('/tweet/:tid/:username/like', async (req, res) => {
+    try {
+        res.set('Content-Type', 'text/plain');
+        const tid = req.params['tid'];
+        const username = req.params['username'];
+
+        // Find the user
+        const user = await User.findOne({ 'username': username });
+        if (!user) {
+            return res.status(404).send('User does not exist');
+        }
+
+        // Find the post
+        const tweet = await Tweet.findById(tid).populate('poster').exec();
+        if (!tweet) {
+            return res.status(404).send('Post does not exist');
+        }
+
+        const time = new Date();
+
+        // Check if the user has already liked the post
+        const likedTweets = user.tweets_liked || [];
+        if (likedTweets.includes(tid)) {
+            return res.status(400).send('User has already liked this tweet');
+        }
+
+        user.tweets_liked.push(tweet._id);
+        tweet.likes.push({ username: username, time: time });
+
+        // Remove from the dislike list
+        if (user.tweets_disliked && user.tweets_disliked.includes(tweet._id)) {
+            console.log(`Remove tweet ${tweet._id} from ${username} dislike list`);
+            user.tweets_disliked.remove(tweet._id);
+            tweet.dislike_counter--;
+        }
+
+        const ret = {
+            "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
+            "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
+        };
+
+        await user.save();
+        await tweet.save();
+
+        const noteobj = await Notification.create({
+            username: tweet.poster.username,
+            actor_id: user._id,
+            action: "like",
+            tid: tweet._id,
+            time: new Date()
         });
-    }).catch((err) => {
+
+        await Notification.updateOne({ nid: noteobj.nid }, { $push: { notification: noteobj._id } });
+
+        console.log("Like successful");
+        return res.status(201).send(ret);
+    } catch (err) {
         console.log("-----Like Error--------");
         console.log(err);
         return res.status(500).send(err);
-    });
+    }
 });
 
-// cancel like a tweet
-app.put('/tweet/:tid/:username/cancel-like', (req, res) => {
-    res.set('Content-Type', 'text/plain');
-    let tid = req.params['tid'];
-    let username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
-        if (!user) { return res.send('User does not exist').status(404); }
-        Tweet.findById(tid).then((tweet) => {
-            if (!tweet) { return res.send('Tweet does not exist').status(404); }
-            if (user.tweets_liked == null || !user.tweets_liked.includes(tid) || tweet.likes == null || tweet.likes.includes(username)) {
-                return res.status(400).send('User have not liked this tweet');
-            }
-            user.tweets_liked.remove(tweet._id);
-            tweet.likes = tweet.likes.filter(item => item.username !== username);
-            let ret = {
-                "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
-                "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
-            }
-            user.save();
-            tweet.save();
-            console.log("Cancel like successfully");
-            return res.status(201).send(ret);
-        });
-    }).catch((err) => {
+// cancel like a post
+app.put('/tweet/:tid/:username/cancel-like', async (req, res) => {
+    try {
+        res.set('Content-Type', 'text/plain');
+        const tid = req.params['tid'];
+        const username = req.params['username'];
+
+        const user = await User.findOne({ 'username': username });
+        if (!user) {
+            return res.status(404).send('User does not exist');
+        }
+
+        const tweet = await Tweet.findById(tid);
+        if (!tweet) {
+            return res.status(404).send('Tweet does not exist');
+        }
+
+        if (!user.tweets_liked?.includes(tid) || !tweet.likes?.some(like => like.username === username)) {
+            return res.status(400).send('User has not liked this tweet');
+        }
+
+        user.tweets_liked.remove(tweet._id);
+        tweet.likes = tweet.likes.filter(like => like.username !== username);
+
+        const ret = {
+            "likeInfo": { "likeCount": tweet.likes.length, "bLikeByUser": user.tweets_liked.includes(tweet._id) },
+            "dislikeInfo": { "dislikeCount": tweet.dislike_counter, "bDislikeByUser": user.tweets_disliked.includes(tweet._id) }
+        };
+
+        await user.save();
+        await tweet.save();
+
+        console.log("Cancel like successfully");
+        return res.status(201).send(ret);
+    } catch (err) {
         console.log("-----Cancel Like Error--------");
         console.log(err);
         return res.status(500).send(err);
-    });
+    }
 });
 
 // dislike a tweet
