@@ -50,7 +50,7 @@ class Comment extends React.Component{
 class CommentForm extends React.Component{
     constructor(props){
         super(props);
-        console.log(this.props.floor)
+        console.log("Here is this.props.floor",this.props.floor)
     }
 
     render(){
