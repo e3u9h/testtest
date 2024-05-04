@@ -17,6 +17,12 @@ import request from './utils/request';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
+// use of existing code: for portrait uploading and preview, I referred to the sample code in the documentation of antd: https://ant.design/components/upload-cn
+// for the profile editing modal, I referred to the sample code in the documentation of react-bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/ and https://react-bootstrap.netlify.app/docs/forms/select
+// for the infinite scroll, I referred to the sample code in the documentation of react-infinite-scroll-component: https://www.npmjs.com/package/react-infinite-scroll-component
+
+// use of AI: I admit that I used GPT-4 in poe (https://poe.com/) for generating some of the code in this file, and modified them to make them useable in our project
+
 const getBase64 = (img, callback) => {
     const reader = new FileReader();
     reader.addEventListener('load', () => callback(reader.result));

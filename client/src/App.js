@@ -24,6 +24,8 @@ import SearchUserid from './Searchid';
 import SearchTweetByKeyword from './SearchTweetByKeyword';
 import Messenger from './Messenger';
 
+// use of existing code: I referred to some sample code in 【使用React、Node.js和MySQL构建博客应用程序-哔哩哔哩】 https://b23.tv/T4LPkm7 to learn how to use creathBrowserRouter
+// use of AI: I used GPT-4 in poe (https://poe.com/) to help me debug
 
 function App() {
 
