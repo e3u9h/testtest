@@ -14,26 +14,26 @@ import request from '../utils/request';
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const { username: selfname, mode } = useAuth();
-  console.log("here1" + JSON.stringify(tweetInfo))
-  const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
-  const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
-  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo['time']));
-  const [commentCount, setCommentCount] = useState(tweetInfo['commentCount']);
-  const [retweetCount, setRetweetCount] = useState(tweetInfo['retweetCount']);
-  const tweetContent = tweetInfo['content'];
-  const portraitUrl = tweetInfo['portraitUrl'];
-  const tags = tweetInfo['tags'];
-  const username = tweetInfo['user']['username'];
-  const files = tweetInfo['files']
-  console.log("here2" + tweetContent + files + tweetInfo['files'])
+  console.log("1:" + JSON.stringify(tweetInfo));
+  const [likeInfo, setLikeInfo] = useState(tweetInfo.likeInfo);
+  const [dislikeInfo, setDislikeInfo] = useState(tweetInfo.dislikeInfo);
+  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo.time));
+  const [commentCount, setCommentCount] = useState(tweetInfo.commentCount);
+  const [retweetCount, setRetweetCount] = useState(tweetInfo.retweetCount);
+  const tweetContent = tweetInfo.content;
+  const portraitUrl = tweetInfo.portraitUrl;
+  const tags = tweetInfo.tags;
+  const username = tweetInfo.user.username;
+  const files = tweetInfo.files;
+  console.log("2:" + tweetContent + files + tweetInfo.files);
 
 
   useEffect(() => {
-    setLikeInfo(tweetInfo['likeInfo']);
-    setDislikeInfo(tweetInfo['dislikeInfo']);
-    setCommentCount(tweetInfo['commentCount']);
-    setRetweetCount(tweetInfo['retweetCount']);
-    setTimeInterval(timeDisplay(tweetInfo['time']));
+    setLikeInfo(tweetInfo.likeInfo);
+    setDislikeInfo(tweetInfo.dislikeInfo);
+    setCommentCount(tweetInfo.commentCount);
+    setRetweetCount(tweetInfo.retweetCount);
+    setTimeInterval(timeDisplay(tweetInfo.time));
   }, [tweetInfo]);
 
   const clickLikeTweet = () => {
@@ -42,15 +42,15 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     } else {
       updateTweetInfo("like");
     }
-  }
-
+  };
+  
   const clickDislikeTweet = () => {
     if (dislikeInfo.bDislikeByUser) {
       updateTweetInfo("cancel-dislike");
     } else {
       updateTweetInfo("dislike");
     }
-  }
+  };
 
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
@@ -72,33 +72,33 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 
 
   const addCommentMain = () => {
-    let newCom = {
-      content: document.getElementById('new-comment' + tweetInfo.tid).value,
+    const newCom = {
+      content: document.getElementById(`new-comment${tweetInfo.tid}`).value,
       username: selfname,
       tid: tweetInfo.tid,
     };
     console.log(newCom);
-    request.post("tweet/comment", newCom)
-      .then(response => {
+    request
+      .post("tweet/comment", newCom)
+      .then((response) => {
         setCommentCount(commentCount + 1);
         return response.data;
       })
-      .then(com_res => console.log(com_res))
-      .catch(err => {
+      .then((com_res) => console.log(com_res))
+      .catch((err) => {
         if (err.response.status === 403) {
           alert(err.response.data);
         }
       });
-    document.getElementById('new-comment' + tweetInfo.tid).value = '';
-  }
+    document.getElementById(`new-comment${tweetInfo.tid}`).value = "";
+  };
 
 
   return (
     <div className="card p-2 m-2 mb-4" style={{ borderRadius: "25px" }}>
       <div className="card-body row flex-column">
         <div className="col-5">
-
-          <div className="d-flex ">
+          <div className="d-flex align-items-center">
             {/* link to the user profile */}
             <Link to={"/" + username}>
               <div className="rounded-circle overflow-hidden" style={{ width: "45px", height: "45px" }}>
@@ -157,31 +157,53 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
               </span>}
               {selfname && mode == 'user' &&
                 <>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (likeInfo.bLikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickLikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (dislikeInfo.bDislikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickDislikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className="btn btn-outline-secondary btn-floating" data-bs-toggle="modal" data-bs-target={"#tweetCommentForm" + tweetInfo.tid} data-bs-whatever="@mdo">
-                      <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{commentCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <a className="btn btn-outline-secondary btn-floating" href={"#tweetForwardForm" + tweetInfo.tid} data-bs-toggle="modal" role='button'>
-                      <FontAwesomeIcon icon={faRetweet}></FontAwesomeIcon>
-                    </a>
-                    <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
-                  </span>
-                </>
+                {/* Like button */}
+                <span className="m-1">
+                  <button
+                  type="button"
+                  className={`btn btn-${likeInfo.bLikeByUser ? "" : "outline-"}secondary rounded-circle`}
+                  onClick={clickLikeTweet}
+                  >
+                    <FontAwesomeIcon icon={faThumbsUp} />
+                  </button>
+                  <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
+                </span>
+                {/* dislike button */}
+                <span className="m-1">
+                  <button 
+                   type="button" 
+                   className={`btn btn-${dislikeInfo.bDislikeByUser ? "" : "outline-"}secondary rounded-circle`}
+                   onClick={clickDislikeTweet}
+                  >
+                    <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
+                  </button>
+                  <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
+                </span>
+                {/* comment */}
+                <span className="m-1">
+                  <button
+                  type="button"
+                  className="btn btn-outline-secondary rounded-pill"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#tweetCommentForm${tweetInfo.tid}`}
+                  data-bs-whatever="@mdo"
+                  >
+                    <FontAwesomeIcon icon={faComment} /> Comment
+                  </button>
+                  <span className="ms-1 opacity-75">{commentCount}</span>
+                </span>
+                {/* repost */}
+                <span className="m-1">
+                  <a 
+                  className="btn btn-outline-secondary rounded-pill" 
+                  href={"#tweetForwardForm" + tweetInfo.tid} 
+                  data-bs-toggle="modal" 
+                  role='button'>
+                    <FontAwesomeIcon icon={faRetweet} /> Repost
+                  </a>
+                  <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
+                </span>
+              </>
               }
             </div>
           </div>
