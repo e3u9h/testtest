@@ -26,7 +26,7 @@ function timeDisplay(time) {
     const now = new Date();
     const postTime = new Date(time);
     if (isNaN(postTime)) {
-        return 'Invalid Date';
+        return 'Loading';
     }
     console.log(time + postTime);
     const year = postTime.getFullYear();
@@ -38,11 +38,11 @@ function timeDisplay(time) {
     const diffInYear = now.getFullYear() - year;
     // If the post year is different from the current year, display "year month day"
     if (diffInYear > 0) {
-        return `${year} ${month.toString()} ${day.toString()}`;
+        return `${year.toString()} ${month} ${day.toString()}`;
     }
     // If the post day is different from the current day, display "month day hour:minute"
     if (!isSameDay) {
-        return `${month.toString()} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        return `${month} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     // If the post day is the same as the current day, display "hour:minute"
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;

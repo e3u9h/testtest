@@ -6,11 +6,16 @@ import { BACK_END } from '../config';
 import './navbar.css';
 import { useAuth } from '../provider/context';
 import request from '../utils/request';
+import { message } from 'antd';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 
 // This is the navigating bar on the left side of the page
 function Navbar() {
     const { logout, username, mode } = useAuth();
     const [userPortraitSrc, setUserPortraitSrc] = useState(null);
+    const [showChangePwdModal, setShowChangePwdModal] = useState(false);
     const [editOldPassword, setEditOldPassword] = useState('');
     const [editNewPassword, setEditNewPassword] = useState('');
     const [editNewPassword2, setEditNewPassword2] = useState('');
@@ -20,6 +25,12 @@ function Navbar() {
         logout();
         navigate('/login');
     };
+    const handleShowChangePwdModal = () => {
+        setShowChangePwdModal(true);
+    }
+    const handleClose = () => {
+        setShowChangePwdModal(false);
+    }
     const changePwd = () => {
         const changepwdusername = username;
         // create a userinfo object from the input
@@ -32,22 +43,27 @@ function Navbar() {
         // console.log(userinfo)
         // check the format of the new password and whether the 2 new passwords are the same
         if (userinfo['newpwd'] === '') {
-            window.alert("Please enter a new password.");
+            message.error("Please enter a new password.");
         } else if (userinfo['newpwd'] !== '' && (userinfo['newpwd'].length <= 4 || userinfo['newpwd'].length >= 20)) {
-            window.alert("The length of the new password should be larger than 4 and smaller than 20.");
+            message.error("The length of the new password should be larger than 4 and smaller than 20.");
         } else if (userinfo['newpwd'] !== userinfo['newpwd2']) {
-            window.alert("Password mismatch!");
+            message.error("Password mismatch!");
         } else {
             // if the format is correct, send the request to the backend
             request.put("changepwd", userinfo)
                 .then(res => {
                     if (res.status === 200) {
+                        setEditOldPassword('');
+                        setEditNewPassword('');
+                        setEditNewPassword2('');
+                        setShowChangePwdModal(false);
                     }
                     return res.data;
                 })
-                .then(data => { alert(data); })
+                .then(data => { message.success(data); })
                 .catch(err => {
                     console.log(err);
+                    message.error(err.response.data);
                 });
         }
     }
@@ -125,34 +141,56 @@ function Navbar() {
                 </a>
                 <ul className="dropdown-menu dropdown-menu-dark text-small shadow">
                     <li><a className="dropdown-item" onClick={handleLogout}>Logout</a></li>
-                    <li><a type="button" className="dropdown-item" data-bs-toggle="modal" data-bs-target="#changepasswordForm" data-bs-whatever="@mdo" >Change Password</a></li>
+                    <li><a type="button" className="dropdown-item" onClick={handleShowChangePwdModal} >Change Password</a></li>
                 </ul>
             </div>}
         </div>}
-        {/* the modal for password changing */}
-        <div className="modal fade" id="changepasswordForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div className="modal-dialog">
-                <div className="modal-content">
-                    <div className="modal-header">
-                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div className="modal-body">
-                        <div className="mb-3">
-                            <label htmlFor="name" className="col-form-label"> Old Password: </label>
-                            <input type="password" className="form-control" value={editOldPassword} onChange={(e) => setEditOldPassword(e.target.value)} />
-                            <label htmlFor="name" className="col-form-label"> New Password: </label>
-                            <input type="password" className="form-control" value={editNewPassword} onChange={(e) => setEditNewPassword(e.target.value)} />
-                            <label htmlFor="name" className="col-form-label"> Recheck New Password: </label>
-                            <input type="password" className="form-control" value={editNewPassword2} onChange={(e) => setEditNewPassword2(e.target.value)} />
-                        </div>
-                    </div>
-                    <div className="modal-footer">
-                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal"> Cancel </button>
-                        <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={changePwd}> Submit </button>
-                    </div>
-                </div>
-            </div>
-        </div></>
+        {/* the modal for changing password */}
+        <Modal show={showChangePwdModal} onHide={handleClose}>
+            <Modal.Header closeButton>
+                <Modal.Title>Change Password</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                        <Form.Label>Old Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder="Please input old password"
+                            value={editOldPassword}
+                            onChange={(e) => setEditOldPassword(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput2">
+                        <Form.Label>New Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder="Please input new password"
+                            value={editNewPassword}
+                            onChange={(e) => setEditNewPassword(e.target.value)}
+                        />
+                    </Form.Group>
+                    <Form.Group className="mb-3" controlId="exampleForm.ControlInput3">
+                        <Form.Label>Recheck New Password</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder="Please input new password again"
+                            value={editNewPassword2}
+                            onChange={(e) => setEditNewPassword2(e.target.value)}
+                        />
+                    </Form.Group>
+                </Form>
+            </Modal.Body>
+            <Modal.Footer>
+                <Button variant="secondary" onClick={handleClose}>
+                    Cancel
+                </Button>
+                <Button variant="primary" onClick={changePwd}>
+                    Submit
+                </Button>
+            </Modal.Footer>
+        </Modal>
+    </>
     )
 }
 

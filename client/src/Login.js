@@ -13,6 +13,7 @@ import Header from './components/header';
 import Form from 'react-bootstrap/Form';
 import { useAuth } from './provider/context';
 import request from './utils/request';
+import { message } from 'antd';
 
 
 
@@ -70,7 +71,7 @@ const Login = (props) => {
                 alert(err1.response.data.message);
               });
           }
-          // alert(res.data);
+          message.success(res.data);
         })
         .catch(err => {
           // if the registration failed, alert the error message
@@ -115,7 +116,7 @@ const Login = (props) => {
           setLoggedin(true);
           login(editUsername, 'admin', res.data.token);
         } 
-        alert(res.data.message);
+        message.success(res.data.message);
       })
       .catch(err => {
         // if the login failed, alert the error message
