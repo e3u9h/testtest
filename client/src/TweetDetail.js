@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import Comment from './Comment';
+import Comment from './components/Comment';
 import { TweetCard } from './components/Tweet';
 import { useAuth } from './provider/context';
-import { timeDifference } from './utils/Utils';
+import { timeDisplay } from './utils/Utils';
 import request from './utils/request';
+import BackButton from './components/backbutton';
 
 const TweetDetail = () => {
     const [tweetInfo, setTweetInfo] = useState({
@@ -54,7 +55,7 @@ const TweetDetail = () => {
             const com = await request.post("tweet/reply", newCom);
             let com_res = com.data;
             console.log(com_res);
-            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDifference(com_res.time) }];
+            let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: timeDisplay(com_res.time) }];
             setCommentInfo(new_comments);
             setTweetInfo({ ...tweetInfo, commentCount: tweetInfo.commentCount + 1 });
             console.log(commentInfo);
@@ -99,6 +100,7 @@ const TweetDetail = () => {
 
     return (
         <div>
+            <BackButton />
             <div id="scrollableComment" style={{ height: "80vh", overflow: "auto" }}>
                 <InfiniteScroll dataLength={commentInfo.length} next={null} hasMore={false} scrollableTarget="scrollableComment"
                     endMessage={<p style={{ textAlign: 'center' }}><b>No more comments</b></p>}>

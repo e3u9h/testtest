@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.css';
-import {Link} from "react-router-dom";
-// import MaterialIcon, {colorPalette} from 'material-icons-react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { BACK_END } from './config';
 import { useAuth } from './provider/context';
-import { timeDifference } from './utils/Utils';
+import { timeDisplay } from './utils/Utils';
 import request from './utils/request';
 
 const actionMap = {
-    "like": "liked your tweet",
+    "like": "liked your post",
     'follow': "started following you",
-    "comment": "commented on your tweet",
-    "retweet": "reposted your tweet" 
+    "comment": "commented on your post",
+    "retweet": "reposted your post" 
 }
     
 
@@ -55,9 +53,9 @@ class NotificationListView extends React.Component{
             <div className='list-group w-auto'>
                 {this.props.notifications.map((note,index)=>
                 note.icon!="follow" ?
-                <SingleNotification key={index} icon={note.icon} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>
+                <SingleNotification key={index} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>
                 :
-                <SingleNotification key={index} icon={note.icon} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>)
+                <SingleNotification key={index} action={note.action} name={note.name} time={note.time} content={note.content} portrait={note.portrait}/>)
                 }
                 
             </div>
@@ -78,7 +76,7 @@ class SingleNotification extends React.Component{
                         <p class="card-text d-inline-block m-2">{this.props.name} {actionMap[this.props.action]}</p>
                         <p style={{ display: 'inline-block', fontStyle: 'italic', fontWeight: 'bold' }}>{this.props.content}</p>
                     </div>
-                    <p class="card-text text-right"><small class="text-muted">Last updated: {timeDifference(this.props.time)} </small></p>
+                    <p class="card-text text-right"><small class="text-muted">Last updated: {timeDisplay(this.props.time)} </small></p>
                 </div>
                 
             </div>

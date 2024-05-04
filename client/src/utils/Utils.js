@@ -16,7 +16,7 @@ function randomSelect(arr, n) {
     return result;
 }
 
-function timeDifference(time) {
+function timeDisplay(time) {
     // This is a functionthat display the time of the post according to the
     // time difference between the post time and the current time
     const monthAbbreviations = [
@@ -25,24 +25,27 @@ function timeDifference(time) {
     ];
     const now = new Date();
     const postTime = new Date(time);
-    // console.log(time + postTime);
+    if (isNaN(postTime)) {
+        return 'Invalid Date';
+    }
+    console.log(time + postTime);
     const year = postTime.getFullYear();
     const month = monthAbbreviations[postTime.getMonth()];
     const day = postTime.getDate();
     const hours = postTime.getHours();
     const minutes = postTime.getMinutes();
-    const diffInDay = now / 86400000 - postTime / 86400000;
+    const isSameDay = (now.getDate() === day && now.getMonth() === postTime.getMonth() && now.getFullYear() === year);
     const diffInYear = now.getFullYear() - year;
     // If the post year is different from the current year, display "year month day"
     if (diffInYear > 0) {
         return `${year} ${month.toString()} ${day.toString()}`;
     }
     // If the post day is different from the current day, display "month day hour:minute"
-    if (diffInDay > 0) {
+    if (!isSameDay) {
         return `${month.toString()} ${day.toString()} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
     }
     // If the post day is the same as the current day, display "hour:minute"
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
-export { randomSelect, timeDifference };
+export { randomSelect, timeDisplay };

@@ -2,19 +2,21 @@ import express from 'express';
 const router = express.Router();
 import Account from "../models/Account.js";
 import User from "../models/User.js";
+import bcryptjs from 'bcryptjs';
 
 // create a new user (used for both user registration and admin creation)
 router.post('/', (req, res) => {
     res.set('Content-Type', 'text/plain');
     const _username = req.body['username'];
-    // check whether the username has already existed
+    // check whether the username already exists
     Account.findOne({ username: _username }).then((acc) => {
         if (acc) { console.log(acc); return res.status(403).send("The username has already been used. Please change a username."); }
         else {
-            // if the username has not existed, first, create an Account record in the database
+            // if the username does not exist, first, create an Account record in the database
             Account.create({
                 username: req.body['newusername'],
-                pwd: req.body['newpwd'],
+                // bcryptjs is for encrypting the password
+                pwd: bcryptjs.hashSync(req.body['newpwd'], 10),
                 identity: 'user'
             }).then(() => {
                 // then, create a User record in the database

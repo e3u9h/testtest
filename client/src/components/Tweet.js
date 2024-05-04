@@ -1,7 +1,7 @@
 import { faThumbsUp, faThumbsDown, faComment, faRetweet, faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState, useRef } from 'react';
-import { timeDifference } from '../utils/Utils';
+import { timeDisplay } from '../utils/Utils';
 import { Link } from "react-router-dom";
 import { useAuth } from '../provider/context';
 import { BACK_END } from '../config';
@@ -12,15 +12,12 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { Image, Form, Input } from 'antd';
 import request from '../utils/request';
 
-
-
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const { username: selfname, mode } = useAuth();
   console.log("here1" + JSON.stringify(tweetInfo))
   const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
   const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
-  const [timeInterval, setTimeInterval] = useState(timeDifference(tweetInfo['time']));
-  const [isReported, setIsReported] = useState(tweetInfo['isReported']);
+  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo['time']));
   const [commentCount, setCommentCount] = useState(tweetInfo['commentCount']);
   const [retweetCount, setRetweetCount] = useState(tweetInfo['retweetCount']);
   const tweetContent = tweetInfo['content'];
@@ -36,7 +33,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     setDislikeInfo(tweetInfo['dislikeInfo']);
     setCommentCount(tweetInfo['commentCount']);
     setRetweetCount(tweetInfo['retweetCount']);
-    setIsReported(tweetInfo['isReported']);
+    setTimeInterval(timeDisplay(tweetInfo['time']));
   }, [tweetInfo]);
 
   const clickLikeTweet = () => {
@@ -73,19 +70,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
       });
   }
 
-  const handleTweetReport = () => {
-    request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/report")
-      .then(res => {
-        if (res.status === 201) {
-          console.log("Report tweet success");
-          setIsReported(true);
-        } else {
-          console.log("Report tweet failed");
-        }
-      }).catch(err => {
-        console.log(err);
-      });
-  }
 
   const addCommentMain = () => {
     let newCom = {
@@ -197,11 +181,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
                     </a>
                     <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
                   </span>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-floating" + (isReported ? "btn-secondary disabled" : " btn-outline-secondary")} data-bs-toggle="modal" data-bs-target={"#report-popup" + tweetInfo['tid']}>
-                      <FontAwesomeIcon icon={faWarning}></FontAwesomeIcon>
-                    </button>
-                  </span>
                 </>
               }
             </div>
@@ -209,24 +188,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
         </div>
       </div>
 
-      {/* Modal */}
-      <div className="modal fade" id={"report-popup" + tweetInfo['tid']} data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel"><FontAwesomeIcon icon={faWarning}></FontAwesomeIcon>Warning</h1>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div className="modal-body">
-              Are you sure to report this tweet?
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-              <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={handleTweetReport}>Yes</button>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* comment form for tweet's comment*/}
       <div className="modal fade" id={"tweetCommentForm" + tweetInfo.tid} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

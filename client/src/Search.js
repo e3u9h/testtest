@@ -1,140 +1,130 @@
-import React from 'react';
-import TweetListView from './components/Tweet';
-import UserListView from './components/User';
-import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import SearchUser from './SearchUser';
-import SearchTweet from './SearchTweet';
+import React, { useState } from 'react';
+import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import { BACK_END } from './config';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { useState } from 'react';
 import request from './utils/request';
 
-class Search extends React.Component{
-    constructor(props){
-        super(props);
-        this.state = {viewMode:"search"}; // two viewmode, notification or message
-        this.clickSearch = this.clickSearch.bind(this)
-        this.onkeydown = this.onkeydown.bind(this)
-    }
-    // Direct to the specific page after clicking the search button to search for something.
-    async clickSearch(){
-        var search=document.getElementById('search_input').value;
-        if(this.state.viewMode == 'searchuser'){
-            window.location = '/searchuser/'+search;
-        }
-        else if(this.state.viewMode  == 'searchtweet'){
-            window.location = '/searchtag/'+search;
-        }
-        else if(this.state.viewMode == 'searchuserid'){
-            window.location = '/searchuserbyid/'+search;
-        }
-        else{
-            window.location = '/searchtweet/' + search;
-        }
+const Search = () => {
+  const [viewMode, setViewMode] = useState('search');
 
-    }
-    async onkeydown(e){
-  if (e.keyCode === 13) {
-   this.clickSearch()
-  }
- }
+  const handleSearch = async () => {
+    const searchInput = document.getElementById('search_input').value;
+    let redirectUrl = '';
 
-    render(){
-        return(
-            <>
-            <div class="input-group">
-                <input id='search_input' type="search" class="form-control rounded" onKeyDown={(e)=>this.onkeydown(e)} placeholder={(this.state.viewMode == 'search' ? "Please select what you want to search" : "Please input the keyword")} aria-label="Search" aria-describedby="search-addon" />
-                <Dropdown as={ButtonGroup}>
-                <Button variant="secondary" id="searchclick" onClick={this.clickSearch} >Search</Button>
-                <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
-                <Dropdown.Menu>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuser"});document.getElementById('searchclick').innerHTML = "Search User by Username"; }}>Search User by Username</Dropdown.Item>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchtweet"});document.getElementById('searchclick').innerHTML = "Search Post by Tag";}}>Search Post by Tag</Dropdown.Item>
-                <Dropdown.Item  onClick={() => {this.setState({viewMode:"searchuserid"});document.getElementById('searchclick').innerHTML = "Search Users by ID";}}>Search Users by ID</Dropdown.Item>
-                <Dropdown.Item onClick={() => { this.setState({ viewMode: "searchtweetbykeyword" }); document.getElementById('searchclick').innerHTML = "Search Post by Keyword"; }}>Search Posts by Keyword</Dropdown.Item>
-                </Dropdown.Menu>
-                </Dropdown>
-                </div>
-                <div className="row">
-                <Trend/>
-            </div>
-            
-            </>
-        )   
+    switch (viewMode) {
+      case 'searchuser':
+        redirectUrl = `/searchuser/${searchInput}`;
+        break;
+      case 'searchtweet':
+        redirectUrl = `/searchtag/${searchInput}`;
+        break;
+      case 'searchuserid':
+        redirectUrl = `/searchuserbyid/${searchInput}`;
+        break;
+      default:
+        redirectUrl = `/searchtweet/${searchInput}`;
     }
-}       
-class Trend extends React.Component{
-    constructor(props) {
-        super(props);
-        this.state = { trendList: []};
+
+    window.location = redirectUrl;
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.keyCode === 13) {
+      handleSearch();
+    }
+  };
+
+  return (
+    <>
+      <div className="input-group">
+        <input
+          id="search_input"
+          type="search"
+          className="form-control rounded"
+          onKeyDown={handleKeyDown}
+          placeholder={viewMode === 'search' ? 'Please select what you want to search' : 'Please input the keyword'}
+          aria-label="Search"
+          aria-describedby="search-addon"
+        />
+        <Dropdown as={ButtonGroup}>
+          <Button variant="secondary" id="searchclick" onClick={handleSearch}>
+            Search
+          </Button>
+          <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
+          <Dropdown.Menu>
+            <Dropdown.Item onClick={() => setViewMode('searchuser')}>Search User by Username</Dropdown.Item>
+            <Dropdown.Item onClick={() => setViewMode('searchtweet')}>Search Post by Tag</Dropdown.Item>
+            <Dropdown.Item onClick={() => setViewMode('searchuserid')}>Search Users by ID</Dropdown.Item>
+            <Dropdown.Item onClick={() => setViewMode('searchtweetbykeyword')}>Search Posts by Keyword</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
+      </div>
+      <div className="row">
+        <Trend />
+      </div>
+    </>
+  );
+};
+
+const Trend = () => {
+  const [trendList, setTrendList] = useState([]);
+
+  const fetchTrends = async () => {
+    try {
+      const response = await request.get('search/trend', {
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+      setTrendList(response.data);
+    } catch (error) {
+      console.error('Failed to fetch trends:', error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchTrends();
+  }, []);
+
+  return (
+    <InfiniteScroll
+      dataLength={trendList.length}
+      next={null}
+      hasMore={false}
+      scrollableTarget="scrollableDiv"
+      endMessage={
+        <p style={{ textAlign: 'center' }}>
+          <b>Current Hot Topics</b>
+        </p>
       }
-    // Get the hot topics
-    async getTrend(){
-        const res = await request.get("search/trend", {
-            headers: {
-                'Accept': 'application/json',
-            },
-        });
-        const l = res.data;
-        await this.setState({trendList:l});
-        console.log(this.state.trendList)
-      }
-      componentDidMount(){
-        this.getTrend()
-      }
+    >
+      <TrendListView trendInfos={trendList} />
+    </InfiniteScroll>
+  );
+};
 
-    render() {
-        return (<>
-            <InfiniteScroll dataLength={this.state.trendList.length} next={null} hasMore={false} scrollableTarget="scrollableDiv"
-                endMessage={<p style={{ textAlign: 'center' }}>
-                    <b> Current Hot Topics </b>
-                </p>}>
-                <TrendListView trendInfos={this.state.trendList}/>
-            </InfiniteScroll>
-        </>
-        );
-    }
-} 
+const TrendListView = ({ trendInfos }) => {
+  return (
+    <>
+      {trendInfos.map((trendInfo, index) => (
+        <TrendCard key={index} tag={trendInfo.tag} />
+      ))}
+    </>
+  );
+};
 
-
-function TrendListView({ trendInfos }) {
-
-    const [trendInfoList, settrendList] = useState(trendInfos);
-
-    return (
-        <>
-            {trendInfos.map((trendInfo, index) =>
-                <TrendCard tag={trendInfo.tag} key={index} />
-            )}
-        </>
-    );
-
-}
-
-class TrendCard extends React.Component{
-    constructor(props) {
-        super(props);
-    }
-    render(){
-        return(
-        <>
-        <div class="list-group w-800">
-        <Link to={"/searchtag/"+this.props.tag} class="list-group-item list-group-item-action d-flex" aria-current="true">
-        <div class="d-flex gap-20 w-1000" style={{margin:10, padding:10}}>
-        <div>
-        <h6 class="mb-0">{this.props.tag}</h6>
+const TrendCard = ({ tag }) => {
+  return (
+    <div className="list-group w-800">
+      <Link to={`/searchtag/${tag}`} className="list-group-item list-group-item-action d-flex" aria-current="true">
+        <div className="d-flex gap-20 w-1000" style={{ margin: 10, padding: 10 }}>
+          <div>
+            <h6 className="mb-0">{tag}</h6>
+          </div>
         </div>
-        </div>
-        </Link>
-        </div>
-        </>
-        )
-    }
-}
-
-
+      </Link>
+    </div>
+  );
+};
 
 export default Search;

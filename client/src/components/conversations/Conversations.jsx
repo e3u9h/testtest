@@ -14,7 +14,7 @@ export default function Conversation({ conversation , currentUsername}) {
       try {        
         const response = await (request.get("profile/" + currentUsername));
         const currentUser = response.data;
-        const friendId = conversation.members.find((m) => m !== currentUser.uid);
+        const friendId = conversation.members.find((m) => m !== currentUser._id);
         const res = await request.get("auser/" + friendId);
         setUser(res.data);
       } catch (err) {

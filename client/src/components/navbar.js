@@ -55,26 +55,28 @@ function Navbar() {
     useEffect(() => {
         console.log(BACK_END + "profile/portrait/" + username);
         // fetch the user portrait from the backend when first rendering
-        request.get("profile/portrait/" + username)
-            .then(res => {
-                console.log(res);
-                if (res.status !== 200) {
-                    throw new Error('Network response was not ok');
-                }
-                return res.data;
-            })
-            .then(text => {
-                console.log(text);
-                let portrait = text;
-                if (!portrait) {
-                    portrait = "/img/defaultPortrait.jpg";
-                }
-                setUserPortraitSrc(portrait);
-            })
-            .catch(err => {
-                console.error(err);
-                setUserPortraitSrc("/img/defaultPortrait.jpg");
-            });
+        if (mode === 'user') {
+            request.get("profile/portrait/" + username)
+                .then(res => {
+                    console.log(res);
+                    if (res.status !== 200) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return res.data;
+                })
+                .then(text => {
+                    console.log(text);
+                    let portrait = text;
+                    if (!portrait) {
+                        portrait = "/img/defaultPortrait.jpg";
+                    }
+                    setUserPortraitSrc(portrait);
+                })
+                .catch(err => {
+                    console.error(err);
+                    setUserPortraitSrc("/img/defaultPortrait.jpg");
+                });
+        }
     }, []);
     return (<>
         {<div className="col-md-2 p-3 text-bg-light">

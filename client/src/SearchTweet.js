@@ -1,58 +1,57 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TweetListView } from './components/Tweet';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import BackButton from './components/backbutton';
 import request from './utils/request';
+import { useParams } from 'react-router-dom';
+import { useAuth } from './provider/context';
 
-class SearchTweet extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      tag: window.location.pathname.split('/')[2],
-      tweetList: [],
+const SearchTweet = () => {
+  const { tag: searchTag } = useParams();
+  const [tweets, setTweets] = useState([]);
+  const { username: currentUser } = useAuth();
+
+  useEffect(() => {
+    const fetchTweetsByTag = async () => {
+      try {
+        const response = await request.get(`searchtag/${searchTag}/${currentUser}`, {
+          headers: {
+            'Accept': 'application/json',
+          },
+        });
+        setTweets(response.data);
+      } catch (error) {
+        console.error('Failed to fetch tweets:', error);
+      }
     };
-  }
 
-  componentDidMount() {
-    this.getAllTweets();
-  }
+    fetchTweetsByTag();
+  }, [searchTag, currentUser]);
 
-  async getAllTweets() {
-    try {
-      const res = await request.get('searchtag/' + this.state.tag, {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      const tweetList = res.data;
-      this.setState({ tweetList });
-      console.log(this.state.tweetList);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
-
-  render() {
-    return (
-      <>
-        <div className='row'>
-          <BackButton />
-        </div>
-        <div id='scrollabletweets' style={{ height: '95vh', overflow: 'auto' }}>
+  return (
+    <div>
+      <BackButton />
+      <div id="tweetScrollContainer" style={{ height: '80vh', overflowY: 'scroll' }}>
+        {tweets.length > 0 ? (
           <InfiniteScroll
-            dataLength={this.state.tweetList.length}
+            dataLength={tweets.length}
             next={null}
             hasMore={false}
-            scrollableTarget='scrollabletweets'
-            endMessage={<p style={{ textAlign: 'center' }}><b>No more Tweets</b></p>}
+            scrollableTarget="tweetScrollContainer"
+            endMessage={
+              <p style={{ textAlign: 'center' }}>
+                <b>No more Posts</b>
+              </p>
+            }
           >
-            <TweetListView tweetInfos={this.state.tweetList} />
+            <TweetListView tweetInfos={tweets} />
           </InfiniteScroll>
-        </div>
-      </>
-    );
-  }
-}
+        ) : (
+          <p style={{ textAlign: 'center' }}>No tweets found for the tag.</p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default SearchTweet;
-    

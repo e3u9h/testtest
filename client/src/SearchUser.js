@@ -4,54 +4,54 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
+import { useParams } from 'react-router-dom';
 
 const SearchUser = () => {
-  const { username: selfname } = useAuth();
-  console.log(selfname);
-    const username = window.location.pathname.split('/')[2];
-  const [userList, setUserList] = useState([]);
-
-  const getAllUser = async () => {
-    try {
-      const res = await request.get("searchuser/" + selfname + "/" + username, {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      const userList = res.data;
-      setUserList(userList);
-      console.log(userList);
-    } catch (error) {
-      console.error('Error:', error);
-    }
-  }
+  const { username: currentUser } = useAuth();
+  const { username: searchUsername } = useParams();
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    getAllUser();
-  }, []);
+    const searchUsers = async () => {
+      try {
+        const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Failed to search users:', error);
+      }
+    };
 
-    return (
-      <>
-        <div className='row'>
-          <BackButton />
-        </div>
-        <div id='scrollabletweets' style={{ height: "95vh", overflow: "auto" }}>
+    searchUsers();
+  }, [currentUser, searchUsername]);
+
+  return (
+    <div>
+      <BackButton />
+      <div id="userScrollContainer" style={{ height: '95vh', overflow: 'auto' }}>
+        {users.length > 0 ? (
           <InfiniteScroll
-            dataLength={userList.length}
+            dataLength={users.length}
             next={null}
             hasMore={false}
-            scrollableTarget="scrollabletweets"
+            scrollableTarget="userScrollContainer"
             endMessage={
               <p style={{ textAlign: 'center' }}>
                 <b>No more Users</b>
               </p>
             }
           >
-            <UserListView userInfos={userList} />
+            <UserListView userInfos={users} />
           </InfiniteScroll>
-        </div>
-      </>
-    );
-}
+        ) : (
+          <p style={{ textAlign: 'center' }}>No users found.</p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export default SearchUser;

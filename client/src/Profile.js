@@ -9,24 +9,31 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { useAuth } from './provider/context';
 import { faWarning } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { message, Upload } from 'antd';
 import { BACK_END } from './config';
 import "./css/profile.css"
 import BackButton from './components/backbutton';
 import request from './utils/request';
 
+const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+};
+const beforeUpload = (file) => {
+    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+    if (!isJpgOrPng) {
+        message.error('You can only upload JPG/PNG file!');
+    }
+    return isJpgOrPng;
+};
+
 function Profile() {
     const { username, mode } = useAuth();
     const props = useParams();
     const [viewMode, setViewMode] = useState("MyPosts");
-    const [self, setSelf] = useState({
-        uid: "Loading",
-        username: username,
-        followings: "Loading",
-        users_blocked: "Loading",
-        users_reported: "Loading"
-    });
     const [target, setTarget] = useState({
-        uid: "Loading",
+        _id: "Loading",
         username: props.username,
         gender: "Loading",
         following_counter: "Loading",
@@ -35,6 +42,7 @@ function Profile() {
         about: "Loading",
         portrait: "Loading"
     });
+    const [selfID, setSelfID] = useState("");
     const [follow, setFollow] = useState(false);
     const [block, setBlock] = useState(false);
     const [beblocked, setBeblocked] = useState(false);
@@ -42,6 +50,14 @@ function Profile() {
     const [textAreaValue, setTextAreaValue] = useState("");
     const [editgender, setEditgender] = useState(target.gender);
     const navigate = useNavigate();
+    const [imageUrl, setImageUrl] = useState();
+    const [file, setFile] = useState(undefined);
+    const handleChange = (info) => {
+        setFile(info.file.originFileObj);
+        getBase64(info.file.originFileObj, (url) => {
+            setImageUrl(url);
+        });
+    };
 
     const fetchInfo = async () => {
 
@@ -55,18 +71,18 @@ function Profile() {
         setTextAreaValue(dataTarget.about);
         // Fetch self information
         if (mode === 'user') {
-            const responseSelf = await request.get("profile/" + self.username + "/actioninfo", {
+            const responseSelf = await request.get("profile/" + username + "/" + target.username + "/actioninfo", {
                 headers: { 'Accept': 'application/json' }
             });
             const dataSelf = responseSelf.data;
-            setSelf(dataSelf);
+            console.log(dataSelf);
             // get the user relationship information and set the states
-            setFollow(dataSelf.followings.includes(dataTarget.uid));
-            setBlock(dataSelf.users_blocked.includes(dataTarget.uid));
+            setSelfID(dataSelf._id);
+            setFollow(dataSelf.isFollowing);
+            setBlock(dataSelf.isBlocking);
             // console.log("here1111");
-            // console.log(dataSelf.users_blocked);
-            setBeblocked(dataTarget.users_blocked.includes(dataSelf.uid));
-            setReport(dataSelf.users_reported.includes(dataTarget.uid));
+            setBeblocked(dataSelf.isBlocked);
+            setReport(dataSelf.hasReported);
         }
     };
 
@@ -77,7 +93,7 @@ function Profile() {
 
     const handleFollowClick = async () => {
         const endpoint = follow ? 'unfollow' : 'follow';
-        const response = await request.put("interaction/" + self.username + "/" + target.username + "/" + endpoint);
+        const response = await request.put("interaction/" + username + "/" + target.username + "/" + endpoint);
 
         if (response.status === 200) {
             setFollow(!follow);
@@ -94,7 +110,7 @@ function Profile() {
 
     const handleBlockClick = async () => {
         const endpoint = block ? 'unblock' : 'block';
-        const response = await request.put("interaction/" + self.username + "/" + target.username + "/" + endpoint);
+        const response = await request.put("interaction/" + username + "/" + target.username + "/" + endpoint);
 
         if (response.status === 200) {
             setBlock(!block);
@@ -106,7 +122,7 @@ function Profile() {
 
     const handleReportClick = async () => {
         if (!report) {
-            const response = await request.put("interaction/" + self.username + "/" + target.username + "/report");
+            const response = await request.put("interaction/" + username + "/" + target.username + "/report");
 
             if (response.status === 200) {
                 setReport(true);
@@ -124,11 +140,13 @@ function Profile() {
         // set the default values in the form to current user information
         setEditgender(target.gender);
         setTextAreaValue(target.about);
+        setImageUrl(BACK_END + target.portrait);
+        setFile(undefined);
     };
 
     const handleEditSubmit = async (event) => {
         event.preventDefault();
-        const portrait = document.getElementById("portrait").files[0];
+        const portrait = file;
         let formData = new FormData();
         if (portrait !== undefined) {
             formData.append('portrait', portrait);
@@ -141,7 +159,7 @@ function Profile() {
         formData.append('about', textAreaValue);
 
         try {
-            const response = await request.put("profile/" + self.username, formData, {
+            const response = await request.put("profile/" + username, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 
@@ -165,8 +183,8 @@ function Profile() {
     const handleChatClick = async () => {
         try {
             await request.post("server/conversations", JSON.stringify({
-                senderId: self.uid,
-                receiverId: target.uid
+                senderId: selfID,
+                receiverId: target._id
             })).then(res => {
                 if (res.status === 200) {
                     navigate(`/messenger`, { state: { current_conversation: res.data } });
@@ -182,12 +200,13 @@ function Profile() {
 
 
     return (<>
+        {/* if self has not blocked target and is not blocked by target or self is an admin, show the profile */}
         {(mode === 'admin' || (!block && !beblocked)) && <Container fluid>
             <div id="scrollableDiv" className='border' style={{ height: "80vh", overflowX: "hidden", overflowY: "scroll" }}>
-                {target['username'] !== self['username'] && <Row>
+                {target['username'] !== username && <Row>
                     <BackButton />
                 </Row>}
-
+                {/* basic information part */}
                 <div class='row'>
                     <div class='col-sm-3'>
                         <img src={BACK_END + target.portrait} width={180} height={180} alt='avatar' class='profile-portrait' style={{ objectFit: 'cover' }}></img>
@@ -195,7 +214,7 @@ function Profile() {
                     <div class='col-sm-7'>
                         <div class='row' id='name-id'>
                             <div className='ms-2 text-black' id='profile-username'>{target['username']}</div>
-                            <div className='ms-2 text-muted'> @{target['uid']} </div>
+                            <div className='ms-2 text-muted'> @{target['_id']} </div>
                         </div>
                         <div class='row'>
                             <span className='ms-2 text-black'> {target['about']} </span>
@@ -229,34 +248,35 @@ function Profile() {
                             </Link>
                         </div>
                     </div>
+                    {/* buttons: Edit Profile for self; Follow/Unfollow, Block/Unblock, Report/Reported and Chat for others */}
                     <div class='col'>
                         <div className="btn-group-vertical" >
                             {
-                                mode === 'user' && target['username'] === self['username'] &&
+                                mode === 'user' && target['username'] === username &&
                                 <button type="button" onClick={handleEditClick} className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#editProfileForm" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', bottom: '-20px', borderRadius: '30px' }}>
                                     Edit Profile
                                 </button>
                             }
                             {
-                                mode === 'user' && target['username'] !== self['username'] && (
+                                mode === 'user' && target['username'] !== username && (
                                     <button type="button" onClick={handleFollowClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="follow" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
                                         {follow ? 'Unfollow' : 'Follow'}
                                     </button>)
                             }
                             {
-                                mode === 'user' && target['username'] !== self['username'] && (
+                                mode === 'user' && target['username'] !== username && (
                                     <button type="button" onClick={handleBlockClick} className={`btn ${block ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ borderColor: ' #6c757d', width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
                                         {block ? 'Unblock' : 'Block'}
                                     </button>)
                             }
                             {
-                                mode === 'user' && target['username'] !== self['username'] && (
+                                mode === 'user' && target['username'] !== username && (
                                     <button type="button" onClick={handleReportClick} className={`btn ${report ? 'btn-light' : 'btn-secondary'}`} id="block" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }} disabled={report}>
                                         {report ? 'Reported' : 'Report'}
                                     </button>)
                             }
                             {
-                                mode === 'user' && target['username'] !== self['username'] &&
+                                mode === 'user' && target['username'] !== username &&
                                 <button type="button" onClick={handleChatClick} className="btn btn-secondary" data-bs-whatever="@mdo" style={{ width: '130px', fontSize: '18px', margin: '10px', borderRadius: '30px' }}>
                                     Chat
                                 </button>
@@ -264,6 +284,7 @@ function Profile() {
                         </div>
                     </div>
                 </div>
+                {/* modal for Edit Profile */}
                 <div className="modal fade" id="editProfileForm" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -288,7 +309,19 @@ function Profile() {
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="text" className="col-sm-12 col-form-label"> Portrait: </label>
-                                        <input type="file" className="form-control" id="portrait" />
+                                        <Upload
+                                            name="avatar"
+                                            listType="picture-circle"
+                                            className="avatar-uploader"
+                                            showUploadList={false}
+                                            beforeUpload={beforeUpload}
+                                            onChange={handleChange}
+                                        >
+                                            <img
+                                                src={imageUrl}
+                                                style={{ width: 100, height: 100, borderRadius: '100%', objectFit: 'cover' }}
+                                            />
+                                        </Upload>
                                     </div>
                                     <div className="mb-3">
                                         <label htmlFor="about-text" className="col-form-label"> About: </label>
@@ -303,8 +336,9 @@ function Profile() {
                         </div>
                     </div>
                 </div>
+                {/* Posts part: for self, show posted posts or liked posts; for others, show only posed posts */}
                 {
-                    (target['username'] === self['username'] &&
+                    (target['username'] === username &&
                         <Row>
                             <Col>
                                 <div className="btn-group d-flex mb-3" role="group" aria-label="...">
@@ -343,7 +377,7 @@ function Profile() {
                             <div className="row">
                                 {viewMode === "MyPosts" && <MyPostsList username={target.username} />}
                             </div>
-
+                                {/* modal for confirming the report action */}
                             <div className="modal fade" id="report-user" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                                 <div className="modal-dialog modal-dialog-centered">
                                     <div className="modal-content">
@@ -366,6 +400,7 @@ function Profile() {
                 }
             </div>
         </Container>}
+        {/* if self has blocked target, show an empty profile and an Unblock button */}
         {block && <Container fluid>
             <Row>
                 <BackButton />
@@ -383,6 +418,7 @@ function Profile() {
                 <div className="col-md-3"></div>
             </div>
         </Container>}
+        {/* if self has been blocked by target, show an empty profile */}
         {beblocked && <Container fluid>
             <Row>
                 <BackButton />
@@ -417,21 +453,12 @@ function MyPostsList({ username }) {
     const [target, setTarget] = useState(username);
 
     const fetchInfo = async () => {
-        let tweetrec;
 
-        if (mode === 'user') {
-            tweetrec = await request.get("profile/" + self + "/" + target + "/tweets", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        } else {
-            tweetrec = await request.get("profile/" + target + "/tweets", {
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-        }
+        let tweetrec = await request.get("profile/" + self + "/" + target + "/tweets", {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
 
         let fetchedTweets = tweetrec.data;
         console.log(tweetrec);

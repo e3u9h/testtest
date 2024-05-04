@@ -6,7 +6,6 @@ import { randomSelect } from './utils/Utils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from './provider/context';
-import { BACK_END } from './config';
 import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
@@ -80,6 +79,12 @@ function NewPost() {
 
   // Post
   const postNewTweet = () => {
+    // Not allowed to post blank post.
+    if (postContent.trim() == '') {
+      alert('Can not publish an empty post! Say someting please!');
+      return;
+    }
+
     // print fileList
     console.log(fileList)
 
@@ -137,7 +142,9 @@ function NewPost() {
         document.getElementById("close-modal").click();
       });
     } else {
-      alert("Tag already exists");
+      // alert("Tag already exists");
+      setTags([...tags, newTag]);
+      document.getElementById("close-modal").click();
     }
     // clear the input field
     setNewTag('');
