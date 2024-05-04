@@ -151,7 +151,7 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             <div className="d-flex align-items-end justify-content-end mt-autoo">
               {!isDetailPage && <span className="m-1">
                 <Link to={"/tweet/" + tweetInfo["tid"]}>
-                  <button type="button" className="btn btn-secondary btn-floating">View Full Post</button>
+                  <button type="button" className="btn btn-secondary rounded-pill">View Full Post</button>
                 </Link>
               </span>}
               {selfname && mode == 'user' &&
@@ -208,7 +208,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
           </div>
         </div>
       </div>
-
 
       {/* comment form for tweet's comment*/}
       <div className="modal fade" id={"tweetCommentForm" + tweetInfo.tid} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -333,51 +332,98 @@ function ForwardForm(props) {
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5"> Repost </h1>
+              <h1 className="modal-title fs-5">Repost</h1>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <Form>
                 <Form.Item>
                   <Input.TextArea
-                    rows={4}
-                    value={repostContent}
-                    onChange={e => setRepostContent(e.target.value)}
-                    placeholder="Say something when repost!"
+                  rows={4}
+                  value={repostContent}
+                  onChange={(e) => setRepostContent(e.target.value)}
+                  placeholder="Say something when repost!"
                   />
                 </Form.Item>
               </Form>
-              <div className="modal-body">
-                <h5>Choose a tag</h5>
-                <hr></hr>
+            <div className="modal-body">
+              <h5>Choose a tag</h5>
+              <hr />
+              <div className="d-flex flex-wrap">
                 {randomSelect(availableTags, 5).map((tag, index) => {
-                  return (
-                    <button type="button" className="btn btn-outline-secondary mx-2 my-1" key={index} onClick={() => setTags([...tags, tag])}>{tag}</button>
-                  );
+                return (
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary mx-2 my-1"
+                    key={index}
+                    onClick={() => setTags([...tags, tag])}
+                  >
+                  {tag}
+                  </button>
+                );
                 })}
-                <div>
-                  <div className="input-group m-2">
-                    <input type="text" id={"new-tag-retweet" + props.tid} className="form-control" placeholder="Input new tags" aria-label="Input new tags" aria-describedby="button-add" />
-                    <button className="btn btn-outline-secondary" type="button" data-bs-target="#tweetForwardForm" onClick={addNewTags}>Add</button>
-                  </div>
-                </div>
               </div>
+              <div className="input-group m-2">
+              <input
+              type="text"
+              id={"new-tag-retweet" + props.tid}
+              className="form-control"
+              placeholder="Input new tags"
+              aria-label="Input new tags"
+              aria-describedby="button-add"
+              />
+              <button
+              className="btn btn-outline-secondary"
+              type="button"
+              data-bs-target="#tweetForwardForm"
+              onClick={addNewTags}
+              >
+              Add
+              </button>
             </div>
-            <div className="modal-footer">
-              <div>
-                {tags != undefined && tags.map((tag, index) => {
-                  return (
-                    <span className="badge bg-secondary my-1 mx-2" key={index}>{tag}</span>
-                  );
-                })}
-              </div>
-              <div>
-                <Dropdown as={ButtonGroup}>
-                  <Button type="button" varient='secondary' id='retweet-privacy' className="btn btn-secondary mx-2" onClick={postRetweet}>Send</Button>
-                  <Dropdown.Toggle split variant="secondary" id="retweet-dropdown-split-privacy" />
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => { setPrivacy('false'); document.getElementById('retweet-privacy').innerHTML = "Send Public" }}>Public</Dropdown.Item>
-                    <Dropdown.Item onClick={() => { setPrivacy('true'); document.getElementById('retweet-privacy').innerHTML = "Send Private"; console.log(privacy) }}>Private</Dropdown.Item>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <div className="d-flex flex-wrap align-items-center">
+          {tags !== undefined &&
+            tags.map((tag, index) => {
+              return (
+                <span className="badge bg-secondary my-1 mx-2" key={index}>
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+          <div>
+          <Dropdown as={ButtonGroup}>
+            <Button
+              type="button"
+              variant="secondary"
+              id="retweet-privacy"
+              className="btn btn-secondary mx-2"
+              onClick={postRetweet}
+            >
+            Send
+            </Button>
+            <Dropdown.Toggle split variant="secondary" id="retweet-dropdown-split-privacy" />
+            <Dropdown.Menu>
+              <Dropdown.Item
+                onClick={() => {
+                  setPrivacy('false');
+                  document.getElementById('retweet-privacy').innerHTML = 'Send Public';
+                }}
+              >
+                Public
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  setPrivacy('true');
+                  document.getElementById('retweet-privacy').innerHTML = 'Send Private';
+                  console.log(privacy);
+                }}
+              >
+                Private
+                  </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </div>
