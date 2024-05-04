@@ -6,26 +6,26 @@ import request from './utils/request';
 import { useParams } from 'react-router-dom';
 import { useAuth } from './provider/context';
 
+const fetchTweetsByTag = async (searchTag, currentUser, setTweets) => {
+  try {
+    const response = await request.get(`searchtag/${searchTag}/${currentUser}`, {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    setTweets(response.data);
+  } catch (error) {
+    console.error('Failed to fetch tweets:', error);
+  }
+};
+
 const SearchTweet = () => {
   const { tag: searchTag } = useParams();
   const [tweets, setTweets] = useState([]);
   const { username: currentUser } = useAuth();
 
   useEffect(() => {
-    const fetchTweetsByTag = async () => {
-      try {
-        const response = await request.get(`searchtag/${searchTag}/${currentUser}`, {
-          headers: {
-            'Accept': 'application/json',
-          },
-        });
-        setTweets(response.data);
-      } catch (error) {
-        console.error('Failed to fetch tweets:', error);
-      }
-    };
-
-    fetchTweetsByTag();
+    fetchTweetsByTag(searchTag, currentUser, setTweets);
   }, [searchTag, currentUser]);
 
   return (
