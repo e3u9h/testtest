@@ -59,8 +59,8 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
         if (res.status === 201) {
           return res.data;
         } else {
-          console.log("Like tweet failed");
-          throw new Error("Like tweet failed");
+          console.log("Like post failed");
+          throw new Error("Like post failed");
         }
       }).then(data => {
         setLikeInfo(data['likeInfo']);
@@ -123,7 +123,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             </div>
           </div>
         </div>
-
 
         <div className="col-12">
           <div className="row d-flex flex-column h-100">
@@ -244,84 +243,90 @@ function ForwardForm(props) {
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
 
-
-
-  const fetchAvailableTags = () => {
-    request.get("tags")
-      .then(res => res.data).then(data => {
-        const fetchedTags = data.map((item) => item['tag']);
-        setAvailableTags(fetchedTags);
-      }).catch(err => {
-        console.log(err);
-      });
+  const fetchAvailableTags = async () => {
+    try {
+      const res = await request.get("tags");
+      const data = res.data;
+      const fetchedTags = data.map(item => item.tag);
+      setAvailableTags(fetchedTags);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     fetchAvailableTags();
   }, []);
 
-
-  const postRetweet = () => {
+  const postRetweet = async () => {
     if (repostContent === "") {
-      setRepostContent(initialContent)
+      setRepostContent(initialContent);
     }
-    let postBody = {
+
+    const postBody = {
       username: selfname,
       tweet_content: repostContent,
       tags: tags,
       tid: props.tid,
       private: privacy
-    }
-    console.log(postBody)
+    };
 
-    request.post("retweet", postBody)
-      .then(res => {
-        console.log(res)
-        if (res.status === 201) {
-          setRepostContent(initialContent);
-          props.setRetweetCount(props.retweetCount + 1);
-          setTags([]);
-          alert("Repost success");
-        } else if (res.status === 403) {
-          res.text().then(text => alert(text));
-        }
-        else {
-          alert("Repost failed");
-        }
-      });
+    try {
+      const res = await request.post("retweet", postBody);
+      console.log(res);
+
+      if (res.status === 201) {
+        setRepostContent(initialContent);
+        props.setRetweetCount(props.retweetCount + 1);
+        setTags([]);
+        alert("Repost success");
+      } else if (res.status === 403) {
+        const text = await res.text();
+        alert(text);
+      } else {
+        alert("Repost failed");
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Repost failed");
+    }
   };
 
+  const addNewTags = async () => {
+    const newTagsDom = document.getElementById("new-tag-retweet" + props.tid);
 
-  const addNewTags = () => {
-    let newTagsDom = document.getElementById("new-tag-retweet" + props.tid);
     if (newTagsDom == null) {
       console.log("Error: newTagsDom is null");
       return;
     }
-    console.log(newTagsDom);
-    let newTags = newTagsDom.value;
-    // check if the tag is already in the list
+
+    const newTags = newTagsDom.value;
+
+    // Check if the tag is already in the list
     if (!availableTags.includes(newTags)) {
-      // insert the new tag into the database
-      request.post("new-tag", { tag: newTags }).then(res => {
+      try {
+        const res = await request.post("new-tag", { tag: newTags });
+
         if (res.status === 201) {
           console.log("New tag inserted");
         } else if (res.status === 202 && res.body === "Tag already exists") {
-          // alert("Tag already exists");
           console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }
+        
         setTags([...tags, newTags]);
-        // close the modal
+
+        // Close the modal
         document.getElementById("close-modal").click();
-      });
+      } catch (err) {
+        console.log(err);
+      }
     } else {
       alert("Tag already exists");
     }
-    // clear the input field
-    newTagsDom.value = '';
-  }
+  };
+
   return (
     <div>
       <div className="modal fade" id={"tweetForwardForm" + props.tid} aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabIndex="-1">
