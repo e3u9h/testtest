@@ -10,7 +10,7 @@ import { Dropdown } from 'react-bootstrap';
 import { ButtonGroup } from '@material-ui/core';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
-import { Image, Upload, Form, Input, message } from 'antd';
+import { Image, Upload, Form, Input } from 'antd';
 import { Row, Col } from 'antd';
 import './css/custom-input.css';
 import request from './utils/request';
@@ -125,28 +125,23 @@ function NewPost() {
   // If the tag is not exist, use this function create a new tag
   const addNewTags = () => {
     console.log(newTag);
-    // check if the tag is already in the list
     if (!availableTags.includes(newTag)) {
-      // insert the new tags into the database
       request.post('new-tag', { tag: newTag })
         .then(res => {
         if (res.status === 201) {
-          console.log("New tag inserted");
+          console.log("New tag is inserted");
         } else if (res.status === 400) {
           console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }
           setTags([...tags, newTag]);
-        // close the modal
         document.getElementById("close-modal").click();
       });
     } else {
-      // alert("Tag already exists");
       setTags([...tags, newTag]);
       document.getElementById("close-modal").click();
     }
-    // clear the input field
     setNewTag('');
   }
 
@@ -162,7 +157,7 @@ function NewPost() {
                 rows={10}
                 value={postContent}
                 onChange={e => setPostContent(e.target.value)}
-                placeholder="What's on your mind?"
+                placeholder="What do you want to share?"
               />
             </Form.Item>
 
@@ -225,29 +220,55 @@ function NewPost() {
         </div>
       </div>
 
-      {/* Modal */}
-      <div className="modal fade" id="add-tag" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
+            {/* Modal */}
+            <div className="modal fade" id="add-tag" tabIndex="-1" aria-labelledby="addTagModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-dialog-scrollable">
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5" id="staticBackdropLabel">Please choose a tag or input new tags</h1>
+              <h5 className="modal-title" id="addTagModalLabel">Select or Create New Tags</h5>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
-              {randomSelect(availableTags, 5).map((tag, index) => {
-                return (
-                  <button type="button" className="btn btn-outline-secondary mx-2 my-1" data-bs-dismiss="modal" key={index} onClick={() => setTags([...tags, tag])}>{tag}</button>
-                );
-              })}
-              <div>
-                <div className="input-group m-2">
-                  <input type="text" id="new-tag" className="form-control" placeholder="Input new tags" aria-label="Input new tags" aria-describedby="button-add" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
-                  <button className="btn btn-outline-secondary" type="button" onClick={addNewTags}>Add</button>
-                </div>
+              <div className="available-tags mb-3">
+                {randomSelect(availableTags, 5).map((tag, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    className="btn btn-outline-secondary m-1"
+                    data-bs-dismiss="modal"
+                    onClick={() => setTags([...tags, tag])}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              <div className="input-group">
+                <input
+                  type="text"
+                  id="new-tag"
+                  className="form-control"
+                  placeholder="Enter new tag"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                />
+                <button
+                  className="btn btn-outline-secondary"
+                  type="button"
+                  onClick={addNewTags}
+                >
+                  Add
+                </button>
               </div>
             </div>
             <div className="modal-footer">
-              <button type="button" id="close-modal" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button
+                type="button"
+                id="close-modal"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

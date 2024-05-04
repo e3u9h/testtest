@@ -6,26 +6,26 @@ import BackButton from './components/backbutton';
 import request from './utils/request';
 import { useParams } from 'react-router-dom';
 
+const searchUsers = async (currentUser, searchUsername, setUsers) => {
+  try {
+    const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+    setUsers(response.data);
+  } catch (error) {
+    console.error('Failed to search users:', error);
+  }
+};
+
 const SearchUser = () => {
   const { username: currentUser } = useAuth();
   const { username: searchUsername } = useParams();
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const searchUsers = async () => {
-      try {
-        const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {
-          headers: {
-            Accept: 'application/json',
-          },
-        });
-        setUsers(response.data);
-      } catch (error) {
-        console.error('Failed to search users:', error);
-      }
-    };
-
-    searchUsers();
+    searchUsers(currentUser, searchUsername, setUsers);
   }, [currentUser, searchUsername]);
 
   return (

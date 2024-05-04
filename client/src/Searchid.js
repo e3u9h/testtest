@@ -5,26 +5,26 @@ import { useAuth } from './provider/context';
 import BackButton from './components/backbutton';
 import request from './utils/request';
 
+const fetchUsers = async (currentUser, searchUserId, setUsers) => {
+  try {
+    const response = await request.get(`searchuserbyid/${currentUser}/${searchUserId}`, {
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    setUsers(response.data);
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  }
+};
+
 const SearchUserid = () => {
   const { username: currentUser } = useAuth();
   const searchUserId = window.location.pathname.split('/')[2];
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await request.get(`searchuserbyid/${currentUser}/${searchUserId}`, {
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        setUsers(response.data);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      }
-    };
-
-    fetchUsers();
+    fetchUsers(currentUser, searchUserId, setUsers);
   }, [currentUser, searchUserId]);
 
   return (
