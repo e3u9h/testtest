@@ -14,26 +14,26 @@ import request from '../utils/request';
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const { username: selfname, mode } = useAuth();
-  console.log("here1" + JSON.stringify(tweetInfo))
-  const [likeInfo, setLikeInfo] = useState(tweetInfo['likeInfo']);
-  const [dislikeInfo, setDislikeInfo] = useState(tweetInfo['dislikeInfo']);
-  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo['time']));
-  const [commentCount, setCommentCount] = useState(tweetInfo['commentCount']);
-  const [retweetCount, setRetweetCount] = useState(tweetInfo['retweetCount']);
-  const tweetContent = tweetInfo['content'];
-  const portraitUrl = tweetInfo['portraitUrl'];
-  const tags = tweetInfo['tags'];
-  const username = tweetInfo['user']['username'];
-  const files = tweetInfo['files']
-  console.log("here2" + tweetContent + files + tweetInfo['files'])
+  console.log("1:" + JSON.stringify(tweetInfo));
+  const [likeInfo, setLikeInfo] = useState(tweetInfo.likeInfo);
+  const [dislikeInfo, setDislikeInfo] = useState(tweetInfo.dislikeInfo);
+  const [timeInterval, setTimeInterval] = useState(timeDisplay(tweetInfo.time));
+  const [commentCount, setCommentCount] = useState(tweetInfo.commentCount);
+  const [retweetCount, setRetweetCount] = useState(tweetInfo.retweetCount);
+  const tweetContent = tweetInfo.content;
+  const portraitUrl = tweetInfo.portraitUrl;
+  const tags = tweetInfo.tags;
+  const username = tweetInfo.user.username;
+  const files = tweetInfo.files;
+  console.log("2:" + tweetContent + files + tweetInfo.files);
 
 
   useEffect(() => {
-    setLikeInfo(tweetInfo['likeInfo']);
-    setDislikeInfo(tweetInfo['dislikeInfo']);
-    setCommentCount(tweetInfo['commentCount']);
-    setRetweetCount(tweetInfo['retweetCount']);
-    setTimeInterval(timeDisplay(tweetInfo['time']));
+    setLikeInfo(tweetInfo.likeInfo);
+    setDislikeInfo(tweetInfo.dislikeInfo);
+    setCommentCount(tweetInfo.commentCount);
+    setRetweetCount(tweetInfo.retweetCount);
+    setTimeInterval(timeDisplay(tweetInfo.time));
   }, [tweetInfo]);
 
   const clickLikeTweet = () => {
@@ -42,15 +42,15 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
     } else {
       updateTweetInfo("like");
     }
-  }
-
+  };
+  
   const clickDislikeTweet = () => {
     if (dislikeInfo.bDislikeByUser) {
       updateTweetInfo("cancel-dislike");
     } else {
       updateTweetInfo("dislike");
     }
-  }
+  };
 
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
@@ -59,8 +59,8 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
         if (res.status === 201) {
           return res.data;
         } else {
-          console.log("Like tweet failed");
-          throw new Error("Like tweet failed");
+          console.log("Like post failed");
+          throw new Error("Like post failed");
         }
       }).then(data => {
         setLikeInfo(data['likeInfo']);
@@ -72,33 +72,33 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 
 
   const addCommentMain = () => {
-    let newCom = {
-      content: document.getElementById('new-comment' + tweetInfo.tid).value,
+    const newCom = {
+      content: document.getElementById(`new-comment${tweetInfo.tid}`).value,
       username: selfname,
       tid: tweetInfo.tid,
     };
     console.log(newCom);
-    request.post("tweet/comment", newCom)
-      .then(response => {
+    request
+      .post("tweet/comment", newCom)
+      .then((response) => {
         setCommentCount(commentCount + 1);
         return response.data;
       })
-      .then(com_res => console.log(com_res))
-      .catch(err => {
+      .then((com_res) => console.log(com_res))
+      .catch((err) => {
         if (err.response.status === 403) {
           alert(err.response.data);
         }
       });
-    document.getElementById('new-comment' + tweetInfo.tid).value = '';
-  }
+    document.getElementById(`new-comment${tweetInfo.tid}`).value = "";
+  };
 
 
   return (
     <div className="card p-2 m-2 mb-4" style={{ borderRadius: "25px" }}>
       <div className="card-body row flex-column">
         <div className="col-5">
-
-          <div className="d-flex ">
+          <div className="d-flex align-items-center">
             {/* link to the user profile */}
             <Link to={"/" + username}>
               <div className="rounded-circle overflow-hidden" style={{ width: "45px", height: "45px" }}>
@@ -123,7 +123,6 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             </div>
           </div>
         </div>
-
 
         <div className="col-12">
           <div className="row d-flex flex-column h-100">
@@ -152,42 +151,63 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
             <div className="d-flex align-items-end justify-content-end mt-autoo">
               {!isDetailPage && <span className="m-1">
                 <Link to={"/tweet/" + tweetInfo["tid"]}>
-                  <button type="button" className="btn btn-secondary btn-floating">View Full Post</button>
+                  <button type="button" className="btn btn-secondary rounded-pill">View Full Post</button>
                 </Link>
               </span>}
               {selfname && mode == 'user' &&
                 <>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (likeInfo.bLikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickLikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsUp}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className={"btn btn-" + (dislikeInfo.bDislikeByUser ? "" : "outline-") + "secondary btn-floating"} onClick={clickDislikeTweet}>
-                      <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <button type="button" className="btn btn-outline-secondary btn-floating" data-bs-toggle="modal" data-bs-target={"#tweetCommentForm" + tweetInfo.tid} data-bs-whatever="@mdo">
-                      <FontAwesomeIcon icon={faComment}></FontAwesomeIcon>
-                    </button>
-                    <span className="ms-1 opacity-75">{commentCount}</span>
-                  </span>
-                  <span className="m-1">
-                    <a className="btn btn-outline-secondary btn-floating" href={"#tweetForwardForm" + tweetInfo.tid} data-bs-toggle="modal" role='button'>
-                      <FontAwesomeIcon icon={faRetweet}></FontAwesomeIcon>
-                    </a>
-                    <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
-                  </span>
-                </>
+                {/* Like button */}
+                <span className="m-1">
+                  <button
+                  type="button"
+                  className={`btn btn-${likeInfo.bLikeByUser ? "" : "outline-"}secondary rounded-circle`}
+                  onClick={clickLikeTweet}
+                  >
+                    <FontAwesomeIcon icon={faThumbsUp} />
+                  </button>
+                  <span className="ms-1 opacity-75">{likeInfo.likeCount}</span>
+                </span>
+                {/* dislike button */}
+                <span className="m-1">
+                  <button 
+                   type="button" 
+                   className={`btn btn-${dislikeInfo.bDislikeByUser ? "" : "outline-"}secondary rounded-circle`}
+                   onClick={clickDislikeTweet}
+                  >
+                    <FontAwesomeIcon icon={faThumbsDown}></FontAwesomeIcon>
+                  </button>
+                  <span className="ms-1 opacity-75">{dislikeInfo.dislikeCount}</span>
+                </span>
+                {/* comment */}
+                <span className="m-1">
+                  <button
+                  type="button"
+                  className="btn btn-outline-secondary rounded-pill"
+                  data-bs-toggle="modal"
+                  data-bs-target={`#tweetCommentForm${tweetInfo.tid}`}
+                  data-bs-whatever="@mdo"
+                  >
+                    <FontAwesomeIcon icon={faComment} /> Comment
+                  </button>
+                  <span className="ms-1 opacity-75">{commentCount}</span>
+                </span>
+                {/* repost */}
+                <span className="m-1">
+                  <a 
+                  className="btn btn-outline-secondary rounded-pill" 
+                  href={"#tweetForwardForm" + tweetInfo.tid} 
+                  data-bs-toggle="modal" 
+                  role='button'>
+                    <FontAwesomeIcon icon={faRetweet} /> Repost
+                  </a>
+                  <span className="ms-1 opacity-75" id='retweetCount'>{retweetCount}</span>
+                </span>
+              </>
               }
             </div>
           </div>
         </div>
       </div>
-
 
       {/* comment form for tweet's comment*/}
       <div className="modal fade" id={"tweetCommentForm" + tweetInfo.tid} tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -222,135 +242,188 @@ function ForwardForm(props) {
   const [privacy, setPrivacy] = useState('false');
   const [repostContent, setRepostContent] = useState('')
 
-
-
-  const fetchAvailableTags = () => {
-    request.get("tags")
-      .then(res => res.data).then(data => {
-        const fetchedTags = data.map((item) => item['tag']);
-        setAvailableTags(fetchedTags);
-      }).catch(err => {
-        console.log(err);
-      });
+  const fetchAvailableTags = async () => {
+    try {
+      const res = await request.get("tags");
+      const data = res.data;
+      const fetchedTags = data.map(item => item.tag);
+      setAvailableTags(fetchedTags);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     fetchAvailableTags();
   }, []);
 
-
-  const postRetweet = () => {
+  const postRetweet = async () => {
     if (repostContent === "") {
-      setRepostContent(initialContent)
+      setRepostContent(initialContent);
     }
-    let postBody = {
+
+    const postBody = {
       username: selfname,
       tweet_content: repostContent,
       tags: tags,
       tid: props.tid,
       private: privacy
-    }
-    console.log(postBody)
+    };
 
-    request.post("retweet", postBody)
-      .then(res => {
-        console.log(res)
-        if (res.status === 201) {
-          setRepostContent(initialContent);
-          props.setRetweetCount(props.retweetCount + 1);
-          setTags([]);
-          alert("Repost success");
-        } else if (res.status === 403) {
-          res.text().then(text => alert(text));
-        }
-        else {
-          alert("Repost failed");
-        }
-      });
+    try {
+      const res = await request.post("retweet", postBody);
+      console.log(res);
+
+      if (res.status === 201) {
+        setRepostContent(initialContent);
+        props.setRetweetCount(props.retweetCount + 1);
+        setTags([]);
+        alert("Repost success");
+      } else if (res.status === 403) {
+        const text = await res.text();
+        alert(text);
+      } else {
+        alert("Repost failed");
+      }
+    } catch (err) {
+      console.log(err);
+      alert("Repost failed");
+    }
   };
 
+  const addNewTags = async () => {
+    const newTagsDom = document.getElementById("new-tag-retweet" + props.tid);
 
-  const addNewTags = () => {
-    let newTagsDom = document.getElementById("new-tag-retweet" + props.tid);
     if (newTagsDom == null) {
       console.log("Error: newTagsDom is null");
       return;
     }
-    console.log(newTagsDom);
-    let newTags = newTagsDom.value;
-    // check if the tag is already in the list
+
+    const newTags = newTagsDom.value;
+
+    // Check if the tag is already in the list
     if (!availableTags.includes(newTags)) {
-      // insert the new tag into the database
-      request.post("new-tag", { tag: newTags }).then(res => {
+      try {
+        const res = await request.post("new-tag", { tag: newTags });
+
         if (res.status === 201) {
           console.log("New tag inserted");
         } else if (res.status === 202 && res.body === "Tag already exists") {
-          // alert("Tag already exists");
           console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
         }
+        
         setTags([...tags, newTags]);
-        // close the modal
+
+        // Close the modal
         document.getElementById("close-modal").click();
-      });
+      } catch (err) {
+        console.log(err);
+      }
     } else {
       alert("Tag already exists");
     }
-    // clear the input field
-    newTagsDom.value = '';
-  }
+  };
+
   return (
     <div>
       <div className="modal fade" id={"tweetForwardForm" + props.tid} aria-hidden="true" aria-labelledby="exampleModalToggleLabel" tabIndex="-1">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
-              <h1 className="modal-title fs-5"> Repost </h1>
+              <h1 className="modal-title fs-5">Repost</h1>
               <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body">
               <Form>
                 <Form.Item>
                   <Input.TextArea
-                    rows={4}
-                    value={repostContent}
-                    onChange={e => setRepostContent(e.target.value)}
-                    placeholder="Say something when repost!"
+                  rows={4}
+                  value={repostContent}
+                  onChange={(e) => setRepostContent(e.target.value)}
+                  placeholder="Say something when repost!"
                   />
                 </Form.Item>
               </Form>
-              <div className="modal-body">
-                <h5>Choose a tag</h5>
-                <hr></hr>
+            <div className="modal-body">
+              <h5>Choose a tag</h5>
+              <hr />
+              <div className="d-flex flex-wrap">
                 {randomSelect(availableTags, 5).map((tag, index) => {
-                  return (
-                    <button type="button" className="btn btn-outline-secondary mx-2 my-1" key={index} onClick={() => setTags([...tags, tag])}>{tag}</button>
-                  );
+                return (
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary mx-2 my-1"
+                    key={index}
+                    onClick={() => setTags([...tags, tag])}
+                  >
+                  {tag}
+                  </button>
+                );
                 })}
-                <div>
-                  <div className="input-group m-2">
-                    <input type="text" id={"new-tag-retweet" + props.tid} className="form-control" placeholder="Input new tags" aria-label="Input new tags" aria-describedby="button-add" />
-                    <button className="btn btn-outline-secondary" type="button" data-bs-target="#tweetForwardForm" onClick={addNewTags}>Add</button>
-                  </div>
-                </div>
               </div>
+              <div className="input-group m-2">
+              <input
+              type="text"
+              id={"new-tag-retweet" + props.tid}
+              className="form-control"
+              placeholder="Input new tags"
+              aria-label="Input new tags"
+              aria-describedby="button-add"
+              />
+              <button
+              className="btn btn-outline-secondary"
+              type="button"
+              data-bs-target="#tweetForwardForm"
+              onClick={addNewTags}
+              >
+              Add
+              </button>
             </div>
-            <div className="modal-footer">
-              <div>
-                {tags != undefined && tags.map((tag, index) => {
-                  return (
-                    <span className="badge bg-secondary my-1 mx-2" key={index}>{tag}</span>
-                  );
-                })}
-              </div>
-              <div>
-                <Dropdown as={ButtonGroup}>
-                  <Button type="button" varient='secondary' id='retweet-privacy' className="btn btn-secondary mx-2" onClick={postRetweet}>Send</Button>
-                  <Dropdown.Toggle split variant="secondary" id="retweet-dropdown-split-privacy" />
-                  <Dropdown.Menu>
-                    <Dropdown.Item onClick={() => { setPrivacy('false'); document.getElementById('retweet-privacy').innerHTML = "Send Public" }}>Public</Dropdown.Item>
-                    <Dropdown.Item onClick={() => { setPrivacy('true'); document.getElementById('retweet-privacy').innerHTML = "Send Private"; console.log(privacy) }}>Private</Dropdown.Item>
+          </div>
+        </div>
+        <div className="modal-footer">
+          <div className="d-flex flex-wrap align-items-center">
+          {tags !== undefined &&
+            tags.map((tag, index) => {
+              return (
+                <span className="badge bg-secondary my-1 mx-2" key={index}>
+                  {tag}
+                </span>
+              );
+            })}
+          </div>
+          <div>
+          <Dropdown as={ButtonGroup}>
+            <Button
+              type="button"
+              variant="secondary"
+              id="retweet-privacy"
+              className="btn btn-secondary mx-2"
+              onClick={postRetweet}
+            >
+            Send
+            </Button>
+            <Dropdown.Toggle split variant="secondary" id="retweet-dropdown-split-privacy" />
+            <Dropdown.Menu>
+              <Dropdown.Item
+                onClick={() => {
+                  setPrivacy('false');
+                  document.getElementById('retweet-privacy').innerHTML = 'Send Public';
+                }}
+              >
+                Public
+              </Dropdown.Item>
+              <Dropdown.Item
+                onClick={() => {
+                  setPrivacy('true');
+                  document.getElementById('retweet-privacy').innerHTML = 'Send Private';
+                  console.log(privacy);
+                }}
+              >
+                Private
+                  </Dropdown.Item>
                   </Dropdown.Menu>
                 </Dropdown>
               </div>

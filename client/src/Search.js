@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
-import { Button, ButtonGroup, Dropdown } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Button, ButtonGroup, Dropdown, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import request from './utils/request';
+import { useNavigate } from 'react-router-dom';
 
 const Search = () => {
   const [viewMode, setViewMode] = useState('search');
+    const [buttonText, setButtonText] = useState("Search");
+    const [searchTerm, setSearchTerm] = useState('');
+    const navigate = useNavigate();
+
 
   const handleSearch = async () => {
-    const searchInput = document.getElementById('search_input').value;
+      const searchInput = searchTerm.trim();
     let redirectUrl = '';
 
     switch (viewMode) {
@@ -25,7 +30,7 @@ const Search = () => {
         redirectUrl = `/searchtweet/${searchInput}`;
     }
 
-    window.location = redirectUrl;
+      navigate(redirectUrl);
   };
 
   const handleKeyDown = (e) => {
@@ -35,34 +40,46 @@ const Search = () => {
   };
 
   return (
-    <>
-      <div className="input-group">
-        <input
-          id="search_input"
-          type="search"
-          className="form-control rounded"
-          onKeyDown={handleKeyDown}
-          placeholder={viewMode === 'search' ? 'Please select what you want to search' : 'Please input the keyword'}
-          aria-label="Search"
-          aria-describedby="search-addon"
-        />
-        <Dropdown as={ButtonGroup}>
-          <Button variant="secondary" id="searchclick" onClick={handleSearch}>
-            Search
-          </Button>
-          <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
-          <Dropdown.Menu>
-            <Dropdown.Item onClick={() => setViewMode('searchuser')}>Search User by Username</Dropdown.Item>
-            <Dropdown.Item onClick={() => setViewMode('searchtweet')}>Search Post by Tag</Dropdown.Item>
-            <Dropdown.Item onClick={() => setViewMode('searchuserid')}>Search Users by ID</Dropdown.Item>
-            <Dropdown.Item onClick={() => setViewMode('searchtweetbykeyword')}>Search Posts by Keyword</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+    <div className="container mt-4">
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <div className="input-group mb-3">
+                      <input
+                          type="search"
+                          className="form-control"
+                          onKeyDown={handleKeyDown}
+                          placeholder={viewMode === 'search' ? 'Please select what you want to search' : 'Please input the keyword'}
+                          aria-label="Search"
+                          aria-describedby="search-addon"
+                          value={searchTerm}
+                          onChange={e => setSearchTerm(e.target.value)}
+                      />
+            <Dropdown as={ButtonGroup}>
+              <Button variant="secondary" id="searchclick" onClick={handleSearch}>
+                              {buttonText}
+              </Button>
+              <Dropdown.Toggle split variant="secondary" id="dropdown-split-basic" />
+              <Dropdown.Menu>
+                              <Dropdown.Item onClick={() => { setViewMode('searchuser'); setButtonText('Search User by Username') }}>Search User by Username</Dropdown.Item>
+                              <Dropdown.Item onClick={() => { setViewMode('searchtweet'); setButtonText("Search Post by Tag") }}>Search Post by Tag</Dropdown.Item>
+                              <Dropdown.Item onClick={() => { setViewMode('searchuserid'); setButtonText("Search Users by ID") }}>Search Users by ID</Dropdown.Item>
+                              <Dropdown.Item onClick={() => { setViewMode('searchtweetbykeyword'); setButtonText("Search Posts by Keyword") }}>Search Posts by Keyword</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+        </div>
       </div>
-      <div className="row">
-        <Trend />
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <Card>
+            <Card.Body>
+              <Card.Title>Current Hot Topics</Card.Title>
+              <Trend />
+            </Card.Body>
+          </Card>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -82,7 +99,7 @@ const Trend = () => {
     }
   };
 
-  React.useEffect(() => {
+    useEffect(() => {
     fetchTrends();
   }, []);
 
@@ -105,25 +122,21 @@ const Trend = () => {
 
 const TrendListView = ({ trendInfos }) => {
   return (
-    <>
+    <div className="list-group">
       {trendInfos.map((trendInfo, index) => (
         <TrendCard key={index} tag={trendInfo.tag} />
       ))}
-    </>
+    </div>
   );
 };
 
 const TrendCard = ({ tag }) => {
   return (
-    <div className="list-group w-800">
-      <Link to={`/searchtag/${tag}`} className="list-group-item list-group-item-action d-flex" aria-current="true">
-        <div className="d-flex gap-20 w-1000" style={{ margin: 10, padding: 10 }}>
-          <div>
-            <h6 className="mb-0">{tag}</h6>
-          </div>
-        </div>
-      </Link>
-    </div>
+    <Link to={`/searchtag/${tag}`} className="list-group-item list-group-item-action">
+      <div className="d-flex w-100 justify-content-between">
+        <h5 className="mb-1">{tag}</h5>
+      </div>
+    </Link>
   );
 };
 

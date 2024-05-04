@@ -27,15 +27,13 @@ const TweetDetail = () => {
     const fetchTweetDetail = async () => {
         // fetch tweet info
         const tweetInfoRes = await request.get("fetchtweet/" + window.location.pathname.split('/')[2] + "/" + username)
-            .then(res => res.data);
 
-        setTweetInfo(tweetInfoRes);
+        setTweetInfo(tweetInfoRes.data);
 
         // fetch comment info
         const commentInfoRes = await request.get("tweet/" + window.location.pathname.split('/')[2] + "/comment")
-            .then(res => res.data);
 
-        setCommentInfo(commentInfoRes);
+        setCommentInfo(commentInfoRes.data);
     }
 
     useEffect(() => {

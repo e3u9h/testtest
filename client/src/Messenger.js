@@ -204,16 +204,10 @@ export default function Messenger(state){
                         </> 
                         ) : (<span className="noCoversationText">Open a conversation here</span>)}
                 </div>
-            </div>
-            <div className="chatOnline">
-                <div className="chatOnlineWrapper">
-                    <ChatOnline/>
-                    <ChatOnline/>
-                    <ChatOnline/>
-                    <ChatOnline/>
-                </div>
-            </div>
-            
+            </div>       
         </div>
     )
 }
+
+
+//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev
