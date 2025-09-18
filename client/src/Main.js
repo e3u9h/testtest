@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRefresh } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from './provider/context';
 import { Dropdown } from 'react-bootstrap';
-import { ButtonGroup } from '@material-ui/core';
+import { ButtonGroup } from '@mui/material';
 import Button from 'react-bootstrap/Button';
 import { PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, Form, Input } from 'antd';
@@ -15,9 +15,7 @@ import { Row, Col } from 'antd';
 import './css/custom-input.css';
 import request from './utils/request';
 
-// Declaration: we use poe.com to generate some code and fix some bugs in this file
 
-// use of existing code: for image uploading and preview in NewPost, we referred to the sample code in the documentation of antd: https://ant.design/components/upload-cn
 function NewPost() {
   const { username } = useAuth();
   const [availableTags, setAvailableTags] = useState([]);

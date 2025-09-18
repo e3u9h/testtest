@@ -13,10 +13,6 @@ import Modal from 'react-bootstrap/Modal';
 import { Image, Form, Input } from 'antd';
 import request from '../utils/request';
 
-// References: for image display, we referred to the documentation of antd: https://ant.design/components/image-cn
-// for general structure of the code, we referred to the open-source code on GitHub (with the actual contents customized): https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Tweet.js
-
-// Declaration: we use poe.com to generate some code and fix some bugs in this file
 
 function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
   const { username: selfname, mode } = useAuth();

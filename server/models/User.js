@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-// reference: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
 
 // The User schema is used for storing the user information and user relationship
 // (only for normal users; admins do not have User records)

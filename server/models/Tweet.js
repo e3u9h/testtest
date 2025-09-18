@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-// reference: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
+
 const TweetSchema = mongoose.Schema({
     poster: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     tweet_content: { type: String },

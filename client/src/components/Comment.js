@@ -8,9 +8,7 @@ import { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-// Declaration: we use poe.com to generate some code and fix some bugs in this file
 
-// Reference of this component: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/Comment.js
 class Comment extends React.Component {
     constructor(props) {
         super(props);

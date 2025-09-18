@@ -3,6 +3,7 @@ const router = express.Router();
 import User from "../models/User.js";
 import upload from '../middlewares/upload.js';
 import Account from '../models/Account.js';
+import CacheService from "../utils/cacheService.js";
 router.use('/uploads', express.static('uploads'))
 
 // get the portrait of the user
@@ -26,15 +27,30 @@ router.get('/portrait/:username', (req, res) => {
 });
 
 // get the information of the target user
-router.get('/:username', (req, res) => {
+router.get('/:username', async (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.params['username'];
-    User.findOne({ 'username': username }).then((user) => {
+    
+    try {
+        // 先尝试从缓存中获取用户信息
+        const cachedUser = await CacheService.getUserProfile(username);
+        if (cachedUser) {
+            console.log(`User profile cache hit: ${username}`);
+            return res.send(cachedUser);
+        }
+        
+        // 缓存未命中，从数据库查询
+        const user = await User.findOne({ 'username': username });
+        if (user) {
+            // 将用户信息存入缓存
+            await CacheService.setUserProfile(username, user, 1800); // 缓存30分钟
+            console.log(`User profile cached: ${username}`);
+        }
         res.send(user);
-    }).catch((err) => {
+    } catch (err) {
         console.log(err);
         res.send(err);
-    });
+    }
 });
 
 // get the action information about the relationship between self and the target user
@@ -143,7 +159,6 @@ router.get('/:self/:target/tweets', (req, res) => {
 
 
 // get tweets liked
-// reference of this function: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
 router.get('/:username/likes', (req, res) => {
     res.set('Content-Type', 'text/plain');
     let username = req.params['username'];

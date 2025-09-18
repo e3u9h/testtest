@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-// reference: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
+
 const NotificationSchema = mongoose.Schema({
     username: { type: String, required: true }, //who is receiving this notifications
     actor_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // who is sending this notification

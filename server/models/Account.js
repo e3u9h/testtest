@@ -1,5 +1,4 @@
 import mongoose from 'mongoose';
-// reference: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js
 
 // The Account schema is used for storing the username, password and identity for both users and admins
 const AccountSchema = mongoose.Schema({

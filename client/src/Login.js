@@ -15,8 +15,6 @@ import { useAuth } from './provider/context';
 import request from './utils/request';
 import { message } from 'antd';
 
-// use of exsiting code: for the switchable register and login forms, I referred to the sample code in the documentation of mdb-react-ui-kit: https://mdbootstrap.com/docs/react/forms/overview/
-// I admit that I used GPT-4 in poe (https://poe.com/) to generate some code, and modified it manually to make it useable in our project
 
 const Login = (props) => {
   const { login, username, mode } = useAuth();
@@ -121,7 +119,8 @@ const Login = (props) => {
       .catch(err => {
         // if the login failed, alert the error message
         console.error("Login failed:", err);
-        alert(err.response.data.message);
+        // alert(err.response.data.message);
+        message.error(err.response.data);
       });
   };
   useEffect(() => {

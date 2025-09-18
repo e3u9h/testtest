@@ -18,5 +18,3 @@ const MessageSchema = new mongoose.Schema(
 const Message = mongoose.model("Message", MessageSchema);
 export default Message;
 
-
-//Reference: https://github.com/safak/youtube/tree/chat-app by Lama Dev

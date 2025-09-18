@@ -4,7 +4,6 @@ import { useAuth } from '../provider/context';
 import { BACK_END } from '../config';
 import request from '../utils/request';
 
-// Reference: https://mdbootstrap.com/docs/standard/extended/profiles/
 
 function UserCard({ userInfo }) {
   console.log(userInfo);

@@ -1,9 +1,5 @@
 import axios from "axios";
 import { BACK_END } from "../config";
-// I admit that I referred to some existing code in
-// 【黑马程序员前端React18入门到实战视频教程，从react+hooks核心基础到企业级项目开发实战（B站评论、极客园项目等）及大厂面试全通关-哔哩哔哩】 https://b23.tv/hqVNyZA (P90: Day06-10.登录-封装request请求模块 and P96: Day7-01.Axios请求头注入Token)
-// for creating the axios instace and the request interceptor,
-// and added a response interceptor to automatically logout if the token is invalid
 
 // This is an axios instance which will be used to make network requests to the backend
 const request = axios.create({

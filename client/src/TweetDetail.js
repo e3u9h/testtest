@@ -8,7 +8,6 @@ import request from './utils/request';
 import BackButton from './components/backbutton';
 import { useParams } from 'react-router-dom';
 
-// Declaration: we use poe.com to generate some code and fix some bugs in this file
 
 const TweetDetail = () => {
     const { tweetid } = useParams();

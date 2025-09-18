@@ -1,6 +1,4 @@
 function randomSelect(arr, n) {
-    // I admit that I used GPT-4 in poe (https://poe.com/) to draft the fisrt version of this part,
-    // and modified it manually to make it useable in our project.
 
     // This is a function that randomly selects min(n, arr.length) elements from an array,
     // which is modified from the Fisher-Yates shuffle algorithm

@@ -11,8 +11,6 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 
-// use of existing code: for the layout design (NavLinks and the dropdown menu) of the navigating bar, I referred to some open-source code on GitHub: https://github.com/lucashaozh/Chirpin/blob/main/chirpin/client/src/App.js
-// for the passwored changing modal, I referred to the sample code in the documentation of react-bootstrap: https://react-bootstrap.netlify.app/docs/components/modal/
 
 // This is the navigating bar on the left side of the page
 function Navbar() {

@@ -9,6 +9,7 @@ import Notification from './models/Notification.js';
 import Tag from './models/Tag.js';
 import Message from './models/Message.js';
 import upload from './middlewares/upload.js';
+import performanceMonitor from './middlewares/performanceMonitor.js';
 import conversationRoute from "./routes/conversations.js";
 import messageRoute from "./routes/messages.js";
 import { createServer } from 'http';
@@ -19,12 +20,12 @@ import changepwdRoute from "./routes/changepwd.js";
 import profileRoute from "./routes/profile.js";
 import followinfoRote from "./routes/getfollowinfo.js";
 import interactionRoute from "./routes/userinteraction.js";
-import { mongoUrl } from './config.js';
+import cacheRoute from "./routes/cache.js";
 import { expressjwt } from 'express-jwt';
-import { jwtKey } from './config.js';
 import bcryptjs from 'bcryptjs';
+import './utils/redisClient.js'; // 初始化 Redis 连接
+import CacheService from './utils/cacheService.js';
 
-// Declaration: we use poe.com to generate some code and fix some bugs in this file
 
 const app = express();
 
@@ -32,12 +33,13 @@ app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
+app.use(performanceMonitor); // 性能监控中间件
 
 // all the requests need to be authorized by the token except for login, creating user and accessing the files
 // (maybe accessing files need to be authorized as well, but now I don't know how to do it
 // because the files are directly accessed in the <img> tag,
 // which cannot use axios's request interceptor to add token to the header, so I just let it not be authorized for now)
-app.use(expressjwt({ secret: jwtKey, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/, /^\/img/] }));
+app.use(expressjwt({ secret: process.env.JWT_KEY, algorithms: ['HS256'] }).unless({ path: [/^\/login/, /^\/createuser/, /^\/uploads/, /^\/img/] }));
 
 app.use('/uploads', express.static('uploads'))
 app.use('/img', express.static('img'))
@@ -49,6 +51,7 @@ app.use('/changepwd', changepwdRoute);
 app.use('/profile', profileRoute);
 app.use('/followinfo', followinfoRote);
 app.use('/interaction', interactionRoute);
+app.use('/cache', cacheRoute); // 缓存管理接口（仅管理员可访问）
 
 // if the token is invalid, send an error message with status 401
 app.use((err, req, res, next) => {
@@ -57,11 +60,15 @@ app.use((err, req, res, next) => {
         console.log(err);
     }
 });
+app.use((req, res, next) => {
+    console.log("req.auth: ", req.auth);
+    next();
+});
 
 
 //Connect to MongoDB
-const url = mongoUrl;
-console.log("Connecting to MongoDB...");
+const url = process.env.MONGO_URI
+console.log("Connecting to MongoDB...", url);
 mongoose.connect(url)
   .then(() => {
     console.log("Connected to MongoDB");
@@ -151,13 +158,32 @@ app.get("/auser/:userId", async (req, res) => {
 
 
 // get all tweets
-app.get('/tweets', (req, res) => {
+app.get('/tweets', async (req, res) => {
     res.set('Content-Type', 'text/plain');
-    Tweet.find().then((tweets) => {
+    
+    try {
+        // 先尝试从缓存中获取热门推文
+        const cachedTweets = await CacheService.getHotTweets();
+        if (cachedTweets) {
+            console.log('Hot tweets cache hit');
+            return res.send(cachedTweets);
+        }
+        
+        // 缓存未命中，从数据库查询
+        const tweets = await Tweet.find()
+            .populate('poster', 'username portrait')
+            .sort({ createdAt: -1 }) // 按创建时间倒序
+            .limit(50); // 限制50条
+            
+        // 将推文存入缓存
+        await CacheService.setHotTweets(tweets, 600); // 缓存10分钟
+        console.log('Hot tweets cached');
+        
         res.send(tweets);
-    }).catch((err) => {
+    } catch (err) {
+        console.log(err);
         res.send(err);
-    });
+    }
 });
 
 // get all users

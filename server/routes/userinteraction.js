@@ -3,7 +3,6 @@ const router = express.Router();
 import User from "../models/User.js";
 import Notification from "../models/Notification.js";
 
-// use of existing code: I referred to the code in https://github.com/lucashaozh/Chirpin/blob/main/chirpin/server/server.js when implemeniting the user interaction functions
 
 // follow
 router.put('/:username/:target/follow', (req, res) => {
