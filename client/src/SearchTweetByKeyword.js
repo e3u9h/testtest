@@ -8,7 +8,7 @@ import { useAuth } from './provider/context';
 // use OpenAI to gernerate some idea and debbuging the code.
 const searchTweets = async (searchKeyword, currentUser, setTweets) => {
   try {
-    const response = await request.get(`searchtweet/${searchKeyword}/${currentUser}`, {
+    const response = await request.get(`search/tweets/bykeyword/${searchKeyword}/${currentUser}`, {
       headers: {
         Accept: 'application/json',
       },

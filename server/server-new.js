@@ -3,19 +3,9 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import { createServer } from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+import { Server as SocketIOServer} from 'socket.io';
 import { expressjwt } from 'express-jwt';
-import dotenv from 'dotenv';
 import './utils/redisClient.js'; // 初始化 Redis 连接
-
-// 加载环境变量
-dotenv.config({ path: '../.env' });
-
-// 调试环境变量
-console.log('Environment variables loaded:');
-console.log('JWT_KEY:', process.env.JWT_KEY ? '✅ Set' : '❌ Missing');
-console.log('MONGO_URI:', process.env.MONGO_URI ? '✅ Set' : '❌ Missing');
-console.log('REDIS_URL:', process.env.REDIS_URL ? '✅ Set' : '❌ Missing');
 
 // Import middleware
 import performanceMonitor from './middlewares/performanceMonitor.js';
@@ -50,17 +40,17 @@ app.use(performanceMonitor); // 性能监控中间件
 
 // JWT authentication middleware
 // All requests need to be authorized by the token except for login, creating user and accessing files
-app.use(expressjwt({
-    secret: process.env.JWT_KEY,
-    algorithms: ['HS256']
-}).unless({
+app.use(expressjwt({ 
+    secret: process.env.JWT_KEY, 
+    algorithms: ['HS256'] 
+}).unless({ 
     path: [
-        /^\/login/,
-        /^\/createuser/,
-        /^\/uploads/,
+        /^\/login/, 
+        /^\/createuser/, 
+        /^\/uploads/, 
         /^\/img/,
         /^\/api\/search\/trends/ // Allow public access to trending topics
-    ]
+    ] 
 }));
 
 // Static file serving
@@ -73,22 +63,13 @@ const API_PREFIX = '/api';
 // Existing routes (maintain backward compatibility)
 app.use("/server/conversations", conversationRoute);
 app.use("/server/messages", messageRoute);
-app.use(`${API_PREFIX}/login`, loginRoute);
-app.use(`${API_PREFIX}/createuser`, registerRoute);
-app.use(`${API_PREFIX}/changepwd`, changepwdRoute);
-app.use(`${API_PREFIX}/profile`, profileRoute);
-app.use(`${API_PREFIX}/followinfo`, followinfoRoute);
-app.use(`${API_PREFIX}/interaction`, interactionRoute);
-app.use(`${API_PREFIX}/cache`, cacheRoute); // 缓存管理接口（仅管理员可访问）
-
-// Legacy routes for backward compatibility
 app.use("/login", loginRoute);
 app.use('/createuser', registerRoute);
 app.use('/changepwd', changepwdRoute);
 app.use('/profile', profileRoute);
 app.use('/followinfo', followinfoRoute);
 app.use('/interaction', interactionRoute);
-app.use('/cache', cacheRoute);
+app.use('/cache', cacheRoute); // 缓存管理接口（仅管理员可访问）
 
 // New modularized API routes
 app.use(`${API_PREFIX}/users`, usersRoute);
@@ -163,8 +144,8 @@ app.use((req, res, next) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'healthy',
+    res.status(200).json({ 
+        status: 'healthy', 
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
@@ -210,7 +191,7 @@ const io = new SocketIOServer(server, {
     cors: {
         origin: "http://localhost:3000",
         methods: ["GET", "POST"]
-    },
+    },    
 });
 
 // Socket.IO user management
@@ -307,7 +288,9 @@ process.on('SIGINT', () => {
 // Start the server
 const PORT = process.env.PORT || 8000;
 server.listen(PORT, () => {
-    console.log(`Server is running on Port ${PORT}`);
+    console.log(`🚀 Server is running on Port ${PORT}`);
+    console.log(`📚 API Documentation available at http://localhost:${PORT}/api/docs`);
+    console.log(`🏥 Health check available at http://localhost:${PORT}/health`);
 });
 
 export default app;

@@ -78,7 +78,7 @@ class Admin extends React.Component {
       }
     
       try {
-        const response = await request.post("/createuser", {
+        const response = await request.post("createuser", {
           newusername: username,
           newpwd: newPassword
         });
@@ -138,12 +138,12 @@ class Admin extends React.Component {
       }
   
       try {
-        const response = await request.put("/adminchangepwd", {
+        const response = await request.put("admin/change-password", {
           username: username,
           newpwd: newPassword,
         });
         const data = response.data; 
-        alert(data); 
+        alert(data.message || "Password changed successfully"); 
         window.location.reload(true); 
       } catch (error) {
         console.log(error); 
@@ -206,7 +206,7 @@ class Admin extends React.Component {
     // Fetch all users from the server
     getAllUser = async () => {
       try {
-        const res = await request.get('listusers', {
+        const res = await request.get('admin/users', {
           headers: {
             'Accept': 'application/json'
           }
@@ -279,7 +279,7 @@ class DeleteUser extends React.Component {
     // Fetch all users from the server 
     getAllUser = async () => {
       try {
-        const res = await request.get('reportusers', {
+        const res = await request.get('admin/reported-users', {
           headers: {
             'Accept': 'application/json'
           }
@@ -329,7 +329,7 @@ class DeleteUser extends React.Component {
     // Handle the deletion of a user
     handleDelete = async () => {
       try {
-        const response = await request.delete(`user/${this.props.name}`, {
+        const response = await request.delete(`admin/users/${this.props.name}`, {
           headers: {
             'Accept': 'application/json'
           }

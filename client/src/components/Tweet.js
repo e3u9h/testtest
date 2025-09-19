@@ -58,13 +58,13 @@ function TweetCard({ tweetInfo, addComment, isDetailPage = true }) {
 
   const updateTweetInfo = (operation) => {
     console.log("Updated tweet info to DB");
-    request.put("tweet/" + tweetInfo['tid'] + "/" + selfname + "/" + operation)
+    request.put("tweets/" + tweetInfo['tid'] + "/" + selfname + "/" + operation)
       .then(res => {
-        if (res.status === 201) {
+        if (res.status === 200 || res.status === 201) {
           return res.data;
         } else {
-          console.log("Like post failed");
-          throw new Error("Like post failed");
+          console.log("Tweet operation failed");
+          throw new Error("Tweet operation failed");
         }
       }).then(data => {
         setLikeInfo(data['likeInfo']);
@@ -274,7 +274,7 @@ function ForwardForm(props) {
     };
 
     try {
-      const res = await request.post("retweet", postBody);
+      const res = await request.post("tweets/retweet", postBody);
       console.log(res);
 
       if (res.status === 201) {
@@ -307,11 +307,11 @@ function ForwardForm(props) {
     // Check if the tag is already in the list
     if (!availableTags.includes(newTags)) {
       try {
-        const res = await request.post("new-tag", { tag: newTags });
+        const res = await request.post("tags", { tag: newTags });
 
         if (res.status === 201) {
           console.log("New tag inserted");
-        } else if (res.status === 202 && res.body === "Tag already exists") {
+        } else if (res.status === 409) {
           console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");

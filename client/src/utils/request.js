@@ -17,6 +17,27 @@ request.interceptors.request.use(
         if (token !== undefined) {
             config.headers["Authorization"] = token;
         }
+
+        // Auto-add /api prefix for certain routes
+        const apiRoutes = [
+            'users', 'tweets', 'tags', 'search', 'notifications', 'admin',
+            'login', 'createuser', 'changepwd', 'profile', 'followinfo', 'interaction', 'cache'
+        ];
+
+        // Check if the URL starts with any of the API routes and doesn't already have /api prefix
+        if (config.url && !config.url.startsWith('/api/') && !config.url.startsWith('/server/')) {
+            const urlPath = config.url.startsWith('/') ? config.url.substring(1) : config.url;
+            const routeMatch = apiRoutes.some(route =>
+                urlPath === route ||
+                urlPath.startsWith(route + '/') ||
+                urlPath.startsWith(route + '?')
+            );
+
+            if (routeMatch) {
+                config.url = '/api/' + urlPath;
+            }
+        }
+
         return config;
     },
     (error) => {   

@@ -130,7 +130,7 @@ export default function Messenger(state){
 
     if (value.trim()) {
       try {
-        const response = await request.get("searchuser/" + currentUser.username + "/" + value.trim());
+        const response = await request.get("search/users/" + currentUser.username + "/" + value.trim());
         const matchedUsers = response.data;
         const matchedUserIds = matchedUsers.map(user => user.uid);
 

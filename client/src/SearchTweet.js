@@ -8,7 +8,7 @@ import { useAuth } from './provider/context';
 // use OpenAI to gernerate some idea and debbuging the code.
 const fetchTweetsByTag = async (searchTag, currentUser, setTweets) => {
   try {
-    const response = await request.get(`searchtag/${searchTag}/${currentUser}`, {
+    const response = await request.get(`search/tweets/bytag/${searchTag}/${currentUser}`, {
       headers: {
         'Accept': 'application/json',
       },

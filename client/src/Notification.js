@@ -21,10 +21,15 @@ const Notification = () => {
 
     const fetchNotification = async () => {
         // fetch notification
-        const notification = await request.get("notification/" + username);
+        const notification = await request.get("notifications/" + username);
         let notificationRes = notification.data;
         console.log(notificationRes);
-        setNotifications(notificationRes);
+        // Handle new response structure
+        if (notificationRes.notifications) {
+            setNotifications(notificationRes.notifications);
+        } else {
+            setNotifications(notificationRes);
+        }
     }
 
     useEffect(() => {

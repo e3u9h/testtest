@@ -88,7 +88,7 @@ const Trend = () => {
 
   const fetchTrends = async () => {
     try {
-      const response = await request.get('search/trend', {
+      const response = await request.get('search/trends', {
         headers: {
           Accept: 'application/json',
         },

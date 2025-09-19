@@ -29,12 +29,13 @@ const TweetDetail = () => {
 
     const fetchTweetDetail = async () => {
         // fetch tweet info
-        const tweetInfoRes = await request.get("fetchtweet/" + window.location.pathname.split('/')[2] + "/" + username)
+        const tweetId = window.location.pathname.split('/')[2];
+        const tweetInfoRes = await request.get("tweets/" + tweetId + "/" + username);
 
         setTweetInfo(tweetInfoRes.data);
 
         // fetch comment info
-        const commentInfoRes = await request.get("tweet/" + window.location.pathname.split('/')[2] + "/comment")
+        const commentInfoRes = await request.get("tweets/" + tweetId + "/comments");
 
         setCommentInfo(commentInfoRes.data);
     }
@@ -79,7 +80,7 @@ const TweetDetail = () => {
         };
         console.log(newCom);
         try {
-            const com = await request.post("tweet/comment", newCom);
+            const com = await request.post("tweets/comment", newCom);
             let com_res = com.data;
             console.log(com_res);
             let new_comments = [...commentInfo, { floor: com_res.floor, username: com_res.username, content: com_res.content, portrait: com_res.portrait, time: "Just now" }];

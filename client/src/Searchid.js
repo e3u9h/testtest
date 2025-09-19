@@ -7,7 +7,7 @@ import request from './utils/request';
 // use OpenAI to gernerate some idea and debbuging the code.
 const fetchUsers = async (currentUser, searchUserId, setUsers) => {
   try {
-    const response = await request.get(`searchuserbyid/${currentUser}/${searchUserId}`, {
+    const response = await request.get(`search/users/byid/${currentUser}/${searchUserId}`, {
       headers: {
         'Accept': 'application/json'
       }

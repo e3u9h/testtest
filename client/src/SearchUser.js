@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 // use OpenAI to gernerate some idea and debbuging the code.
 const searchUsers = async (currentUser, searchUsername, setUsers) => {
   try {
-    const response = await request.get(`searchuser/${currentUser}/${searchUsername}`, {
+    const response = await request.get(`search/users/${currentUser}/${searchUsername}`, {
       headers: {
         Accept: 'application/json',
       },

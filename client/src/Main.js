@@ -103,7 +103,7 @@ function NewPost() {
       formData.append('files', file.originFileObj)
     });
 
-    request.post('new-tweet', formData, {
+    request.post('tweets', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -126,11 +126,11 @@ function NewPost() {
   const addNewTags = () => {
     console.log(newTag);
     if (!availableTags.includes(newTag)) {
-      request.post('new-tag', { tag: newTag })
+      request.post('tags', { tag: newTag })
         .then(res => {
         if (res.status === 201) {
           console.log("New tag is inserted");
-        } else if (res.status === 400) {
+        } else if (res.status === 409) {
           console.log("Tag already exists");
         } else {
           console.log("Failed to insert new tag");
@@ -288,7 +288,7 @@ function Main() {
   const [dataLength, setDataLength] = useState(0);
   const fetchFollowingsTweet = () => {
     console.log("hereFollowings tweets");
-    request.get('followings/' + username)
+    request.get('followinfo/followings/' + username)
       .then((res) => {
       if (res.status === 200) {
         return res.data;
@@ -302,7 +302,7 @@ function Main() {
   }
 
   const fetchRecommendUsers = () => {
-    request.get('users/' + username)
+    request.get('users/recommended/' + username)
       .then((res) => res.data).then((data) => {
         console.log("Recommend users");
         console.log(data);
@@ -314,7 +314,7 @@ function Main() {
 
   const fetchRecommendTweets = () => {
     console.log("hereRecommend tweets");
-    request.get('tweets/' + username)
+    request.get('tweets/user/' + username)
       .then((res) => res.data).then((data) => {
         console.log("Recommend tweets");
         console.log(data);
