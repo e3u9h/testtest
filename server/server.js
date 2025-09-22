@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import './utils/redisClient.js'; // 初始化 Redis 连接
 
 // 加载环境变量
-dotenv.config({ path: '../.env' });
+dotenv.config(); // 移除path参数，直接从环境变量读取
 
 // 调试环境变量
 console.log('Environment variables loaded:');

@@ -9,13 +9,16 @@ services:
       - JWT_KEY=${JWT_KEY}
       - REDIS_URL=redis://redis:6379
     depends_on:
-      - client
       - redis
+    env_file:
+      - .env.docker
 
   client:
     build: ./client
     ports:
       - "3000:80"
+    depends_on:
+      - backend
 
   redis:
     image: redis:7-alpine

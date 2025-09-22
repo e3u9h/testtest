@@ -1,0 +1,13 @@
+# Ignore local development configurations
+.env*
+
+# Ignore node modules (they should be installed inside the container)
+node_modules
+
+# Ignore logs and other junk files
+.DS_Store
+*.log
+
+# Ignore uploads for development
+uploads/*
+!uploads/.gitkeep
