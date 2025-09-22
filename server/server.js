@@ -53,6 +53,15 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 app.use(performanceMonitor); // 性能监控中间件
 
+// Health check endpoint before JWT middleware
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // JWT authentication middleware
 // All requests need to be authorized by the token except for login, creating user and accessing files
 app.use(expressjwt({
@@ -171,15 +180,6 @@ app.use((err, req, res, next) => {
 app.use((req, res, next) => {
     console.log("Authentication info:", req.auth);
     next();
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
 });
 
 // API documentation endpoint
