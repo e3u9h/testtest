@@ -20,7 +20,7 @@ else
 fi
 
 # 测试 Redis 连接
-echo "🔍 Testing Redis connection..."
+echo " Testing Redis connection..."
 if docker exec redis-dev redis-cli ping > /dev/null 2>&1; then
     echo " Redis is responding to ping"
 else

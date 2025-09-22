@@ -13,17 +13,17 @@ if %errorlevel% neq 0 (
 
 echo Docker is running
 
-REM 启动 Redis 容器（如果不存在）
-docker ps | findstr redis >nul
-if %errorlevel% neq 0 (
-    echo Starting Redis container...
-    docker run -d --name redis-dev -p 6379:6379 redis:7-alpine
-    timeout /t 3 /nobreak >nul
-) else (
-    echo Redis container is already running
-)
+echo Cleaning up existing Redis container...
+docker rm -f redis-dev >nul 2>&1
 
-echo 🔍 Testing Redis connection...
+echo Creating new Redis container...
+docker run -d --name redis-dev -p 6379:6379 redis:7-alpine
+
+REM 等待 Redis 启动
+echo Waiting for Redis to be ready...
+timeout /t 5 /nobreak >nul
+
+echo Testing Redis connection...
 docker exec redis-dev redis-cli ping >nul 2>&1
 if %errorlevel% neq 0 (
     echo Redis is not responding

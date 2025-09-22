@@ -14,7 +14,9 @@ router.get('/portrait/:username', (req, res) => {
         console.log(user);
         if (user) {
             console.log(user['portrait']);
-            res.send(user['portrait']);
+            // 转换Windows路径为URL友好格式
+            const portraitPath = user['portrait'] ? user['portrait'].replace(/\\/g, '/') : '';
+            res.send(portraitPath);
         }
         else {
             console.log("no such user");
@@ -36,12 +38,21 @@ router.get('/:username', async (req, res) => {
         const cachedUser = await CacheService.getUserProfile(username);
         if (cachedUser) {
             console.log(`User profile cache hit: ${username}`);
+            // 确保返回的头像路径使用正斜杠
+            if (cachedUser.portrait) {
+                cachedUser.portrait = cachedUser.portrait.replace(/\\/g, '/');
+            }
             return res.send(cachedUser);
         }
         
         // 缓存未命中，从数据库查询
         const user = await User.findOne({ 'username': username });
         if (user) {
+            // 转换头像路径为URL友好格式
+            if (user.portrait) {
+                user.portrait = user.portrait.replace(/\\/g, '/');
+            }
+            
             // 将用户信息存入缓存
             await CacheService.setUserProfile(username, user, 1800); // 缓存30分钟
             console.log(`User profile cached: ${username}`);
@@ -83,7 +94,8 @@ router.put('/:username', upload.single('portrait'), (req, res) => {
     res.set('Content-Type', 'text/plain');
     const username = req.params['username'];
     const updateGender = req.body.gender;
-    const updatePortrait = req.file ? req.file.path : '';
+    // 将 Windows 路径的反斜杠转换为正斜杠，确保URL兼容性
+    const updatePortrait = req.file ? req.file.path.replace(/\\/g, '/') : '';
     const updateAbout = req.body.about;
 
     User.findOne({ 'username': username }).then((user) => {

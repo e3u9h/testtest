@@ -6,6 +6,11 @@ import CacheService from '../utils/cacheService.js';
 
 const router = express.Router();
 
+// Helper function to normalize file paths for URLs
+const normalizePathForUrl = (path) => {
+    return path ? path.replace(/\\/g, '/') : '';
+};
+
 // Get all tags
 router.get('/', async (req, res) => {
     try {
@@ -126,7 +131,7 @@ router.get('/:tag/tweets/:currentUser', async (req, res) => {
             commentCount: tweet.comments.length,
             retweetCount: tweet.retweets.length,
             time: tweet.post_time,
-            portraitUrl: tweet.poster.portrait,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
             tags: tweet.tags,
             private: tweet.private,
         }));

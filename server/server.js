@@ -41,8 +41,13 @@ import notificationsRoute from "./routes/notifications.js";
 
 const app = express();
 
-// Middleware configuration
-app.use(cors());
+// 简化的 CORS 配置 - 开发环境允许所有来源
+app.use(cors({
+    origin: true, // 允许所有来源
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+}));
+
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
@@ -55,11 +60,14 @@ app.use(expressjwt({
     algorithms: ['HS256']
 }).unless({
     path: [
-        /^\/login/,
-        /^\/createuser/,
-        /^\/uploads/,
-        /^\/img/,
-        /^\/api\/search\/trends/ // Allow public access to trending topics
+        '/api/login/user',
+        '/api/createuser',
+        '/uploads',
+        '/img',
+        { url: /^\/uploads\/.*/, methods: ['GET'] },
+        { url: /^\/img\/.*/, methods: ['GET'] },
+        { url: /^\/api\/tweets.*/, methods: ['GET'] }, // 允许游客查看推文
+        { url: /^\/api\/search\/trends.*/, methods: ['GET'] } // Allow public access to trending topics
     ]
 }));
 
@@ -118,6 +126,10 @@ app.get('/users/:username', (req, res) => {
 
 app.get('/tweets/:username', (req, res) => {
     res.redirect(301, `${API_PREFIX}/tweets/user/${req.params.username}`);
+});
+
+app.get('/followings/:username', (req, res) => {
+    res.redirect(301, `${API_PREFIX}/tweets/followings/${req.params.username}`);
 });
 
 app.post('/new-tweet', (req, res) => {

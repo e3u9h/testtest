@@ -8,6 +8,11 @@ import CacheService from '../utils/cacheService.js';
 
 const router = express.Router();
 
+// Helper function to normalize file paths for URLs (Windows compatibility)
+const normalizePathForUrl = (path) => {
+    return path ? path.replace(/\\/g, '/') : '';
+};
+
 // Get all tweets (with caching)
 router.get('/', async (req, res) => {
     try {
@@ -71,7 +76,7 @@ router.get('/user/:username', async (req, res) => {
             files: tweet.files,
             postTime: tweet.post_time,
             username: tweet.poster.username,
-            portraitUrl: tweet.poster.portrait,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
             tags: tweet.tags,
             reportCounter: tweet.report_counter,
         }));
@@ -79,6 +84,96 @@ router.get('/user/:username', async (req, res) => {
         res.json(recommendedTweets);
     } catch (err) {
         console.error('Error fetching user tweets:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Get all the followings' tweets of the user (including the own posts)
+router.get('/followings/:username', async (req, res) => {
+    try {
+        const { username } = req.params;
+        
+        // Find the user and populate followings and their tweets
+        const user = await User.findOne({ username })
+            .populate({
+                path: 'followings',
+                populate: {
+                    path: 'tweets',
+                    model: 'Tweet',
+                    match: { private: false },
+                    populate: {
+                        path: 'poster',
+                        model: 'User',
+                        select: 'username portrait'
+                    }
+                }
+            })
+            .populate({
+                path: 'tweets',
+                match: { private: false },
+                populate: {
+                    path: 'poster',
+                    model: 'User',
+                    select: 'username portrait'
+                }
+            });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Collect all tweets from followings
+        let tweets = [];
+        if (user.followings) {
+            for (let following of user.followings) {
+                if (following.tweets) {
+                    tweets = [...tweets, ...following.tweets];
+                }
+            }
+        }
+        
+        // Add user's own tweets
+        if (user.tweets) {
+            tweets = [...tweets, ...user.tweets];
+        }
+
+        // Format tweets information
+        const tweetsInfo = tweets.map((tweet) => ({
+            tid: tweet._id,
+            likeInfo: { 
+                likeCount: tweet.likes.length, 
+                bLikeByUser: user.tweets_liked ? user.tweets_liked.includes(tweet._id) : false 
+            },
+            dislikeInfo: { 
+                dislikeCount: tweet.dislike_counter, 
+                bDislikeByUser: user.tweets_disliked ? user.tweets_disliked.includes(tweet._id) : false 
+            },
+            isReported: user.tweets_reported ? user.tweets_reported.includes(tweet._id) : false,
+            user: { 
+                uid: tweet.poster._id, 
+                username: tweet.poster.username 
+            },
+            content: tweet.tweet_content,
+            files: tweet.files,
+            commentCount: tweet.comments ? tweet.comments.length : 0,
+            retweetCount: tweet.retweets ? tweet.retweets.length : 0,
+            time: tweet.post_time,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
+            tags: tweet.tags,
+            private: tweet.private
+        }));
+
+        // Sort tweets by post time (newest first)
+        tweetsInfo.sort((a, b) => {
+            const time1 = new Date(a.time);
+            const time2 = new Date(b.time);
+            return time2 - time1;
+        });
+
+        console.log(`----Get Followings Tweets for ${username}------`);
+        res.json(tweetsInfo);
+    } catch (err) {
+        console.error('---Followings Tweets Error---', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -169,7 +264,7 @@ router.get('/:tid/:username', async (req, res) => {
             files: tweet.files,
             postTime: tweet.post_time,
             username: tweet.poster.username,
-            portraitUrl: tweet.poster.portrait,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
             tags: tweet.tags,
             reportCounter: tweet.report_counter,
         };
@@ -418,7 +513,7 @@ router.post('/comment', async (req, res) => {
 
         const new_comment = {
             user: user._id,
-            portrait: user.portrait,
+            portrait: normalizePathForUrl(user.portrait),
             content: content,
             time: time,
             floor: floor_num
@@ -426,7 +521,7 @@ router.post('/comment', async (req, res) => {
 
         const new_comment_res = {
             username: user.username,
-            portrait: user.portrait,
+            portrait: normalizePathForUrl(user.portrait),
             content: content,
             time: time,
             floor: floor_num

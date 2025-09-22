@@ -288,7 +288,7 @@ function Main() {
   const [dataLength, setDataLength] = useState(0);
   const fetchFollowingsTweet = () => {
     console.log("hereFollowings tweets");
-    request.get('followinfo/followings/' + username)
+    request.get(`followings/${username}`)
       .then((res) => {
       if (res.status === 200) {
         return res.data;

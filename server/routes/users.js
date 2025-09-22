@@ -4,6 +4,11 @@ import CacheService from '../utils/cacheService.js';
 
 const router = express.Router();
 
+// Helper function to normalize file paths for URLs
+const normalizePathForUrl = (path) => {
+    return path ? path.replace(/\\/g, '/') : '';
+};
+
 // Get a user by ID
 router.get("/:userId", async (req, res) => {
     const userId = req.params.userId; 
@@ -63,7 +68,7 @@ router.get('/recommended/:username', async (req, res) => {
                 "following": user.followings.length,
                 "follower": user.followers.length,
                 "isFollowing": currUser.followings.includes(user._id),
-                "portraitUrl": user.portrait
+                "portraitUrl": normalizePathForUrl(user.portrait)
             }
         });
         
@@ -101,7 +106,7 @@ router.get('/search/:currentUser/:searchUsername', async (req, res) => {
             following: user.followings.length,
             follower: user.followers.length,
             isFollowing: user.followers.includes(currentUserDoc._id),
-            portraitUrl: user.portrait,
+            portraitUrl: normalizePathForUrl(user.portrait),
         }));
         
         res.json(userList);
@@ -134,7 +139,7 @@ router.get('/searchbyid/:currentUser/:targetUserId', async (req, res) => {
             following: targetUserDoc.followings.length,
             follower: targetUserDoc.followers.length,
             isFollowing: targetUserDoc.followers.includes(currentUserDoc._id),
-            portraitUrl: targetUserDoc.portrait,
+            portraitUrl: normalizePathForUrl(targetUserDoc.portrait),
         };
         
         res.json([userInfo]);

@@ -6,6 +6,11 @@ import CacheService from '../utils/cacheService.js';
 
 const router = express.Router();
 
+// Helper function to normalize file paths for URLs
+const normalizePathForUrl = (path) => {
+    return path ? path.replace(/\\/g, '/') : '';
+};
+
 // Search users by username
 router.get('/users/:currentUser/:searchUsername', async (req, res) => {
     try {
@@ -27,7 +32,7 @@ router.get('/users/:currentUser/:searchUsername', async (req, res) => {
             following: user.followings.length,
             follower: user.followers.length,
             isFollowing: user.followers.includes(currentUserDoc._id),
-            portraitUrl: user.portrait,
+            portraitUrl: normalizePathForUrl(user.portrait),
         }));
         
         res.json(userList);
@@ -59,7 +64,7 @@ router.get('/users/byid/:currentUser/:targetUserId', async (req, res) => {
             following: targetUserDoc.followings.length,
             follower: targetUserDoc.followers.length,
             isFollowing: targetUserDoc.followers.includes(currentUserDoc._id),
-            portraitUrl: targetUserDoc.portrait,
+            portraitUrl: normalizePathForUrl(targetUserDoc.portrait),
         };
         
         res.json([userInfo]);
@@ -116,7 +121,7 @@ router.get('/tweets/bytag/:tag/:currentUser', async (req, res) => {
             commentCount: tweet.comments.length,
             retweetCount: tweet.retweets.length,
             time: tweet.post_time,
-            portraitUrl: tweet.poster.portrait,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
             tags: tweet.tags,
             private: tweet.private,
         }));
@@ -178,7 +183,7 @@ router.get('/tweets/bykeyword/:keyword/:currentUser', async (req, res) => {
             commentCount: tweet.comments.length,
             retweetCount: tweet.retweets.length,
             time: tweet.post_time,
-            portraitUrl: tweet.poster.portrait,
+            portraitUrl: normalizePathForUrl(tweet.poster.portrait),
             tags: tweet.tags,
             private: tweet.private,
         }));
@@ -272,7 +277,7 @@ router.get('/advanced', async (req, res) => {
                     tid: tweet._id,
                     content: tweet.tweet_content,
                     username: tweet.poster.username,
-                    portraitUrl: tweet.poster.portrait,
+                    portraitUrl: normalizePathForUrl(tweet.poster.portrait),
                     time: tweet.post_time,
                     tags: tweet.tags
                 })),
@@ -307,7 +312,7 @@ router.get('/advanced', async (req, res) => {
                         tid: tweet._id,
                         content: tweet.tweet_content,
                         username: tweet.poster.username,
-                        portraitUrl: tweet.poster.portrait,
+                        portraitUrl: normalizePathForUrl(tweet.poster.portrait),
                         time: tweet.post_time,
                         tags: tweet.tags
                     }));

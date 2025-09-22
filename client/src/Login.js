@@ -10,14 +10,14 @@ import {
   from 'mdb-react-ui-kit';
 import { useNavigate } from 'react-router-dom';
 import Header from './components/header';
+import { useSimpleNotification } from './components/SimpleNotification';
 import Form from 'react-bootstrap/Form';
 import { useAuth } from './provider/context';
 import request from './utils/request';
-import { message } from 'antd';
-
 
 const Login = (props) => {
   const { login, username, mode } = useAuth();
+  const { showNotification, NotificationComponent } = useSimpleNotification();
   const [loggedin, setLoggedin] = useState(username !== undefined);
   const [justifyActive, setJustifyActive] = useState('login');
   const [editUsername, setEditUsername] = useState('');
@@ -36,15 +36,15 @@ const Login = (props) => {
     };
     // check the format of the username and password and whether the 2 input passwords are the same
     if (editUsername === '') {
-      window.alert("Please enter a username.");
+      showNotification("Please enter a username.", 'warning');
     } else if (editUsername.length >= 20) {
-      window.alert("The length of the username should be smaller than 20.");
+      showNotification("The length of the username should be smaller than 20.", 'warning');
     } else if (!editPassword || !editPassword2) {
-      window.alert("Please enter a password.");
+      showNotification("Please enter a password.", 'warning');
     } else if (editPassword.length <= 4 || editPassword.length >= 20) {
-      window.alert("The length of the password should be larger than 4 and smaller than 20.");
+      showNotification("The length of the password should be larger than 4 and smaller than 20.", 'warning');
     } else if (editPassword !== editPassword2) {
-      window.alert("Password mismatch!");
+      showNotification("Password mismatch!", 'error');
     } else {
       // if the format is correct, send the request to the backend
       request.post("createuser", userInfo)
@@ -66,15 +66,15 @@ const Login = (props) => {
               })
               .catch(err1 => {
                 console.error("Login failed:", err1);
-                alert(err1.response.data.message);
+                showNotification(err1.response?.data?.message || "Login failed after registration", 'error');
               });
           }
-          message.success(res.data);
+          showNotification(res.data || "Registration successful!", 'success');
         })
         .catch(err => {
           // if the registration failed, alert the error message
           console.log(err);
-          alert(err.response.data);
+          showNotification(err.response?.data || "Registration failed", 'error');
         });
     }
   }
@@ -114,20 +114,20 @@ const Login = (props) => {
           setLoggedin(true);
           login(editUsername, 'admin', res.data.token);
         } 
-        message.success(res.data.message);
+        showNotification(res.data?.message || "Login successful!", 'success');
       })
       .catch(err => {
         // if the login failed, alert the error message
         console.error("Login failed:", err);
-        // alert(err.response.data.message);
-        message.error(err.response.data);
+        const errorMessage = err.response?.data?.message || err.response?.data || "Login failed";
+        showNotification(errorMessage, 'error');
       });
   };
   useEffect(() => {
     // when first loading the page, set loggedin according to the information of the context
     setLoggedin(username !== undefined);
-  }
-    , []);
+  }, [username]);
+
   useEffect(() => {
     // when the loggedin state or mode changes, navigate to the corresponding page
     // (main page or admin page) if the user is logged in
@@ -135,12 +135,12 @@ const Login = (props) => {
     if (loggedin) {
       navigate(mode === 'user' ? '/' : '/admin');
     }
-  }, [loggedin, mode]);
+  }, [loggedin, mode, navigate]);
   return (
     (<>
       <Header />
-      <MDBContainer className="p-3 my-5 d-flex flex-column w-50">
-        {/* tabs */}
+      <NotificationComponent />
+      <MDBContainer className="p-3 my-5 d-flex flex-column w-50">{/* tabs */}
         <MDBTabs pills justify className='mb-3 d-flex flex-row justify-content-between'>
           <MDBTabsItem>
             <MDBTabsLink
