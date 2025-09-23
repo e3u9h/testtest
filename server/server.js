@@ -53,12 +53,29 @@ app.use(bodyParser.urlencoded({ extended: false, limit: '10mb' }));
 app.use(express.json());
 app.use(performanceMonitor); // 性能监控中间件
 
+// Add logging middleware to see all incoming requests
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
+});
+
 // Health check endpoint before JWT middleware
 app.get('/health', (req, res) => {
+    console.log('Health check endpoint hit!');
     res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         uptime: process.uptime()
+    });
+});
+
+// Also add root endpoint for health checks
+app.get('/', (req, res) => {
+    console.log('Root endpoint hit!');
+    res.status(200).json({
+        status: 'healthy',
+        message: 'Social Media API is running',
+        timestamp: new Date().toISOString()
     });
 });
 
@@ -69,14 +86,14 @@ app.use(expressjwt({
     algorithms: ['HS256']
 }).unless({
     path: [
+        '/',
+        '/health',
         '/api/login/user',
         '/api/createuser',
         '/uploads',
         '/img',
         { url: /^\/uploads\/.*/, methods: ['GET'] },
         { url: /^\/img\/.*/, methods: ['GET'] },
-        { url: /^\/api\/tweets.*/, methods: ['GET'] }, // 允许游客查看推文
-        { url: /^\/api\/search\/trends.*/, methods: ['GET'] } // Allow public access to trending topics
     ]
 }));
 
